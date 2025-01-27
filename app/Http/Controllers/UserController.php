@@ -1,0 +1,251 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\File;
+use App\Mail\VerificationCodeMail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Traits\ApiResponse;
+use App\Models\User;
+use App\Services\ImageService;
+
+class UserController extends Controller
+{
+    use ApiResponse;
+
+    protected $imageservice;
+
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageservice = $imageService;
+    }
+
+
+    public function usersCount()
+    {
+        try {
+            // افتراض أن هناك نموذج اسمه User
+            $count = User::count();
+
+            // إرجاع استجابة ناجحة مع العدد
+            return $this->successResponse($count, "Users count retrieved successfully", 200);
+        } catch (\Exception $e) {
+            // في حال حدوث خطأ، يتم إرجاع استجابة خطأ
+            return $this->errorResponse("Failed to retrieve users count", ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+    public function index()
+    {
+        try {
+            $users = User::orderBy('created_at', 'desc')->paginate(15);
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'message' => 'No Users Available !'
+                ], 404);
+            }
+            return response()->json([
+                'data' => $users->items(),
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'per_page' => $users->perPage(),
+                    'total' => $users->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Faild error', ['message' => $e->getMessage()], 500);
+        }
+    }
+    public function usersByNumberOfReservations()
+    {
+        try {
+            $users = User::orderBy('number_of_reservations', 'desc')->paginate(15);
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'message' => 'No Users Available !'
+                ], 404);
+            }
+            return response()->json([
+                'data' => $users->items(),
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'per_page' => $users->perPage(),
+                    'total' => $users->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Faild error', ['message' => $e->getMessage()], 500);
+        }
+    }
+
+    // إنشاء مستخدم جديد
+    public function store(StoreUserRequest $request)
+    {
+        try {
+
+            $user = new User();
+            $user->fill($request->only(['name', 'email', 'phone_number', 'role']));
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+
+            if ($request->has('image')) {
+                $this->imageservice->ImageUploader($request, $user, 'images/users');
+            }
+
+            $user->save();
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'User created successfully.',
+                'data' => $user,
+                'token' => $token
+            ], 201);
+        } catch (\Exception $e) {
+            return $this->errorResponse('User Not Created', ['message' => $e->getMessage()], 500);
+        }
+    }
+
+    // عرض تفاصيل مستخدم محدد
+    public function show($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            return $this->successResponse($user, "User Founded Successfully", 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('User Not Founded', ['message' => $e->getMessage()], 404);
+        }
+    }
+
+    // تحديث بيانات مستخدم
+    public function update(UpdateUserRequest $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $data = $request->validated();
+        try {
+            $user->fill($data);
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+
+            if ($request->has('image')) {
+                $this->imageservice->ImageUploader($request, $user, 'images/users');
+            }
+
+            $user->save();
+            return $this->successResponse($user, 'User Updated Successfully', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Faild Update', ['message' => $e->getMessage()], 500);
+        }
+    }
+
+    // حذف مستخدم
+    public function destroy($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $old_image = $user->image;
+            $storagePath = "images/users";
+            if ($old_image) {
+                $old_image_name = basename(parse_url($old_image, PHP_URL_PATH));
+                $file_path = public_path($storagePath . '/' . $old_image_name);
+                if (File::exists($file_path)) {
+                    File::delete($file_path);
+                }
+            }
+            $user->delete();
+
+            return $this->successResponse([], "User Deleted Successfully", 204);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Faild Delete", ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+    public function sendVerificationCode(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        try {
+            // البحث عن المستخدم حسب البريد الإلكتروني
+            $user = User::where('email', $request->email)->firstOrFail();
+
+            // إنشاء كود تحقق عشوائي
+            $verificationCode = Str::random(6);
+
+            // إرسال البريد الإلكتروني
+            Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+
+            return response()->json([
+                'message' => 'Verification code sent successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to send verification code.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function checkPassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|string'
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+
+            if (Hash::check($request->password, $user->password)) {
+                return $this->successResponse(['Message' => 'Password is Correct'], 'Done', 200);
+            } else {
+                return $this->errorResponse("Incorrect Password", ['message' => 'Password does not match'], 401);
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse("Failed to Check Password", ['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function SearchByNameForUser($name)
+    {
+        try {
+            $users = User::where('name', 'like', '%' . $name . '%') // تحسين البحث ليشمل الجزئي
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'message' => 'No Users Found With this Name.',
+                ], 404); // يمكن إضافة كود الحالة HTTP 404
+            }
+
+            return response()->json([
+                'data' => $users->items(), // `items` لجلب البيانات فقط
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'per_page' => $users->perPage(),
+                    'total' => $users->total(),
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Failed Error", [
+                'message' => $e->getMessage(),
+            ], 500); // إرسال رسالة الخطأ مع كود الحالة 500
+        }
+    }
+}

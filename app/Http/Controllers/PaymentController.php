@@ -1,0 +1,284 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Arma_Card;
+use App\Models\Bell;
+use App\Models\Book;
+use App\Models\organization;
+use App\Models\ProvisionalData;
+use App\Services\MyFatoorahService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PaymentSuccessNotification;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+
+class PaymentController extends Controller
+{
+    protected $myFatoorahService;
+
+    public function __construct(MyFatoorahService $myFatoorahService)
+    {
+        $this->myFatoorahService = $myFatoorahService;
+    }
+
+    public function initiatePayment(Request $request)
+    {
+        $validated = $request->validate([
+            'customerName' => 'required|string',
+            'notificationOption' => 'required|string',
+            'invoiceValue' => 'required|numeric',
+            'currentUserId' => 'required|numeric',
+            'cardsDetailes' => 'required',
+            'account_type' => 'required|in:user,User,organization'
+        ]);
+
+
+        $uniqueDataId = rand(1000, 9999);
+
+        $cardsDetailes = $request->cardsDetailes;
+
+        ProvisionalData::create([
+            'uniqueId' => $uniqueDataId,
+            'cardsDetailes' => $cardsDetailes,
+            'expire_at' => now()->addMinute(60)
+        ]);
+
+        $data = [
+            'InvoiceValue' => $validated['invoiceValue'],
+            'currency' => "USD",
+            'cardsDetailesId' => $uniqueDataId,
+            'CustomerName' => $validated['customerName'],
+            'currentUserId' => $validated['currentUserId'],
+            'accountType' => $validated['account_type'],
+            'NotificationOption' => $validated['notificationOption'],
+            'Language' => 'EN', // يمكن ضبطها إلى AR إذا كانت باللغة العربية
+            'CustomerEmail' => $request->input('customerEmail', 'test@test.com'),
+        ];
+
+        $response = $this->myFatoorahService->sendPayment($data);
+
+        return response()->json($response);
+    }
+
+
+    public function initiatebookedPayment(Request $request)
+    {
+        $validated = $request->validate([
+            'customerName' => 'required|string|max:255',
+            'notificationOption' => 'required|string|max:50',
+            'invoiceValue' => 'required|numeric|min:0',
+            'currentUserId' => 'required|numeric',
+            'customerEmail' => 'required|email|max:255',
+            'book_day' => 'required|date',
+            'book_time' => 'required',
+            'expire_in' => 'required',
+            'additional_notes' => 'nullable|string|max:500',
+            'user_id' => 'required|numeric',
+            'organization_id' => 'required|numeric',
+            'account_type' => 'required|in:user,User,organization,Organization'
+        ]);
+
+        $uniqueDataId = rand(1000, 9999);
+
+
+        $bookData = [
+            'book_day' => $validated['book_day'],
+            'book_time' => $validated['book_time'],
+            'expire_in' => $validated['expire_in'],
+            'additional_notes' => $validated['additional_notes'],
+            'user_id' => $validated['user_id'],
+            'organization_id' => $validated['organization_id'],
+        ];
+
+
+
+        $data = [
+            'InvoiceValue' => $validated['invoiceValue'],
+            'CustomerName' => $validated['customerName'],
+            'currentUserId' => $validated['currentUserId'],
+            'accountType' => $validated['account_type'],
+            'NotificationOption' => $validated['notificationOption'],
+            'CustomerEmail' => $validated['customerEmail'],
+            'uniqueDataId' => $uniqueDataId,
+            'currency' => "USD",
+            'Language' => 'EN', // يمكن ضبطها إلى AR إذا كانت باللغة العربية
+        ];
+
+        ProvisionalData::create([
+            'uniqueId' => $uniqueDataId,
+            'cardsDetailes' => json_encode($bookData),
+            'expire_at' => now()->addMinute(60)
+        ]);
+
+        $response = $this->myFatoorahService->bookedPayment($data);
+
+        return response()->json($response);
+    }
+
+
+    public function handleCallback(Request $request)
+    {
+        try {
+            $paymentId = $request->query('paymentId');
+            $accountType = $request->query('accountType');
+            $cardsDetailesId = base64_decode($request->query('cardsDetailesId'));
+            $userId = base64_decode($request->query('UserId'));
+            $Amount = $request->query('InvoiceValue');
+            $model = ProvisionalData::where('uniqueId', $cardsDetailesId)->first();
+
+
+            // Cheack For Errors
+
+            if (!$paymentId) {
+                return response()->json(['message' => 'Payment ID is missing.']);
+            }
+
+            if (!$cardsDetailesId) {
+                return response()->json(['message' => 'Card details ID is missing.']);
+            }
+
+            if (!$model) {
+                return response()->json(['message' => 'No provisional data found for the provided card details ID.']);
+            }
+
+            $jsoncardsDetailes = json_decode($model->cardsDetailes);
+
+            $response = $this->myFatoorahService->getPaymentStatus($paymentId);
+
+            // End Check For variables Errors
+
+
+
+            if ($response['IsSuccess'] && $response['Data']['InvoiceStatus'] === 'Paid') {
+                $cardsToInsert = [];
+                foreach ($jsoncardsDetailes as $card) {
+                    for ($i = 0; $i < $card->quantity; $i++) {
+                        $cardsToInsert[] = [
+                            'user_id' => $userId,
+                            'card_number' => null,
+                            'price' => $card->price,
+                            'issue_date' => $card->duration,
+                            'expiry_date' => null,
+                            'cvv' => null,
+                            'cardtype_id' => $card->id,
+                        ];
+                    }
+                }
+
+                if (Arma_Card::insert($cardsToInsert)) {
+                    Bell::create([
+                        'bell_items' => json_encode($jsoncardsDetailes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT),
+                        'bell_type' => 'cards_bell',
+                        'account_type' => $accountType,
+                        'amount' => floatval($Amount),
+                        'user_id' => intval($userId)
+                    ]);
+                }
+                $model->delete();
+                return redirect()->to(env('SUCCESS_PAYMENT_URL') . $paymentId);
+            } else {
+                return redirect()->to(env('ERROR_PAYMENT_URL'));
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+
+
+    public function bookedPayment(Request $request)
+    {
+        try {
+            $paymentId = $request->query('paymentId');
+            $accountType = $request->query('accountType');
+            $Amount = $request->query('InvoiceValue');
+            $uniqueDataId = $request->query('uniqueDataId');
+
+
+
+            // التحقق من المتغيرات الأساسية
+            if (!$paymentId) {
+                return response()->json(['message' => 'Payment ID is missing.'], 400);
+            }
+
+            if (!$uniqueDataId) {
+                return response()->json(['message' => 'Invalid uniqueDataId.'], 400);
+            }
+
+
+            $response = $this->myFatoorahService->getPaymentStatus($paymentId);
+            $model = ProvisionalData::where('uniqueId', $uniqueDataId)->first();
+            $data = json_decode($model->cardsDetailes);
+
+
+            // End Check For variables Errors
+
+            if ($response['IsSuccess'] && $response['Data']['InvoiceStatus'] === 'Paid') {
+
+                Book::create([
+                    'book_day' => $data->book_day,
+                    'book_time' => $data->book_time,
+                    'expire_in' => $data->expire_in,
+                    'additional_notes' => $data->additional_notes,
+                    'user_id' => $data->user_id,
+                    'organization_id' => $data->organization_id,
+                ]);
+
+                $organization = organization::select('title_en', 'email', 'number_of_reservations')
+                    ->findOrFail($data->organization_id);
+                $user = User::select('number_of_reservations')
+                    ->findOrFail($data->organization_id);
+
+                $organization->increment('number_of_reservations');
+                $organization->save();
+                $user->increment('number_of_reservations');
+                $user->save();
+                // إرسال البريد
+                try {
+                    Mail::to($organization->email)->send(new PaymentSuccessNotification(
+                        $organization->name,
+                        [
+                            'book_day' => $data->book_day,
+                            'book_time' => $data->book_time,
+                            'additional_notes' => $data->additional_notes,
+                        ]
+                    ));
+                } catch (\Exception $mailException) {
+                    Log::error("Failed to send email: " . $mailException->getMessage());
+                }
+
+                Bell::create([
+                    'bell_type' => 'confirm_booked',
+                    'bell_items' => json_encode($data),
+                    'account_type' => $accountType,
+                    'amount' => floatval($Amount),
+                    'user_id' => intval($data->user_id),
+                ]);
+
+                $model->delete();
+                return redirect()->to(env('SUCCESS_PAYMENT_URL') . $paymentId . '&mail_statue=true');
+            } else {
+                return redirect()->to(env('ERROR_PAYMENT_URL'));
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getPaymentStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'paymentId' => 'required|string',
+        ]);
+
+        $response = $this->myFatoorahService->getPaymentStatus($validated['paymentId']);
+
+        return response()->json($response);
+    }
+}

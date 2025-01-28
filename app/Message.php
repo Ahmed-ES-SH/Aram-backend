@@ -14,6 +14,7 @@ class Message extends Model
         'file_path',
         'is_read',
         'message_type',
+        'message_type',
     ];
 
 
@@ -22,3 +23,4 @@ class Message extends Model
         return $this->belongsTo(Conversation::class);
     }
 }
+

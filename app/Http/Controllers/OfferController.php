@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateOfferRequest;
 use App\Models\Offer;
 use App\Services\ImageService;
 use App\Traits\ApiResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OfferController extends Controller
@@ -63,6 +64,96 @@ class OfferController extends Controller
         }
     }
 
+    public function offersByorganization($id)
+    {
+        try {
+            // جلب العروض مع العلاقات المطلوبة
+            $offers = Offer::where('organization_id', $id)->orderBy('created_at', 'desc')
+                ->with([
+                    'organization:id,title_en,title_ar,image,icon',
+                    'category:id,title_en,title_ar,image'
+                ])
+                ->paginate(25);
+
+            // التحقق من وجود بيانات
+            if ($offers->isEmpty()) {
+                return $this->errorResponse(
+                    "No Data Found",
+                    ['message' => 'No Offers Found'],
+                    404
+                );
+            }
+
+            // إعداد الاستجابة مع البيانات وترقيم الصفحات
+            return response()->json([
+                'data' => $offers->items(),
+                'pagination' => [
+                    'current_page' => $offers->currentPage(),
+                    'last_page' => $offers->lastPage(),
+                    'per_page' => $offers->perPage(),
+                    'total' => $offers->total(),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            // معالجة الأخطاء العامة
+            return $this->errorResponse(
+                "Failed to Load Data",
+                ['message' => $e->getMessage()],
+                500
+            );
+        }
+    }
+    public function offersBySearch($id, Request $request)
+    {
+        try {
+            // تحقق من صحة البيانات المدخلة
+            $request->validate([
+                'content_search' => 'required|string', // على الأقل 3 أحرف
+            ]);
+
+            // البحث في الخدمات التابعة
+            $searchTerm = '%' . $request->content_search . '%'; // إضافة علامات % للبحث الجزئي
+
+            // استعلام البحث مع ضمان أن الخدمات تابعة للمنظمة المحددة
+            $offers = Offer::where('organization_id', $id)
+                ->where(function ($query) use ($searchTerm) {
+                    $query->where('title_en', 'like', $searchTerm)
+                        ->orWhere('title_ar', 'like', $searchTerm)
+                        ->orWhere('description_ar', 'like', $searchTerm)
+                        ->orWhere('description_en', 'like', $searchTerm);
+                })->with([
+                    'organization:id,title_en,title_ar,image,icon',
+                    'category:id,title_en,title_ar,image'
+                ])->paginate(25);
+
+            // التحقق من وجود بيانات
+            if ($offers->isEmpty()) {
+                return $this->errorResponse(
+                    "No Data Found",
+                    ['message' => 'No Offers Found'],
+                    404
+                );
+            }
+
+            // إعداد الاستجابة مع البيانات وترقيم الصفحات
+            return response()->json([
+                'data' => $offers->items(),
+                'pagination' => [
+                    'current_page' => $offers->currentPage(),
+                    'last_page' => $offers->lastPage(),
+                    'per_page' => $offers->perPage(),
+                    'total' => $offers->total(),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            // معالجة الأخطاء العامة
+            return $this->errorResponse(
+                "Failed to Load Data",
+                ['message' => $e->getMessage()],
+                500
+            );
+        }
+    }
     public function offersByCategory($id)
     {
         try {
@@ -102,6 +193,59 @@ class OfferController extends Controller
             );
         }
     }
+
+
+
+
+
+    public function updateOfferStatuses()
+    {
+        try {
+            // جلب جميع السجلات التي تجاوز تاريخ البداية (start_date) التاريخ الحالي
+            $records = Offer::where('start_date', '<=', Carbon::now())
+                ->get();
+
+            // تحقق من عدد العروض التي تم تحديث حالتها
+            $activatedCount = 0;
+            $expiredCount = 0;
+
+            // تحديث status بناءً على التاريخ
+            foreach ($records as $record) {
+                // إذا كان وقت العرض قد جاء ولم ينته بعد
+                if (Carbon::now()->lt($record->end_date) && $record->status != 'active') {
+                    $record->status = 'active'; // تفعيل العرض
+                    $activatedCount++;
+                }
+                // إذا كان وقت العرض قد انتهى
+                elseif (Carbon::now()->gt($record->end_date) && $record->status != 'expired') {
+                    $record->status = 'expired'; // وضع العرض في الحالة "منتهي"
+                    $expiredCount++;
+                }
+                // حفظ التحديثات
+                $record->save();
+            }
+
+            // إرجاع استجابة مع عدد العروض التي تم تفعيلها أو انتهائها
+            if ($activatedCount > 0 && $expiredCount > 0) {
+                return response()->json([
+                    'message' => "تم تفعيل $activatedCount عرض(عروض) وانهاء $expiredCount عرض(عروض) بنجاح"
+                ]);
+            } elseif ($activatedCount > 0) {
+                return response()->json(['message' => "تم تفعيل $activatedCount عرض(عروض) بنجاح"]);
+            } elseif ($expiredCount > 0) {
+                return response()->json(['message' => "تم انهاء $expiredCount عرض(عروض) بنجاح"]);
+            } else {
+                return response()->json(['message' => 'لا توجد عروض لتحديث حالتها']);
+            }
+        } catch (\Exception $e) {
+            // في حال حدوث خطأ، إرجاع استجابة تحتوي على الخطأ
+            return response()->json([
+                'error' => 'حدث خطأ أثناء تحديث الحالة',
+                'message' => $e->getMessage()
+            ], 500); // كود الحالة 500 يعني خطأ في الخادم
+        }
+    }
+
 
     public function trendingOffers()
     {

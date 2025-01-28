@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('code')->unique()->nullable(); // كود الكوبون (فريد إذا كان موجوداً)
             $table->decimal('discount_value', 10, 2); // قيمة الخصم
             $table->date('start_date'); // تاريخ بداية العرض
+            $table->enum('status', ['waiting', 'active', 'expired'], 'waiting'); // تاريخ بداية العرض
             $table->date('end_date'); // تاريخ نهاية العرض
             $table->boolean('is_active')->default(false); // حالة العرض (نشط أو غير نشط)
             // العلاقة مع المركز الطبي

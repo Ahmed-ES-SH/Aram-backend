@@ -16,6 +16,7 @@ class Offer extends Model
         "discount_value",
         "start_date",
         "end_date",
+        "status",
         "is_active",
         "organization_id",
         "category_id",

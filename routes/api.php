@@ -479,6 +479,9 @@ Route::controller(BellController::class)->group(function () {
 
 Route::controller(OfferController::class)->group(function () {
     Route::get('/all-offers', 'index');
+    Route::post('/offers-for-organization-by-search/{id}', 'offersBySearch');
+    Route::post('/check-offer-date', 'updateOfferStatuses');
+    Route::get('/organization-offers/{id}', 'offersByorganization');
     Route::get('/offers-by-category/{id}', 'offersByCategory');
     Route::get('/trending-offers', 'trendingOffers');
     Route::get('/active-offers', 'getPublishedOffers');

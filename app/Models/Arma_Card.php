@@ -27,4 +27,8 @@ class Arma_Card extends Model
     {
         return $this->belongsTo(CardType::class, 'cardtype_id');
     }
+    public function affiliate_card_type()
+    {
+        return $this->belongsTo(Affiliate_cardType::class, 'affiliate_cardtype_id');
+    }
 }

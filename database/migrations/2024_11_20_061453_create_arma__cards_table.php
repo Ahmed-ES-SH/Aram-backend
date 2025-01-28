@@ -22,7 +22,8 @@ return new class extends Migration
             $table->integer('usage_limit')->nullable();
             $table->integer('cvv')->nullable();
             $table->integer('current_usage')->default(0);
-            $table->foreignId('cardtype_id')->constrained('card_types')->onDelete('cascade');
+            $table->foreignId('cardtype_id')->nullable()->constrained('card_types')->onDelete('cascade');
+            $table->foreignId('affiliate_cardtype_id')->nullable()->constrained('affiliate_card_types')->onDelete('cascade');
             $table->timestamps();
         });
     }

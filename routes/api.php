@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AffiliateCardTypeController;
 use App\Http\Controllers\AffiliateServiceController;
 use App\Http\Controllers\ArmaCardController;
 use App\Http\Controllers\ArticalCategoryController;
@@ -277,6 +278,24 @@ Route::controller(CardTypeController::class)->group(function () {
     Route::post('/update-card-type/{id}', 'update');
     Route::delete('/card-type/{id}', 'destroy');
 });
+
+
+
+
+// -------------------------------
+//  Cards types Routes -----------
+// -------------------------------
+Route::controller(AffiliateCardTypeController::class)->group(function () {
+    Route::get('/affiliate-card-types', 'index');
+    Route::get('/active-affiliate-card-types', 'activecards');
+    Route::get('/affiliate-card-type/{id}', 'show');
+    Route::post('/add-affiliate-card-type', 'store');
+    Route::post('/update-affiliate-card-type/{id}', 'update');
+    Route::delete('/affiliate-card-type/{id}', 'destroy');
+});
+
+
+
 // -------------------------
 //  Cards Routes -----------
 // -------------------------

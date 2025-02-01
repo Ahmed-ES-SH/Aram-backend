@@ -29,6 +29,8 @@ class organization extends Model
         'open_at',
         'close_at',
         'url',
+        'rateing',
+        'status',
         'image',
         'icon',
         'is_signed',
@@ -59,6 +61,11 @@ class organization extends Model
         return $this->hasMany(Book::class);
     }
 
+    public function financialTransactions()
+    {
+        return $this->hasMany(FinancialTransactions::class);
+    }
+
 
     public function blockedUsers()
     {
@@ -68,5 +75,11 @@ class organization extends Model
     public function blockedBy()
     {
         return $this->morphMany(blocked_user::class, 'blocked');
+    }
+
+
+    public function organization()
+    {
+        return $this->hasMany(Affiliate_cardType::class);
     }
 }

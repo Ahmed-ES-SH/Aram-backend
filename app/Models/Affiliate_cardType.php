@@ -9,6 +9,7 @@ class Affiliate_cardType extends Model
     protected $fillable = [
         "title_en",
         "title_ar",
+        "organization_id",
         "description_en",
         "description_ar",
         "price_before_discount",
@@ -23,7 +24,14 @@ class Affiliate_cardType extends Model
 
     protected $casts = ["features_ar" => 'array', "features_en" => 'array'];
 
-    public function card () {
+    public function card()
+    {
         return $this->hasMany(Arma_Card::class);
+    }
+
+
+    public function organization()
+    {
+        return $this->belongsTo(organization::class, 'organization_id');
     }
 }

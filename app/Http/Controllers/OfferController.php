@@ -103,28 +103,42 @@ class OfferController extends Controller
             );
         }
     }
-    public function offersBySearch($id, Request $request)
+    public function offersBySearchforOrganization($id, Request $request)
     {
         try {
-            // تحقق من صحة البيانات المدخلة
+            // التحقق من صحة البيانات المدخلة
             $request->validate([
-                'content_search' => 'required|string', // على الأقل 3 أحرف
+                'content_search' => 'required|string|min:3',
             ]);
 
-            // البحث في الخدمات التابعة
-            $searchTerm = '%' . $request->content_search . '%'; // إضافة علامات % للبحث الجزئي
+            // تنظيف البحث
+            $searchTerm = trim($request->content_search);
 
-            // استعلام البحث مع ضمان أن الخدمات تابعة للمنظمة المحددة
+            // التحقق من عدم ترك الحقل فارغًا بعد التنظيف
+            if (strlen($searchTerm) < 3) {
+                return $this->errorResponse(
+                    "Invalid Search Term",
+                    ['message' => 'Search term must be at least 3 characters.'],
+                    400
+                );
+            }
+
+            // استخدام البحث الجزئي
+            $searchPattern = "%{$searchTerm}%";
+
+            // تنفيذ البحث مع التأكد من أن الخدمات تابعة للمنظمة المحددة
             $offers = Offer::where('organization_id', $id)
-                ->where(function ($query) use ($searchTerm) {
-                    $query->where('title_en', 'like', $searchTerm)
-                        ->orWhere('title_ar', 'like', $searchTerm)
-                        ->orWhere('description_ar', 'like', $searchTerm)
-                        ->orWhere('description_en', 'like', $searchTerm);
-                })->with([
+                ->where(function ($query) use ($searchPattern) {
+                    $query->where('title_en', 'like', $searchPattern)
+                        ->orWhere('title_ar', 'like', $searchPattern)
+                        ->orWhere('description_ar', 'like', $searchPattern)
+                        ->orWhere('description_en', 'like', $searchPattern);
+                })
+                ->with([
                     'organization:id,title_en,title_ar,image,icon',
                     'category:id,title_en,title_ar,image'
-                ])->paginate(25);
+                ])
+                ->paginate(25);
 
             // التحقق من وجود بيانات
             if ($offers->isEmpty()) {
@@ -154,6 +168,75 @@ class OfferController extends Controller
             );
         }
     }
+
+
+    public function offersBySearch(Request $request)
+    {
+        try {
+            // التحقق من صحة البيانات المدخلة
+            $request->validate([
+                'content_search' => 'required|string|min:3',
+            ]);
+
+            // تنظيف البحث
+            $searchTerm = trim($request->content_search);
+
+            // التحقق من عدم ترك الحقل فارغًا بعد التنظيف
+            if (strlen($searchTerm) < 3) {
+                return $this->errorResponse(
+                    "Invalid Search Term",
+                    ['message' => 'Search term must be at least 3 characters.'],
+                    400
+                );
+            }
+
+            // البحث الجزئي
+            $searchPattern = "%{$searchTerm}%";
+
+            // تنفيذ البحث بدون قيد على منظمة معينة
+            $offers = Offer::where(function ($query) use ($searchPattern) {
+                $query->where('title_en', 'like', $searchPattern)
+                    ->orWhere('title_ar', 'like', $searchPattern)
+                    ->orWhere('description_ar', 'like', $searchPattern)
+                    ->orWhere('description_en', 'like', $searchPattern);
+            })
+                ->with([
+                    'organization:id,title_en,title_ar,image,icon',
+                    'category:id,title_en,title_ar,image'
+                ])
+                ->orderBy('created_at', 'desc') // ترتيب الأحدث أولاً
+                ->paginate(25);
+
+            // التحقق من وجود بيانات
+            if ($offers->isEmpty()) {
+                return $this->errorResponse(
+                    "No Data Found",
+                    ['message' => 'No Offers Found'],
+                    404
+                );
+            }
+
+            // إعداد الاستجابة مع البيانات وترقيم الصفحات
+            return response()->json([
+                'data' => $offers->items(),
+                'pagination' => [
+                    'current_page' => $offers->currentPage(),
+                    'last_page' => $offers->lastPage(),
+                    'per_page' => $offers->perPage(),
+                    'total' => $offers->total(),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            // معالجة الأخطاء العامة
+            return $this->errorResponse(
+                "Failed to Load Data",
+                ['message' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
+
     public function offersByCategory($id)
     {
         try {
@@ -276,7 +359,7 @@ class OfferController extends Controller
     public function getPublishedOffers()
     {
         try {
-            $offers = Offer::where('is_active', true)
+            $offers = Offer::where('is_active', true)->where('status', 'active')
                 ->orderBy('created_at', 'desc')
                 ->with(['category', 'organization'])
                 ->paginate(15);
@@ -287,7 +370,7 @@ class OfferController extends Controller
             }
 
             return response()->json([
-                'data' =>  $offers,
+                'data' =>  $offers->items(),
                 'pagination' => [
                     'current_page' => $offers->currentPage(),
                     'last_page' => $offers->lastPage(),

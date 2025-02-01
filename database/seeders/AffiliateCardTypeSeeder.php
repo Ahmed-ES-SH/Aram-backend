@@ -2,21 +2,20 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class CardSeeder extends Seeder
+class AffiliateCardTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         // تعطيل فحص المفاتيح الخارجية لإزالة البيانات القديمة
         DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
-        // DB::table('card_types')->truncate(); // حذف البيانات القديمة
+        // DB::table('affiliate_card_types')->truncate(); // حذف البيانات القديمة
 
         // مسار الصور
         $urlimage = env('BACK_END_URL'); // عنوان URL الأساسي
@@ -28,6 +27,7 @@ class CardSeeder extends Seeder
         $imagesarray = array_filter($images, function ($image) {
             return in_array(pathinfo($image, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
         });
+
 
         // بيانات البطاقات
         $cards = [
@@ -43,6 +43,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'status' => 'allow'
             ],
             [
                 'title_en' => 'Pro Subscription',
@@ -56,6 +57,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'status' => 'allow'
             ],
             [
                 'title_en' => 'Enterprise Subscription',
@@ -69,18 +71,21 @@ class CardSeeder extends Seeder
                 'duration' => '1 year',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'status' => 'allow'
             ],
             // يمكنك إضافة المزيد من البطاقات هنا
         ];
 
         // إدخال البيانات في الجدول
         foreach ($cards as $card) {
-            DB::table('card_types')->insert($card);
+            DB::table('affiliate_card_types')->insert($card);
         }
 
         // إعادة تفعيل فحص المفاتيح الخارجية
         DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
     }
+
+
 
     /**
      * الحصول على رابط صورة عشوائية من المجلد.
@@ -92,11 +97,8 @@ class CardSeeder extends Seeder
      */
     private function getRandomImageUrl($urlimage, $path, $imagesarray)
     {
-        if (empty($imagesarray)) {
-            return 'https://via.placeholder.com/150'; // صورة افتراضية إذا لم توجد صور
-        }
-
         $imagecard = $imagesarray[array_rand($imagesarray)]; // اختيار صورة عشوائية
-        return $urlimage . '/' . 'public/' . $path . '/' . $imagecard; // إنشاء الرابط الكامل
+        return $urlimage . '/'  . $path . '/' . $imagecard; // إنشاء الرابط الكامل
+        // return $urlimage . '/' . 'public/' . $path . '/' . $imagecard; // إنشاء الرابط الكامل
     }
 }

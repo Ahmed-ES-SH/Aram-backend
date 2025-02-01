@@ -25,6 +25,7 @@ class StoreAffiliateCardTypeRequest extends FormRequest
         return [
             'title_en' => 'required|string|max:255',
             'title_ar' => 'required|string|max:255',
+            'organization_id' => 'required|numeric|exists:organizations,id',
             'description_en' => 'required|string',
             'description_ar' => 'required|string',
             'price_before_discount' => 'nullable|numeric|min:0',

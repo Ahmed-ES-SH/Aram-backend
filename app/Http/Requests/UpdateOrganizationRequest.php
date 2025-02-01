@@ -40,7 +40,8 @@ class UpdateOrganizationRequest extends FormRequest
             'icon' => 'nullable', // التأكد من أن الملف أيقونة
             'account_type' => 'nullable',
             'is_signed' => 'nullable',
-            'number_of_reservations' => 'nullable'
+            'number_of_reservations' => 'nullable',
+            'status' => 'sometimes|in:published,not_published,under_review'
         ];
     }
 

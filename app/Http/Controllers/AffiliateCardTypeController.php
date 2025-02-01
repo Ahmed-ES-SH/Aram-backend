@@ -11,13 +11,13 @@ use Illuminate\Http\Request;
 
 class AffiliateCardTypeController extends Controller
 {
-    use ApiResponse ;
-    protected $imageservice ;
+    use ApiResponse;
+    protected $imageservice;
 
-        public function __construct(ImageService $imageService)
-        {
-            $this->imageservice = $imageService ;
-        }
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageservice = $imageService;
+    }
 
 
     /**
@@ -45,12 +45,119 @@ class AffiliateCardTypeController extends Controller
             return $this->errorResponse('Faild Error', ['message' => $e->getMessage()], 500);
         }
     }
+    public function AffiliateCardTypeBySearch(Request $request)
+    {
+        try {
+            $request->validate([
+                'content_search' => 'required|string'
+            ]);
+            $searchTerm = '%' . $request->content_search . '%';
+            $cardtypes = Affiliate_cardType::where('title_en', 'like', $searchTerm)
+                ->orWhere('title_ar', 'like', $searchTerm)
+                ->orWhere('description_ar', 'like', $searchTerm)
+                ->orWhere('description_en', 'like', $searchTerm)->orderBy('created_at', 'desc')->paginate(12);
+            if ($cardtypes->isEmpty()) {
+                return response()->json([
+                    'message' => 'No cardtypes Available !'
+                ], 404);
+            }
+            return response()->json([
+                'data' => $cardtypes->items(),
+                'pagination' => [
+                    'current_page' => $cardtypes->currentPage(),
+                    'last_page' => $cardtypes->lastPage(),
+                    'per_page' => $cardtypes->perPage(),
+                    'total' => $cardtypes->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Faild Error', ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function getAffiliateCardsFororganizationBySearch($id, Request $request)
+    {
+        try {
+            // تحقق من صحة البيانات المدخلة
+            $request->validate([
+                'content_search' => 'required|string', // على الأقل 3 أحرف
+            ]);
+
+            // البحث في الخدمات التابعة
+            $searchTerm = '%' . $request->content_search . '%'; // إضافة علامات % للبحث الجزئي
+
+            // استعلام البحث مع ضمان أن الخدمات تابعة للمنظمة المحددة
+            $cards = Affiliate_cardType::where('organization_id', $id)
+                ->where(function ($query) use ($searchTerm) {
+                    $query->where('title_en', 'like', $searchTerm)
+                        ->orWhere('title_ar', 'like', $searchTerm)
+                        ->orWhere('description_ar', 'like', $searchTerm)
+                        ->orWhere('description_en', 'like', $searchTerm);
+                })->paginate(12);
+
+            // التحقق من وجود نتائج
+            if ($cards->isEmpty()) {
+                return response()->json(['message' => 'No cards found.'], 404);
+            }
+
+            // إرجاع النتائج
+            return response()->json([
+                'data' => $cards->items(),
+                'pagination' => [
+                    'current_page' => $cards->currentPage(),
+                    'last_page' => $cards->lastPage(),
+                    'per_page' => $cards->perPage(),
+                    'total' => $cards->total(),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            // إرجاع رسالة الخطأ في حالة حدوث استثناء
+            return $this->errorResponse("Failed to search cards", ['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function AffiliateCardtypesForOrganization($id)
+    {
+        try {
+            $cards = Affiliate_cardType::where('organization_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
+
+            if ($cards->isEmpty()) {
+                return response()->json([
+                    'message' => 'No Cards Found'
+                ], 404);
+            }
+
+            // تحويل البيانات إلى الشكل الصحيح
+            $data = $cards->map(function ($card) {
+                $card->features_en = is_string($card->features_en) ? json_decode($card->features_en, true) : $card->features_en;
+                $card->features_ar = is_string($card->features_ar) ? json_decode($card->features_ar, true) : $card->features_ar;
+                return $card;
+            });
+
+            return response()->json([
+                'data' => $data,
+                'pagination' => [
+                    'current_page' => $cards->currentPage(),
+                    'last_page' => $cards->lastPage(),
+                    'per_page' => $cards->perPage(),
+                    'total' => $cards->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Failed Error", ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
 
     public function allowedAffiliateCards()
     {
         try {
             // جلب البطاقات النشطة مع التصفح (pagination)
-            $cardtypes = Affiliate_cardType::where('status', 'allow')->paginate(12);
+            $cardtypes = Affiliate_cardType::where('status', 'allow')->paginate(16);
 
             // التحقق إذا كانت البطاقات فارغة
             if ($cardtypes->isEmpty()) {
@@ -82,15 +189,15 @@ class AffiliateCardTypeController extends Controller
     {
         try {
             $data = $request->validated();
-             $card = new Affiliate_cardType();
-             $card->fill($data);
-             if ($request->has('image')) {
-                $this->imageservice->ImageUploader($request , $card , 'images/affiliateCardTypes' );
-             }
-             $card->save();
-             return $this->successResponse($card , 'Card Created Successfully' ,  201);
+            $card = new Affiliate_cardType();
+            $card->fill($data);
+            if ($request->has('image')) {
+                $this->imageservice->ImageUploader($request, $card, 'images/affiliateCardTypes');
+            }
+            $card->save();
+            return $this->successResponse($card, 'Card Created Successfully',  201);
         } catch (\Exception $e) {
-            return $this->errorResponse("Faild Error" , ['message' => $e->getMessage()] , 500);
+            return $this->errorResponse("Faild Error", ['message' => $e->getMessage()], 500);
         }
     }
 
@@ -100,10 +207,10 @@ class AffiliateCardTypeController extends Controller
     public function show($id)
     {
         try {
-            $cardType= Affiliate_cardType::findOrFail($id);
-            return $this->successResponse($cardType , 'Card founded Successfully' , 200);
+            $cardType = Affiliate_cardType::findOrFail($id);
+            return $this->successResponse($cardType, 'Card founded Successfully', 200);
         } catch (\Exception $e) {
-            return $this->errorResponse("Faild Error" , ['message' => $e->getMessage()] , 500);
+            return $this->errorResponse("Faild Error", ['message' => $e->getMessage()], 500);
         }
     }
 
@@ -118,12 +225,14 @@ class AffiliateCardTypeController extends Controller
             $card = Affiliate_cardType::findOrFail($id);
             $card->fill($data);
             if ($request->has('image')) {
-                $this->imageservice->ImageUploader($request , $card , 'images/affiliateCardTypes');
+                $this->imageservice->ImageUploader($request, $card, 'images/affiliateCardTypes');
             }
             $card->save();
-            return $this->successResponse($card , 'Card Updated Succsessfully' , 200);
-        }catch (\Exception $e) {
-            return $this->errorResponse("Faild Error" , ['message' => $e->getMessage()] , 500);
+            $card->features_en = is_string($card->features_en) ? json_decode($card->features_en, true) : $card->features_en;
+            $card->features_ar = is_string($card->features_ar) ? json_decode($card->features_ar, true) : $card->features_ar;
+            return $this->successResponse($card, 'Card Updated Succsessfully', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Faild Error", ['message' => $e->getMessage()], 500);
         }
     }
 
@@ -132,13 +241,13 @@ class AffiliateCardTypeController extends Controller
      */
     public function destroy($id)
     {
-    try {
-        $card = Affiliate_cardType::findOrFail($id);
-        $this->imageservice->deleteOldImage($card , 'images/affiliateCardTypes');
-        $card->delete();
-        return $this->successResponse([] , 'Card Deleted Successfully' , 200);
-    } catch (\Exception $e) {
-        return $this->errorResponse('Faild Error' , ['message' => $e->getMessage()] , 500);
-    }
+        try {
+            $card = Affiliate_cardType::findOrFail($id);
+            $this->imageservice->deleteOldImage($card, 'images/affiliateCardTypes');
+            $card->delete();
+            return $this->successResponse([], 'Card Deleted Successfully', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Faild Error', ['message' => $e->getMessage()], 500);
+        }
     }
 }

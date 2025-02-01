@@ -32,6 +32,8 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->string('icon')->nullable();
             $table->boolean('active')->default(0);
+            $table->enum('status', ['published', 'not_published', 'under_review'])->default('not_published');
+            $table->decimal('rateing', 3, 2)->default(0);
             $table->integer('number_of_reservations')->default(0);
             $table->boolean('is_signed')->default(0);
             $table->string('account_type')->default("Organization");

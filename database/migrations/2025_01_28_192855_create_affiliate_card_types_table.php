@@ -24,7 +24,8 @@ return new class extends Migration
             $table->string('duration');
             $table->text('image');
             $table->boolean('active')->default(0);
-            $table->enum('status' , ['allow' , 'not_allow' , 'under_review'])->default('not_allow');
+            $table->enum('status', ['allow', 'not_allow', 'under_review'])->default('not_allow');
+            $table->foreignId('organization_id')->constrained('organizations', 'id')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }

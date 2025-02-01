@@ -11,6 +11,8 @@ use App\Services\MyFatoorahService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PaymentSuccessNotification;
+use App\Models\balance;
+use App\Models\FinancialTransactions;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
@@ -251,13 +253,37 @@ class PaymentController extends Controller
                     Log::error("Failed to send email: " . $mailException->getMessage());
                 }
 
-                Bell::create([
+                $bill = new Bell();
+                $bill->bell_type = 'confirm_booked';
+                $bill->bell_items = json_encode($data);
+                $bill->account_type = $accountType;
+                $bill->amount = floatval($Amount);
+                $bill->user_id = intval($data->user_id);
+                $bill->save();
+
+
+                FinancialTransactions::create([
+                    'bell_id' => $bill->id,
                     'bell_type' => 'confirm_booked',
                     'bell_items' => json_encode($data),
                     'account_type' => $accountType,
                     'amount' => floatval($Amount),
+                    'balance_type' => 'pending_balance',
                     'user_id' => intval($data->user_id),
+                    'organization_id' => intval($data->organization_id),
                 ]);
+
+                // تحديث الأرصدة تلقائيًا
+                $balance = balance::where('user_id', $data->user_id)
+                    ->orWhere('organization_id', $data->organization_id)
+                    ->firstOrNew([
+                        'user_id' => $data->user_id ?? null,
+                        'organization_id' => $data->organization_id ?? null,
+                    ]);
+
+                $balance->total_balance += floatval($Amount);
+                $balance->pending_balance += floatval($Amount);
+                $balance->save();
 
                 $model->delete();
                 return redirect()->to(env('SUCCESS_PAYMENT_URL') . $paymentId . '&mail_statue=true');

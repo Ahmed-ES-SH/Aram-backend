@@ -6,6 +6,7 @@ use App\Http\Controllers\ArmaCardController;
 use App\Http\Controllers\ArticalCategoryController;
 use App\Http\Controllers\ArticleReactionController;
 use App\Http\Controllers\Authcontroller;
+use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\BellController;
 use App\Http\Controllers\BlockedUserController;
 use App\Http\Controllers\BlogController;
@@ -33,6 +34,8 @@ use App\Http\Controllers\TermsConditionOrganizationController;
 use App\Http\Controllers\TermsConditionUserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuestionAnswerController;
+use App\Http\Controllers\FinancialTransactionsController;
+use App\Http\Controllers\WithdrawalrequestController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -218,6 +221,7 @@ Route::controller(CommentController::class)->group(function () {
 Route::controller(OrganizationController::class)->group(function () {
     Route::get('/organizations', 'index');
     Route::get('/getlocations', 'getlocations');
+    Route::get('/organizations-by-rateing', 'orgsByRateing');
     Route::get('/orgs-by-number-of-reservations', 'orgsbynumberofreservations');
     Route::get('/organizations-count', 'organizationsCount');
     Route::get('/organizations-by-service/{id}', 'organizationsByServiceCategory');
@@ -287,7 +291,10 @@ Route::controller(CardTypeController::class)->group(function () {
 // -------------------------------
 Route::controller(AffiliateCardTypeController::class)->group(function () {
     Route::get('/affiliate-card-types', 'index');
-    Route::get('/active-affiliate-card-types', 'activecards');
+    Route::get('/affiliate-card-types-for-organization/{id}', 'AffiliateCardtypesForOrganization');
+    Route::post('/affiliate-card-Type-by-search', 'AffiliateCardTypeBySearch');
+    Route::post('/affiliate-card-Type-for-organization-by-search/{id}', 'getAffiliateCardsFororganizationBySearch');
+    Route::get('/active-affiliate-card-types', 'allowedAffiliateCards');
     Route::get('/affiliate-card-type/{id}', 'show');
     Route::post('/add-affiliate-card-type', 'store');
     Route::post('/update-affiliate-card-type/{id}', 'update');
@@ -498,7 +505,8 @@ Route::controller(BellController::class)->group(function () {
 
 Route::controller(OfferController::class)->group(function () {
     Route::get('/all-offers', 'index');
-    Route::post('/offers-for-organization-by-search/{id}', 'offersBySearch');
+    Route::post('/offers-for-organization-by-search/{id}', 'offersBySearchforOrganization');
+    Route::post('/offers-by-search', 'offersBySearch');
     Route::post('/check-offer-date', 'updateOfferStatuses');
     Route::get('/organization-offers/{id}', 'offersByorganization');
     Route::get('/offers-by-category/{id}', 'offersByCategory');
@@ -541,4 +549,27 @@ Route::controller(QuestionAnswerController::class)->group(function () {
     Route::get('/questions/{id}', 'show'); // عرض سؤال وجواب محدد
     Route::post('/questions/{id}', 'update'); // تحديث سؤال وجواب محدد
     Route::delete('/questions/{id}', 'destroy'); // حذف سؤال وجواب محدد
+});
+
+
+Route::get('/numbers/{id}/{type}', [BalanceController::class, 'getNumbersbyorganizationId']);
+Route::get('/financial-transactions/{id}', [FinancialTransactionsController::class, 'getDataById']);
+
+
+
+Route::controller(WithdrawalrequestController::class)->group(function () {
+    // تقديم طلب سحب جديد
+    Route::post('/withdrawal-request', 'store');
+
+    // الموافقة على طلب السحب
+    Route::post('/withdrawal-requests/{id}/approve', 'approve');
+
+    // رفض طلب السحب
+    Route::post('/withdrawal-requests/{id}/reject', 'reject');
+
+    // جلب جميع طلبات السحب
+    Route::get('/withdrawal-requests', 'index');
+
+    // جلب تفاصيل طلب معين
+    Route::get('/withdrawal-requests/{id}', 'show');
 });

@@ -31,7 +31,7 @@ class UpdateAffiliateCardTypeRequest extends FormRequest
             'features_ar' => 'nullable|string',
             'features_en' => 'nullable|string',
             'duration' => 'sometimes|integer|min:1',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image' => 'nullable',
             'active' => 'sometimes|boolean',
             'status' => 'sometimes|string|in:allow,not_allow,under_review',
         ];

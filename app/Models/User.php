@@ -82,6 +82,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Arma_Card::class);
     }
+    public function financialTransactions()
+    {
+        return $this->hasMany(FinancialTransactions::class);
+    }
 
 
     public function blockedUsers()

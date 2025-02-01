@@ -107,6 +107,64 @@ class OrganizationController extends Controller
 
 
 
+    public function orgsByRateing()
+    {
+        try {
+            // جلب المنظمات مع الأقسام الخاصة بها استنادًا إلى categories_ids المخزنة في قاعدة البيانات
+            $orgs = Organization::where('status', 'published')->orderBy('rateing', 'desc')->paginate(8);
+
+            // التحقق من وجود بيانات
+            if ($orgs->isEmpty()) {
+                return $this->errorResponse("Faild Error", ['mesage' => 'no organization found'], 404);
+            }
+
+            // جلب الأقسام المتوافقة مع الـ categories_ids لجميع المنظمات في الـ orgs
+            $categoryIds = $orgs->pluck('categories_ids')->flatten()->unique();
+
+            // تحويل الـ categories_ids إلى مصفوفة حقيقية في حال كانت سلسلة نصية
+            $categoryIds = $categoryIds->map(function ($categoryId) {
+                return json_decode($categoryId);
+            })->flatten()->unique();
+
+            // جلب الأقسام المتوافقة
+            $categories = ServiceCategory::whereIn('id', $categoryIds)->get()->keyBy('id');
+
+            // تحويل المصفوفة إلى Collection لاستخدام map
+            $orgsWithCategories = collect($orgs->items())->map(function ($org) use ($categories) {
+                // التأكد من أن categories_ids هي مصفوفة
+                $categoryIds = is_string($org->categories_ids) ? json_decode($org->categories_ids, true) : $org->categories_ids;
+
+                if (!is_array($categoryIds)) {
+                    $categoryIds = []; // تعيين مصفوفة فارغة إذا لم تكن صالحة
+                }
+
+                // إضافة الأقسام الخاصة بالمنظمة
+                $org->categories = collect();
+
+                foreach ($categoryIds as $categoryId) {
+                    if ($categories->has($categoryId)) {
+                        $org->categories->push($categories->get($categoryId));
+                    }
+                }
+
+                return $org;
+            });
+
+            // إرجاع المنظمات مع الأقسام المرتبطة بها
+            return response()->json([
+                'data' => $orgsWithCategories,
+                'pagination' => [
+                    'current_page' => $orgs->currentPage(),
+                    'last_page' => $orgs->lastPage(),
+                    'per_page' => $orgs->perPage(),
+                    'total' => $orgs->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed error', ['message' => $e->getMessage()], 500);
+        }
+    }
+
     public function orgsbynumberofreservations()
     {
         try {
@@ -533,7 +591,7 @@ class OrganizationController extends Controller
                 $this->imageservice->ImageUploaderwithvariable($request, $org, 'images/organizations/icons', 'icon');
             }
             $org->save();
-            return $this->successResponse($org, 'Organization Updated Successfully', 201);
+            return $this->successResponse($org, 'Organization Updated Successfully', 200);
         } catch (\Exception $e) {
             return $this->errorResponse('Faild error', ['message' => $e->getMessage()], 500);
         }

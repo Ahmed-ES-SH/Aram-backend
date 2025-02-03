@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\PaymentSuccessNotification;
 use App\Models\balance;
 use App\Models\FinancialTransactions;
+use App\Models\Purchase;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +34,8 @@ class PaymentController extends Controller
             'invoiceValue' => 'required|numeric',
             'currentUserId' => 'required|numeric',
             'cardsDetailes' => 'required',
-            'account_type' => 'required|in:user,User,organization'
+            'account_type' => 'required|in:user,User,organization',
+            'purchase_id' => 'nullable',
         ]);
 
 
@@ -41,22 +43,27 @@ class PaymentController extends Controller
 
         $cardsDetailes = $request->cardsDetailes;
 
-        ProvisionalData::create([
+        $ProvisionalData = ProvisionalData::create([
             'uniqueId' => $uniqueDataId,
             'cardsDetailes' => $cardsDetailes,
             'expire_at' => now()->addMinute(60)
         ]);
 
+        if ($request->has('purchase_id')) {
+            $ProvisionalData->purchase_id = $request->purchase_id;
+        }
+
         $data = [
             'InvoiceValue' => $validated['invoiceValue'],
             'currency' => "USD",
             'cardsDetailesId' => $uniqueDataId,
+            'purchase_id' => $validated['purchase_id'],
             'CustomerName' => $validated['customerName'],
             'currentUserId' => $validated['currentUserId'],
             'accountType' => $validated['account_type'],
             'NotificationOption' => $validated['notificationOption'],
             'Language' => 'EN', // يمكن ضبطها إلى AR إذا كانت باللغة العربية
-            'CustomerEmail' => $request->input('customerEmail', 'test@test.com'),
+            'CustomerEmail' => $request->input('customerEmail'),
         ];
 
         $response = $this->myFatoorahService->sendPayment($data);
@@ -125,6 +132,7 @@ class PaymentController extends Controller
         try {
             $paymentId = $request->query('paymentId');
             $accountType = $request->query('accountType');
+            $purchase_id = $request->query('purchase_id');
             $cardsDetailesId = base64_decode($request->query('cardsDetailesId'));
             $userId = base64_decode($request->query('UserId'));
             $Amount = $request->query('InvoiceValue');
@@ -169,7 +177,15 @@ class PaymentController extends Controller
                     }
                 }
 
+                $Purchase = Purchase::where('uniqId', $purchase_id)->first();
+                if (!$Purchase) {
+                    return response()->json(['message' => 'Purchase record not found.'], 404);
+                }
+
+
                 if (Arma_Card::insert($cardsToInsert)) {
+                    $Purchase->status = 'completed';
+                    $Purchase->save();
                     Bell::create([
                         'bell_items' => json_encode($jsoncardsDetailes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT),
                         'bell_type' => 'cards_bell',

@@ -472,6 +472,93 @@ class OrganizationController extends Controller
         }
     }
 
+
+    public function publishedOrganizationswithSelectedData()
+    {
+        try {
+            // جلب البطاقات النشطة مع التصفح (pagination)
+            $orgs = organization::where('status', 'published')->select('id', 'icon', 'title_en', 'title_ar')->paginate(12);
+
+            // التحقق إذا كانت البطاقات فارغة
+            if ($orgs->isEmpty()) {
+                return response()->json([
+                    'message' => 'لا توجد منظمات نشطة حالياً.'
+                ], 404);
+            }
+
+
+
+            // إرسال البطاقات مع تفاصيل التصفح
+            return response()->json([
+                'data' => $orgs->items(), // إرسال البطاقات في الشكل الصحيح
+                'pagination' => [
+                    'current_page' => $orgs->currentPage(),
+                    'last_page' => $orgs->lastPage(),
+                    'per_page' => $orgs->perPage(),
+                    'total' => $orgs->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            // في حالة حدوث خطأ
+            return $this->errorResponse('حدث خطأ أثناء جلب البطاقات النشطة', ['message' => $e->getMessage()], 500);
+        }
+    }
+    public function publishedOrganizations()
+    {
+        try {
+            // جلب البطاقات النشطة مع التصفح (pagination)
+            $orgs = organization::where('status', 'published')->paginate(12);
+
+            // التحقق إذا كانت البطاقات فارغة
+            if ($orgs->isEmpty()) {
+                return response()->json([
+                    'message' => 'لا توجد منظمات نشطة حالياً.'
+                ], 404);
+            }
+
+            // جلب الأقسام المتوافقة مع الـ categories_ids لجميع المنظمات في الـ orgs
+            // جلب الأقسام المتوافقة مع categories_ids
+            $categoryIds = $orgs->pluck('categories_ids')->map(function ($categories) {
+                return is_string($categories) ? json_decode($categories, true) : $categories;
+            })->filter()->flatten()->unique();
+            $categories = ServiceCategory::whereIn('id', $categoryIds)->get()->keyBy('id');
+
+            // تحويل المصفوفة إلى Collection لاستخدام map
+            $orgsWithCategories = collect($orgs->items())->map(function ($org) use ($categories) {
+                // التأكد من أن categories_ids هي مصفوفة
+                $categoryIds = is_string($org->categories_ids) ? json_decode($org->categories_ids, true) : $org->categories_ids;
+
+                if (!is_array($categoryIds)) {
+                    $categoryIds = []; // تعيين مصفوفة فارغة إذا لم تكن صالحة
+                }
+
+                $org->categories = collect();
+
+                foreach ($categoryIds as $categoryId) {
+                    if ($categories->has($categoryId)) {
+                        $org->categories->push($categories->get($categoryId));
+                    }
+                }
+
+                return $org;
+            });
+
+            // إرسال البطاقات مع تفاصيل التصفح
+            return response()->json([
+                'data' => $orgsWithCategories, // إرسال البطاقات في الشكل الصحيح
+                'pagination' => [
+                    'current_page' => $orgs->currentPage(),
+                    'last_page' => $orgs->lastPage(),
+                    'per_page' => $orgs->perPage(),
+                    'total' => $orgs->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            // في حالة حدوث خطأ
+            return $this->errorResponse('حدث خطأ أثناء جلب البطاقات النشطة', ['message' => $e->getMessage()], 500);
+        }
+    }
+
     public function updateactiveorganization($id, $active)
     {
         try {

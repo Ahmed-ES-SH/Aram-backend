@@ -32,8 +32,9 @@ class UpdateOfferRequest extends FormRequest
             'start_date' => 'sometimes|date', // تاريخ البداية (اختياري، تاريخ صالح)
             'end_date' => 'sometimes|date|after_or_equal:start_date', // تاريخ النهاية (اختياري، بعد أو يساوي تاريخ البداية)
             'is_active' => 'sometimes|boolean', // حالة العرض (اختياري، قيمة منطقية)
+            'status' => 'string|in:waiting,expired,active', // حالة العرض (اختياري، قيمة منطقية)
             'organization_id' => 'sometimes|exists:organizations,id', // معرف المنظمة (اختياري، موجود في جدول المنظمات)
-            'category_id' => 'sometimes|exists:categories,id', // معرف الفئة (اختياري، موجود في جدول الفئات)
+            'category_id' => 'sometimes|exists:service_categories,id', // معرف الفئة (اختياري، موجود في جدول الفئات)
         ];
     }
 

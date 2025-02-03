@@ -27,11 +27,20 @@ class AffiliateCardTypeController extends Controller
     {
         try {
             $cardtypes = Affiliate_cardType::orderBy('created_at', 'desc')->paginate(12);
+
             if ($cardtypes->isEmpty()) {
                 return response()->json([
-                    'message' => 'No cardtypes Available !'
+                    'message' => 'No cardtypes Available!'
                 ], 404);
             }
+
+            // تحويل القيم النصية إلى JSON عند الحاجة
+            $cardtypes->transform(function ($cardType) {
+                $cardType->features_en = $this->decodeJson($cardType->features_en);
+                $cardType->features_ar = $this->decodeJson($cardType->features_ar);
+                return $cardType;
+            });
+
             return response()->json([
                 'data' => $cardtypes->items(),
                 'pagination' => [
@@ -42,9 +51,18 @@ class AffiliateCardTypeController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            return $this->errorResponse('Faild Error', ['message' => $e->getMessage()], 500);
+            return $this->errorResponse('Failed Error', ['message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * فك ترميز JSON إذا كان نصًا
+     */
+    private function decodeJson($value)
+    {
+        return is_string($value) ? json_decode($value, true) : $value;
+    }
+
     public function AffiliateCardTypeBySearch(Request $request)
     {
         try {

@@ -82,4 +82,9 @@ class organization extends Model
     {
         return $this->hasMany(Affiliate_cardType::class);
     }
+
+    public function coupons()
+    {
+        return $this->hasMany(Copone::class);
+    }
 }

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->boolean('is_signed')->default(0);
             $table->integer('number_of_reservations')->default(0);
             $table->string('account_type')->default("User");
+            $table->string('user_code')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

@@ -27,6 +27,10 @@ class Authcontroller extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
+            do {
+                $userCode = Str::random(10);
+            } while (User::where('user_code', $userCode)->exists());
+
 
             // البحث عن المستخدم أو إنشاؤه
             $user = User::firstOrCreate(
@@ -35,7 +39,8 @@ class Authcontroller extends Controller
                     'name' => $googleUser->getName(),
                     'password' => Hash::make(Str::random(24)),
                     'social_id' => $googleUser->getId(),
-                    'social_type' => "google"
+                    'social_type' => "google",
+                    'user_code' => $userCode
                 ]
             );
 
@@ -79,7 +84,9 @@ class Authcontroller extends Controller
     {
         try {
             $facebookUser = Socialite::driver('facebook')->stateless()->user();
-
+            do {
+                $userCode = Str::random(10);
+            } while (User::where('user_code', $userCode)->exists());
             // البحث عن المستخدم بناءً على البريد الإلكتروني أو إنشاؤه
             $user = User::firstOrCreate(
                 ['email' => $facebookUser->getEmail()],
@@ -87,7 +94,8 @@ class Authcontroller extends Controller
                     'name' => $facebookUser->getName(),
                     'password' => Hash::make(Str::random(24)), // كلمة مرور عشوائية
                     'social_id' => $facebookUser->getId(), // حفظ facebook ID
-                    'social_type' => "facebook"
+                    'social_type' => "facebook",
+                    'user_code' => $userCode
                 ]
             );
 

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('offers', function (Blueprint $table) {
+        Schema::create('copones', function (Blueprint $table) {
             // الأعمدة الأساسية
             $table->id(); // معرف فريد للعرض/الكوبون
             $table->string('title_ar'); // عنوان العرض باللغة العربية
@@ -27,9 +27,9 @@ return new class extends Migration
             $table->date('end_date'); // تاريخ نهاية العرض
             $table->boolean('is_active')->default(false); // حالة العرض (نشط أو غير نشط)
             // العلاقة مع المركز الطبي
-            $table->foreignId('organization_id')->nullable()->constrained('organizations', 'id')->onDelete('cascade');
+            $table->foreignId('organization_id')->constrained('organizations', 'id')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('service_categories', 'id')->onDelete('cascade'); // العلاقة مع الفئة
-            $table->timestamps(); // created_at و updated_at
+            $table->timestamps();
         });
     }
 
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('offers');
+        Schema::dropIfExists('copones');
     }
 };

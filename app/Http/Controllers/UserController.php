@@ -65,6 +65,45 @@ class UserController extends Controller
             return $this->errorResponse('Faild error', ['message' => $e->getMessage()], 500);
         }
     }
+
+    public function getUserCoupons($userId)
+    {
+        try {
+            $user = User::find($userId);
+
+            // التحقق من وجود المستخدم
+            if (!$user) {
+                return $this->errorResponse('User not found', ['message' => 'No user found with the given ID'], 404);
+            }
+            $userCoupons = $user->coupons()
+                ->with([
+                    'organization' => function ($query) {
+                        $query->select('id', 'image', 'icon', 'title_en', 'title_ar');
+                    },
+                    'category' => function ($query) {
+                        $query->select('id', 'image', 'title_en', 'title_ar');
+                    }
+                ])
+                ->paginate(12);
+
+            // إضافة معلومات الـ pagination إلى الاستجابة
+            $paginationDetails = [
+                'total' => $userCoupons->total(),         // العدد الإجمالي للعناصر
+                'current_page' => $userCoupons->currentPage(),  // الصفحة الحالية
+                'per_page' => $userCoupons->perPage(),     // عدد العناصر في كل صفحة
+                'last_page' => $userCoupons->lastPage(),   // الصفحة الأخيرة
+                'from' => $userCoupons->firstItem(),       // العنصر الأول في الصفحة الحالية
+                'to' => $userCoupons->lastItem(),          // العنصر الأخير في الصفحة الحالية
+            ];
+            return response()->json([
+                'data' => $userCoupons->items(),
+                'pagination' => $paginationDetails
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Faild Error", ['message' => $e->getMessage()], 500);
+        }
+    }
+
     public function usersByNumberOfReservations()
     {
         try {
@@ -102,7 +141,11 @@ class UserController extends Controller
             if ($request->has('image')) {
                 $this->imageservice->ImageUploader($request, $user, 'images/users');
             }
+            do {
+                $userCode = Str::random(10);
+            } while (User::where('user_code', $userCode)->exists());
 
+            $user->user_code = $userCode;
             $user->save();
 
             $token = $user->createToken('auth_token')->plainTextToken;

@@ -87,6 +87,11 @@ class User extends Authenticatable
         return $this->hasMany(FinancialTransactions::class);
     }
 
+    public function coupons()
+    {
+        return $this->belongsToMany(Copone::class, 'coupon_user', 'user_id', 'coupon_id');
+    }
+
 
     public function blockedUsers()
     {
@@ -96,5 +101,18 @@ class User extends Authenticatable
     public function blockedBy()
     {
         return $this->morphMany(blocked_user::class, 'blocked');
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'user_id');
+    }
+    public function visitors()
+    {
+        return $this->hasMany(Visit::class, 'user_id');
+    }
+    public function Cardvisitors()
+    {
+        return $this->hasMany(CardVisit::class, 'user_id');
     }
 }

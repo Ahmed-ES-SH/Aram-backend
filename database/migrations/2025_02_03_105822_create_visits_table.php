@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('provisional_data', function (Blueprint $table) {
+        Schema::create('visits', function (Blueprint $table) {
             $table->id();
-            $table->string('uniqueId');
-            $table->unsignedBigInteger('purchase_id')->nullable();
-            $table->json('cardsDetailes');
-            $table->string('expire_at');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // المستخدم صاحب الرابط
+            $table->string('ip_address'); // عنوان IP للزائر
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('provisional_data');
+        Schema::dropIfExists('visits');
     }
 };

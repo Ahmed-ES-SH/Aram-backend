@@ -17,4 +17,8 @@ class ServiceCategory extends Model
     {
         return $this->hasMany(Service::class, 'category_id');
     }
+    public function coupons()
+    {
+        return $this->hasMany(Copone::class);
+    }
 }

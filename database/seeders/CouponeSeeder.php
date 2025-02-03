@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
 
-class OffersSeeder extends Seeder
+class CouponeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -18,7 +18,7 @@ class OffersSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
 
         // تفريغ جدول العروض
-        DB::table('offers')->truncate();
+        DB::table('copones')->truncate();
 
         // تمكين فحص المفاتيح الخارجية مرة أخرى
         DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
@@ -51,7 +51,7 @@ class OffersSeeder extends Seeder
             $randomImage = $urlimage . '/'  . $path . '/' . $imagesarray[array_rand($imagesarray)];
 
             // إنشاء عرض جديد
-            DB::table('offers')->insert([
+            DB::table('copones')->insert([
                 'title_ar' => 'عرض ' . $faker->word, // عنوان العرض بالعربية
                 'title_en' => 'Offer ' . $faker->word, // عنوان العرض بالإنجليزية
                 'image' => $randomImage, // صورة عشوائية من المجلد
@@ -64,7 +64,6 @@ class OffersSeeder extends Seeder
                 'is_active' => $faker->boolean(80), // حالة العرض (80% احتمالية أن يكون نشطاً)
                 'organization_id' => $organizationIds[array_rand($organizationIds)], // معرف المنظمة عشوائي
                 'category_id' => $categoryIds[array_rand($categoryIds)], // معرف الفئة عشوائي
-                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

@@ -12,11 +12,13 @@ use App\Http\Controllers\BlockedUserController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CardTypeController;
+use App\Http\Controllers\CardVisitController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CompanyDetailesController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\CoponeController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\MainpageController;
 use App\Http\Controllers\MessageController;
@@ -35,6 +37,8 @@ use App\Http\Controllers\TermsConditionUserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuestionAnswerController;
 use App\Http\Controllers\FinancialTransactionsController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\VisitController;
 use App\Http\Controllers\WithdrawalrequestController;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +77,7 @@ Route::get('/auth/facebook/callback', [AuthController::class, 'handleFacebookCal
 // -------------------------
 Route::controller(UserController::class)->group(function () {
     Route::get('/users', 'index');
+    Route::get('/get-user-coupones/{id}', 'getUserCoupons');
     Route::get('/users-by-number-of-reservations', 'usersByNumberOfReservations');
     Route::get('/users-count', 'usersCount');
     Route::post('/register', 'store');
@@ -220,6 +225,8 @@ Route::controller(CommentController::class)->group(function () {
 // -------------------------
 Route::controller(OrganizationController::class)->group(function () {
     Route::get('/organizations', 'index');
+    Route::get('/published-organiztions', 'publishedOrganizations');
+    Route::get('/published-organiztions-with-selected-data', 'publishedOrganizationswithSelectedData');
     Route::get('/getlocations', 'getlocations');
     Route::get('/organizations-by-rateing', 'orgsByRateing');
     Route::get('/orgs-by-number-of-reservations', 'orgsbynumberofreservations');
@@ -505,6 +512,7 @@ Route::controller(BellController::class)->group(function () {
 
 Route::controller(OfferController::class)->group(function () {
     Route::get('/all-offers', 'index');
+    Route::get('/random-offers', 'getRandomPublishedOffers');
     Route::post('/offers-for-organization-by-search/{id}', 'offersBySearchforOrganization');
     Route::post('/offers-by-search', 'offersBySearch');
     Route::post('/check-offer-date', 'updateOfferStatuses');
@@ -517,6 +525,23 @@ Route::controller(OfferController::class)->group(function () {
     Route::get('/get-offer/{id}', 'show');
     Route::post('/update-offer/{id}', 'update');
     Route::delete('/delete-offer/{id}', 'destroy');
+});
+
+
+
+//////////////////////////////
+// Copones Routes /////////////
+//////////////////////////////
+
+Route::controller(CoponeController::class)->group(function () {
+    Route::get('/all-copones', 'index');
+    Route::post('/search-copones', 'coponesBySearch');
+    Route::post('/copones-by-category/{id}', 'coponesByCategory');
+    Route::post('/send-coupone', 'sendCoponeToSelectedUsers');
+    Route::post('/add-copone', 'store');
+    Route::get('/get-copone', 'show');
+    Route::post('/update-copone/{id}', 'update');
+    Route::delete('/destroy-copone/{id}', 'destroy');
 });
 
 
@@ -540,6 +565,9 @@ Route::controller(AffiliateServiceController::class)->group(function () {
 });
 
 
+/////////////////////////////////////////
+// QuestionAnswer Routes /////////////
+/////////////////////////////////////////
 
 
 Route::controller(QuestionAnswerController::class)->group(function () {
@@ -552,8 +580,46 @@ Route::controller(QuestionAnswerController::class)->group(function () {
 });
 
 
+
+/////////////////////////////////////////
+// Balance Routes /////////////
+/////////////////////////////////////////
+
+
 Route::get('/numbers/{id}/{type}', [BalanceController::class, 'getNumbersbyorganizationId']);
 Route::get('/financial-transactions/{id}', [FinancialTransactionsController::class, 'getDataById']);
+
+/////////////////////////////////////////
+// visit track Routes /////////////
+/////////////////////////////////////////
+
+Route::post('/track-visit', [VisitController::class, 'store']);
+Route::get('/user-visits/{userId}', [VisitController::class, 'getUserVisits']);
+Route::get('/visits-count', [VisitController::class, 'getUsersWithvisitorsCount']);
+Route::get('/visits-user/{id}', [VisitController::class, 'getVisitsByUserId']);
+Route::get('/visits-count-user/{id}', [VisitController::class, 'getVisitCountByUserId']);
+
+
+
+/////////////////////////////////////////
+// card visit track Routes /////////////
+/////////////////////////////////////////
+
+Route::post('/track-card-visit', [CardVisitController::class, 'store']);
+Route::get('/user-card-visits/{userId}', [CardVisitController::class, 'getUserVisits']);
+Route::get('/card-visits-count', [CardVisitController::class, 'getUsersWithvisitorsCount']);
+Route::get('/card-visits-user/{id}', [CardVisitController::class, 'getVisitsByUserId']);
+Route::get('/card-visits-count-user/{id}', [CardVisitController::class, 'getVisitCountByUserId']);
+
+
+/////////////////////////////////////////
+// Purchase Routes //////////////////////
+/////////////////////////////////////////
+
+Route::middleware('auth:sanctum')->post('/purchase', [PurchaseController::class, 'store']);
+Route::get('/user-purchases/{userId}', [PurchaseController::class, 'getPurchasesByUserId']);
+Route::get('/user-purchases-count/{userId}', [PurchaseController::class, 'getPurchaseCountByUserId']);
+Route::get('/user-purchases-count', [PurchaseController::class, 'getUsersWithPurchaseCount']);
 
 
 

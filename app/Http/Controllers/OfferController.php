@@ -383,6 +383,34 @@ class OfferController extends Controller
         }
     }
 
+    public function getRandomPublishedOffers()
+    {
+        try {
+            // جلب 10 عروض عشوائية فقط بشرط أن تكون مفعلة وحالتها "نشطة"
+            $offers = Offer::where('is_active', true)
+                ->where('status', 'active')
+                ->inRandomOrder() // اختيار عشوائي
+                ->limit(10) // تحديد العدد بـ 10
+                ->with('organization', function ($query) {
+                    $query->select('id', 'icon', 'title_en', 'title_ar');
+                })
+                ->with('category', function ($query) {
+                    $query->select('id', 'image', 'title_en', 'title_ar');
+                })
+                ->get();
+
+            if ($offers->isEmpty()) {
+                return $this->errorResponse("No Data Found", ['message' => 'No Offers Found'], 404);
+            }
+
+            return response()->json([
+                'data' =>  $offers
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Failed Error", ['message' => $e->getMessage()], 500);
+        }
+    }
+
 
 
     public function checkExpiredOffers()

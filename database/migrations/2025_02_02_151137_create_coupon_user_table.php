@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('provisional_data', function (Blueprint $table) {
+        Schema::create('coupon_user', function (Blueprint $table) {
             $table->id();
-            $table->string('uniqueId');
-            $table->unsignedBigInteger('purchase_id')->nullable();
-            $table->json('cardsDetailes');
-            $table->string('expire_at');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('coupon_id')->constrained('copones')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('provisional_data');
+        Schema::dropIfExists('coupon_user');
     }
 };

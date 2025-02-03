@@ -17,8 +17,8 @@ class UsersTableSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
         DB::table('users')->truncate();
         $faker = Faker::create();
-        $urlimage = env('BACK_END_URL');
-        // $urlimage = 'http://127.0.0.1:8000';
+        // $urlimage = env('BACK_END_URL');
+        $urlimage = 'http://127.0.0.1:8000';
         $path = 'images/users';
         $fullpath = public_path($path);
         $images = scandir($fullpath);
@@ -27,7 +27,7 @@ class UsersTableSeeder extends Seeder
         });
         foreach (range(1, 50) as $index) {
             $imageuser = $imagesarray[array_rand($imagesarray)];
-            $imageurl = $urlimage . '/' . 'public/'  . $path . '/' . $imageuser;
+            $imageurl = $urlimage . '/'   . $path . '/' . $imageuser;
             DB::table('users')->insert([
                 'id' => $index,
                 'image' => $faker->imageUrl(100, 100, 'people', true, 'User'),
@@ -35,6 +35,7 @@ class UsersTableSeeder extends Seeder
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
                 'image' => $imageurl,
+                'user_code' => Str::random(10),
                 'location' => '{"address":"Muzdalifah Road, كدي, محافظة مكة المكرمة, منطقة مكة المكرمة, 24243, السعودية","latitude":21.40281772305478,"longitude":39.84603881835938}',
                 'phone_number' => $faker->phoneNumber,
                 'role' => $faker->randomElement(['admin', 'user', 'editor']),

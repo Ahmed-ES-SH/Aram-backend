@@ -22,6 +22,12 @@ class FinancialTransactionsController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(25);
 
+            if ($models->isEmpty()) {
+                return response()->json([
+                    'message' => 'NO Data Available Yet .'
+                ], 404);
+            }
+
             // معالجة البيانات وإضافة معلومات المستخدم
             $data = $models->map(function ($line) {
                 $user_type = $line->account_type;

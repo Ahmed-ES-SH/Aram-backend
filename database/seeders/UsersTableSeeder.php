@@ -17,8 +17,8 @@ class UsersTableSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
         DB::table('users')->truncate();
         $faker = Faker::create();
-        // $urlimage = env('BACK_END_URL');
-        $urlimage = 'http://127.0.0.1:8000';
+        $urlimage = env('BACK_END_URL');
+        // $urlimage = 'http://127.0.0.1:8000';
         $path = 'images/users';
         $fullpath = public_path($path);
         $images = scandir($fullpath);
@@ -27,7 +27,7 @@ class UsersTableSeeder extends Seeder
         });
         foreach (range(1, 50) as $index) {
             $imageuser = $imagesarray[array_rand($imagesarray)];
-            $imageurl = $urlimage . '/'   . $path . '/' . $imageuser;
+            $imageurl = $urlimage . '/' . 'public/'   . $path . '/' . $imageuser;
             DB::table('users')->insert([
                 'id' => $index,
                 'image' => $faker->imageUrl(100, 100, 'people', true, 'User'),

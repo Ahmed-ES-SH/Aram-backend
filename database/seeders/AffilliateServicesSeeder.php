@@ -71,6 +71,5 @@ class AffilliateServicesSeeder extends Seeder
         }
 
         // إظهار رسالة نجاح
-        $this->command->info('تم إنشاء ' . $numberOfServices . ' خدمات بنجاح.');
     }
 }

@@ -24,9 +24,17 @@ class DatabaseSeeder extends Seeder
             OrganizationsTableSeeder::class,
             SliderSeeder::class,
             BookingListSeeder::class,
+            CardSeeder::class,
             CommentsSeeder::class,
             contactMessagesSeeder::class,
             AffilliateServicesSeeder::class,
+            OffersSeeder::class,
+            CouponeSeeder::class,
+            FinancialTransactionsSeeder::class,
+            AffiliateCardTypeSeeder::class,
+            PurchaseSeeder::class,
+            CardVisitSeeder::class,
+            VisitsSeeder::class,
         ]);
     }
 }

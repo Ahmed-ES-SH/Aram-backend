@@ -48,7 +48,7 @@ class OffersSeeder extends Seeder
         for ($i = 0; $i < $numberOfOffers; $i++) {
             // اختيار صورة عشوائية من المجلد
             // $randomImage = $urlimage . '/' . 'public/' . $path . '/' . $imagesarray[array_rand($imagesarray)];
-            $randomImage = $urlimage . '/'  . $path . '/' . $imagesarray[array_rand($imagesarray)];
+            $randomImage = $urlimage . '/' . 'public/'  . $path . '/' . $imagesarray[array_rand($imagesarray)];
 
             // إنشاء عرض جديد
             DB::table('offers')->insert([

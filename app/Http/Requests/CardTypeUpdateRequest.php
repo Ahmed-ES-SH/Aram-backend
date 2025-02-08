@@ -33,6 +33,7 @@ class CardTypeUpdateRequest extends FormRequest
             'features_en' => 'sometimes', // يجب أن يكون النص JSON صالحًا
             'duration' => 'sometimes|string|max:255',
             'price_before_discount' => 'sometimes',
+            'category_id' => 'sometimes|exists:card_type_categories,id',
             'price' => 'sometimes',
             'active' => 'sometimes',
             'quantity' => 'sometimes'

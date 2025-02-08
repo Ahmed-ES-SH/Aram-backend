@@ -10,5 +10,6 @@ class ProvisionalData extends Model
         'cardsDetailes',
         'uniqueId',
         'expire_at',
+        'purchase_id',
     ];
 }

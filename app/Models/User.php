@@ -29,6 +29,7 @@ class User extends Authenticatable
         'social_id',
         'social_type',
         'is_signed',
+        'is_promoter',
         'number_of_reservations',
         'account_type'
     ];
@@ -114,5 +115,13 @@ class User extends Authenticatable
     public function Cardvisitors()
     {
         return $this->hasMany(CardVisit::class, 'user_id');
+    }
+    public function orgreviews()
+    {
+        return $this->hasMany(organizationReview::class, 'user_id');
+    }
+    public function orgreviewslikes()
+    {
+        return $this->hasMany(ReviewLikesCheck::class, 'user_id');
     }
 }

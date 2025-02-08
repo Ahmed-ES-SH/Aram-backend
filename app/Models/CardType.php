@@ -18,6 +18,7 @@ class CardType extends Model
         'price_before_discount',
         'price',
         'quantity',
+        'category_id',
         'active'
     ];
 
@@ -31,5 +32,11 @@ class CardType extends Model
     public function card()
     {
         return $this->hasMany(Arma_Card::class, 'cardtype_id');
+    }
+
+
+    public function category()
+    {
+        return $this->belongsTo(CardTypeCategory::class);
     }
 }

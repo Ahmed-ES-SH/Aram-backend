@@ -9,6 +9,7 @@ use App\Models\ServiceCategory;
 use App\Services\ImageService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 
 class OrganizationController extends Controller
@@ -228,70 +229,85 @@ class OrganizationController extends Controller
     public function organizationsByLocation($address)
     {
         try {
-            // جلب المؤسسات مرتبة حسب تاريخ الإنشاء مع pagination
-            $models = Organization::orderBy('created_at', 'desc')->paginate(8);
+            // فك تشفير العنوان المستلم
+            $decodedAddress = urldecode($address);
+
+            // جلب جميع المؤسسات بدون Pagination
+            $models = Organization::orderBy('created_at', 'desc')->get();
 
             // تحويل المنظمات إلى Collection
-            $orgs = collect($models->items());
+            $orgs = collect($models);
 
             // استخراج جميع categories_ids من المنظمات وتوحيد القيم إلى أرقام
             $categoryIds = $orgs->pluck('categories_ids')->map(function ($categories) {
                 return is_string($categories) ? json_decode($categories, true) : $categories;
-            })->filter(function ($categories) {
-                return !empty($categories);  // التأكد من أن categories_ids غير فارغة
-            })->flatten()->map(function ($categoryId) {
-                return (int) $categoryId;  // تحويل جميع القيم إلى أرقام
-            })->unique();
+            })->filter()->flatten()->map(fn($categoryId) => (int) $categoryId)->unique();
 
             // جلب الأقسام المتوافقة مع categories_ids
             $categories = ServiceCategory::whereIn('id', $categoryIds)->get()->keyBy('id');
 
-            // تصفية المنظمات بناءً على العنوان وإضافة الأقسام الخاصة بكل منظمة
-            $filteredOrgs = $orgs->map(function ($org) use ($address, $categories) {
+            // تصفية المنظمات بناءً على العنوان باستخدام `mb_stripos`
+            $filteredOrgs = $orgs->map(function ($org) use ($decodedAddress, $categories) {
                 // تحويل location من JSON إلى كائن
                 $location = json_decode($org->location);
 
-                // إذا كان location غير فارغ ويحتوي على address
                 if ($location && isset($location->address)) {
-                    // حساب درجة التشابه بين العنوان المرسل وعنوان المنظمة
-                    similar_text($address, $location->address, $similarity);
-                    $org->similarity = $similarity; // إضافة درجة التشابه إلى الكائن
+                    // التحقق مما إذا كان العنوان يحتوي على النص المطلوب
+                    if (mb_stripos($location->address, $decodedAddress) !== false) {
+                        $org->categories = collect();
+                        $categoryIds = is_string($org->categories_ids) ? json_decode($org->categories_ids, true) : $org->categories_ids;
 
-                    // إضافة الأقسام إلى المنظمة
-                    $org->categories = collect();
-                    $categoryIds = is_string($org->categories_ids) ? json_decode($org->categories_ids, true) : $org->categories_ids;
-
-                    if (is_array($categoryIds) && !empty($categoryIds)) {
-                        foreach ($categoryIds as $categoryId) {
-                            if ($categories->has($categoryId)) {
-                                $org->categories->push($categories->get($categoryId));
+                        if (is_array($categoryIds) && !empty($categoryIds)) {
+                            foreach ($categoryIds as $categoryId) {
+                                if ($categories->has($categoryId)) {
+                                    $org->categories->push($categories->get($categoryId));
+                                }
                             }
                         }
-                    }
 
-                    return $org;
+                        return $org;
+                    }
                 }
 
-                return null; // تجاهل المنظمات التي لا تحتوي على location صحيح
-            })->filter()->sortByDesc('similarity'); // تصفية القيم الفارغة وترتيب النتائج بناءً على التشابه
+                return null;
+            })->filter();
 
-            // تطبيق pagination على البيانات المفلترة
-            $paginatedOrgs = $filteredOrgs->values(); // تحويل إلى indexed array
+            // تحقق إذا كانت البيانات المفلترة فارغة
+            if ($filteredOrgs->isEmpty()) {
+                return response()->json([
+                    'data' => [],
+                    'pagination' => [
+                        'current_page' => 1,
+                        'last_page' => 1,
+                        'per_page' => 8,
+                        'total' => 0,
+                    ]
+                ]);
+            }
 
-            // إرجاع الاستجابة مع المنظمات والـ pagination المناسب
+            // تطبيق Pagination على البيانات المفلترة
+            $perPage = 8;
+            $currentPage = request()->get('page', 1);
+            $total = $filteredOrgs->count();
+            $paginatedOrgs = $filteredOrgs->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
             return response()->json([
                 'data' => $paginatedOrgs,
                 'pagination' => [
-                    'current_page' => $models->currentPage(),
-                    'last_page' => $models->lastPage(), // استخدام lastPage من الـ paginator الأصلي
-                    'per_page' => $models->perPage(),
-                    'total' => $filteredOrgs->count(),
+                    'current_page' => $currentPage,
+                    'last_page' => ceil($total / $perPage),
+                    'per_page' => $perPage,
+                    'total' => $total,
                 ]
             ]);
         } catch (\Exception $e) {
-            return $this->errorResponse("Failed Error", ['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Failed Error', 'error' => $e->getMessage()], 500);
         }
     }
+
+
+
+
 
 
 

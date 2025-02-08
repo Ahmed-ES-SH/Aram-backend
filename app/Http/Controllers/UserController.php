@@ -165,6 +165,7 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
+            $user->location = is_string($user->location) ? json_decode($user->location) : $user->location;
             return $this->successResponse($user, "User Founded Successfully", 200);
         } catch (\Exception $e) {
             return $this->errorResponse('User Not Founded', ['message' => $e->getMessage()], 404);

@@ -30,7 +30,8 @@ class StoreUserRequest extends FormRequest
             'image' => 'nullable|image|max:2048', // تحقق من أن الصورة صحيحة
             'role' => 'nullable|string|max:50',
             'account_type' => 'nullable',
-            'is_signed' => 'nullable'
+            'is_signed' => 'nullable',
+            'is_promoter' => 'nullable'
         ];
     }
     public function messages()

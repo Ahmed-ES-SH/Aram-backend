@@ -37,18 +37,18 @@ class PurchaseController extends Controller
 
 
 
-    public function getUsersWithPurchaseCount()
+    public function getUsersWithPurchaseTotalAndCount()
     {
         try {
-            // جلب جميع المستخدمين مع عدد عمليات الشراء المكتملة وترتيبهم من الأعلى إلى الأقل مع التصفح
+            // جلب جميع المستخدمين مع مجموع المبالغ الخاصة بالعمليات المكتملة وعدد العمليات المكتملة وترتيبهم من الأعلى إلى الأقل مع التصفح
             $users = User::select('id', 'image', 'name', 'user_code')
-                ->with(['purchases' => function ($query) {
+                ->withSum(['purchases' => function ($query) {
                     $query->where('status', 'completed');
-                }])
+                }], 'amount') // إضافة مجموع المبالغ لكل مستخدم
                 ->withCount(['purchases' => function ($query) {
                     $query->where('status', 'completed');
-                }])
-                ->orderByDesc('purchases_count') // ترتيب تنازلي حسب عدد العمليات
+                }]) // إضافة عدد العمليات المكتملة لكل مستخدم
+                ->orderByDesc('purchases_sum_amount') // ترتيب تنازلي حسب مجموع المبالغ
                 ->paginate(20); // عدد العناصر في كل صفحة
 
             // إضافة معلومات التصفح إلى الاستجابة
@@ -65,6 +65,9 @@ class PurchaseController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+
+
 
     public function getPurchasesByUserId($userId)
     {

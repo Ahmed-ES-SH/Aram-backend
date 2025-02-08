@@ -11,6 +11,7 @@ use App\Http\Controllers\BellController;
 use App\Http\Controllers\BlockedUserController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CardTypeCategoryController;
 use App\Http\Controllers\CardTypeController;
 use App\Http\Controllers\CardVisitController;
 use App\Http\Controllers\CategoryController;
@@ -37,9 +38,11 @@ use App\Http\Controllers\TermsConditionUserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuestionAnswerController;
 use App\Http\Controllers\FinancialTransactionsController;
+use App\Http\Controllers\OrganizationReviewController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\VisitController;
 use App\Http\Controllers\WithdrawalrequestController;
+use App\Http\Controllers\ReviewLikesCheckController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -82,6 +85,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/users-count', 'usersCount');
     Route::post('/register', 'store');
     Route::post('/search-for-user-by-name/{name}', 'SearchByNameForUser');
+    Route::get('/get-user-by-name/{name}', 'SearchByNameForUser');
     Route::post('/users/send-verification-code', 'store');
     Route::post('/update-user/{id}', 'update');
     Route::get('/user/{id}', 'show');
@@ -245,6 +249,27 @@ Route::controller(OrganizationController::class)->group(function () {
 });
 
 
+// -------------------------------
+//  OrganizationReviews Routes ---
+// -------------------------------
+
+Route::controller(OrganizationReviewController::class)->group(function () {
+    Route::get('/org-reviews/{id}', 'ReviewsForOrg');
+    Route::get('/org-reviews-numbers/{id}', 'ReviewsNumbers');
+    Route::post('/add-review', 'store');
+    Route::delete('/delete-review/{id}', 'store');
+});
+
+
+/////////////////////////////////////////
+// Check reviews Likes Routes ///////////
+/////////////////////////////////////////
+
+Route::post('/react-review', [ReviewLikesCheckController::class, 'store']);
+Route::get('/review-like-user/{orgId}/{userId}', [ReviewLikesCheckController::class, 'GetReviewsForUser']);
+Route::delete('/review-like/{reviewId}/{userId}', [ReviewLikesCheckController::class, 'destroy']);
+
+
 // -------------------------
 //  Bookings Routes --------
 // -------------------------
@@ -277,11 +302,30 @@ Route::controller(CompanyDetailesController::class)->group(function () {
     Route::post('/update-detailes', 'update');
 });
 
+
+
+
+/////////////////////////////////////////
+// CardTypeCategories Routes ////////////
+/////////////////////////////////////////
+
+
+Route::controller(CardTypeCategoryController::class)->group(function () {
+    Route::get('/all-card-type-categories', 'allCategories');
+    Route::get('/card-type-categories', 'index');
+    Route::get('/card-type-category/{id}', 'show');
+    Route::post('/add-card-type-category', 'store');
+    Route::post('/update-card-type-category/{id}', 'update');
+    Route::delete('/card-type-category/{id}', 'destroy');
+});
+
+
 // -------------------------------
 //  Cards types Routes -----------
 // -------------------------------
 Route::controller(CardTypeController::class)->group(function () {
     Route::get('/card-types', 'index');
+    Route::get('/cards-by-category/{categoryId}', 'getCardsByCategory');
     Route::get('/active-card-types', 'activecards');
     Route::get('/update-active/{id}/{active}', 'updateactivestate');
     Route::get('/card-type/{id}', 'show');
@@ -619,7 +663,12 @@ Route::get('/card-visits-count-user/{id}', [CardVisitController::class, 'getVisi
 Route::middleware('auth:sanctum')->post('/purchase', [PurchaseController::class, 'store']);
 Route::get('/user-purchases/{userId}', [PurchaseController::class, 'getPurchasesByUserId']);
 Route::get('/user-purchases-count/{userId}', [PurchaseController::class, 'getPurchaseCountByUserId']);
-Route::get('/user-purchases-count', [PurchaseController::class, 'getUsersWithPurchaseCount']);
+Route::get('/user-purchases-count', [PurchaseController::class, 'getUsersWithPurchaseTotalAndCount']);
+
+
+
+
+
 
 
 

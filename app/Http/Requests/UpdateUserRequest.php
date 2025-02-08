@@ -26,11 +26,12 @@ class UpdateUserRequest extends FormRequest
             'email' => 'sometimes|email',
             'password' => 'sometimes|string',
             'phone_number' => 'sometimes|string|max:15',
-            'image' => 'nullable|image',
-            'location' => 'nullable|string',
-            'role' => 'nullable|string|max:50',
-            'account_type' => 'nullable',
-            'is_signed' => 'nullable'
+            'image' => 'sometimes',
+            'location' => 'sometimes|string',
+            'role' => 'sometimes|string|max:50',
+            'account_type' => 'sometimes',
+            'is_signed' => 'sometimes',
+            'is_promoter' => 'sometimes',
         ];
     }
 

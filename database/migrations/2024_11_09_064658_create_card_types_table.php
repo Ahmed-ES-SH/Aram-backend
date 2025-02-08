@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('duration');
             $table->text('image');
             $table->boolean('active')->default(0);
+            $table->foreignId('category_id')->constrained('card_type_categories', 'id')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }

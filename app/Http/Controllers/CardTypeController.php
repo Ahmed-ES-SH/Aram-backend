@@ -50,6 +50,30 @@ class CardTypeController extends Controller
     }
 
 
+    public function getCardsByCategory($categoryId)
+    {
+        try {
+            $cards = CardType::where('category_id', $categoryId)->orderBy('created_at', 'desc')->paginate(12);
+            if ($cards->total() === 0) { // أو يمكن استخدام count()
+                return response()->json(['message' => 'No data found'], 404);
+            }
+
+            return response()->json([
+                'data' => $cards->items(),
+                'pagination' => [
+                    'current_page' => $cards->currentPage(),
+                    'last_page' => $cards->lastPage(),
+                    'total' => $cards->total(),
+                    'per_page' => $cards->perPage(),
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            // في حالة حدوث خطأ
+            return $this->errorResponse('حدث خطأ أثناء جلب البطاقات النشطة', ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function activecards()
     {
         try {

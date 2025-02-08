@@ -35,6 +35,7 @@ class CardTypeStoreRequest extends FormRequest
             'image' => 'required|file|image', // تأكد أن البيانات هي مسار أو رابط الصورة
             'price_before_discount' => 'required|string',
             'price' => 'required|string',
+            'category_id' => 'required|exists:card_type_categories,id',
             'active' => 'nullable|boolean'
         ];
     }

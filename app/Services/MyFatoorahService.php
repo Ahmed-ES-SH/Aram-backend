@@ -29,10 +29,10 @@ class MyFatoorahService
                 'cardsDetailesId' => base64_encode($data['cardsDetailesId']),
                 'UserId' =>  base64_encode($data['currentUserId']),
                 'accountType' =>  $data['accountType'],
-                'purchase_id' =>  $data['purchase_id'],
                 'InvoiceValue' => $data['InvoiceValue']
             ]
         );
+
         $ErrorUrl = 'http://localhost:3000/cards';
         $url = "{$this->baseUrl}/v2/SendPayment";
 

@@ -16,7 +16,7 @@ class CardSeeder extends Seeder
     {
         // تعطيل فحص المفاتيح الخارجية لإزالة البيانات القديمة
         DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
-        DB::table('card_types')->truncate(); // حذف البيانات القديمة
+        // DB::table('card_types')->truncate(); // حذف البيانات القديمة
 
         // مسار الصور
         $urlimage = env('BACK_END_URL'); // عنوان URL الأساسي
@@ -43,6 +43,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 7
             ],
             [
                 'title_en' => 'Pro Subscription',
@@ -56,6 +57,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 6
             ],
             [
                 'title_en' => 'Enterprise Subscription',
@@ -69,6 +71,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 year',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 2
             ],
             [
                 'title_en' => 'Basic Subscription',
@@ -82,6 +85,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 7
             ],
             [
                 'title_en' => 'Pro Subscription',
@@ -95,6 +99,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 5
             ],
             [
                 'title_en' => 'Enterprise Subscription',
@@ -108,6 +113,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 year',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 5
             ],
             [
                 'title_en' => 'Basic Subscription',
@@ -121,6 +127,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 4
             ],
             [
                 'title_en' => 'Pro Subscription',
@@ -134,6 +141,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 month',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 2
             ],
             [
                 'title_en' => 'Enterprise Subscription',
@@ -147,6 +155,7 @@ class CardSeeder extends Seeder
                 'duration' => '1 year',
                 'image' => $this->getRandomImageUrl($urlimage, $path, $imagesarray), // رابط صورة عشوائي
                 'active' => 1,
+                'category_id' => 2
             ],
             // يمكنك إضافة المزيد من البطاقات هنا
         ];

@@ -46,6 +46,7 @@ class PaymentController extends Controller
         $ProvisionalData = ProvisionalData::create([
             'uniqueId' => $uniqueDataId,
             'cardsDetailes' => $cardsDetailes,
+            'purchase_id' => null,
             'expire_at' => now()->addMinute(60)
         ]);
 
@@ -53,11 +54,12 @@ class PaymentController extends Controller
             $ProvisionalData->purchase_id = $request->purchase_id;
         }
 
+        $ProvisionalData->save();
+
         $data = [
             'InvoiceValue' => $validated['invoiceValue'],
             'currency' => "USD",
             'cardsDetailesId' => $uniqueDataId,
-            'purchase_id' => $validated['purchase_id'],
             'CustomerName' => $validated['customerName'],
             'currentUserId' => $validated['currentUserId'],
             'accountType' => $validated['account_type'],
@@ -65,6 +67,7 @@ class PaymentController extends Controller
             'Language' => 'EN', // يمكن ضبطها إلى AR إذا كانت باللغة العربية
             'CustomerEmail' => $request->input('customerEmail'),
         ];
+
 
         $response = $this->myFatoorahService->sendPayment($data);
 
@@ -132,15 +135,13 @@ class PaymentController extends Controller
         try {
             $paymentId = $request->query('paymentId');
             $accountType = $request->query('accountType');
-            $purchase_id = $request->query('purchase_id');
             $cardsDetailesId = base64_decode($request->query('cardsDetailesId'));
             $userId = base64_decode($request->query('UserId'));
             $Amount = $request->query('InvoiceValue');
             $model = ProvisionalData::where('uniqueId', $cardsDetailesId)->first();
+            $purchase_id = $model ? $model->purchase_id : null; // التأكد من وجود الـ model قبل الحصول على purchase_id
 
-
-            // Cheack For Errors
-
+            // Check For Errors
             if (!$paymentId) {
                 return response()->json(['message' => 'Payment ID is missing.']);
             }
@@ -159,8 +160,6 @@ class PaymentController extends Controller
 
             // End Check For variables Errors
 
-
-
             if ($response['IsSuccess'] && $response['Data']['InvoiceStatus'] === 'Paid') {
                 $cardsToInsert = [];
                 foreach ($jsoncardsDetailes as $card) {
@@ -177,15 +176,17 @@ class PaymentController extends Controller
                     }
                 }
 
-                $Purchase = Purchase::where('uniqId', $purchase_id)->first();
-                if (!$Purchase) {
-                    return response()->json(['message' => 'Purchase record not found.'], 404);
+                // في حال عدم وجود purchase_id، استمر في العمليات التالية
+                if ($purchase_id) {
+                    $Purchase = Purchase::where('uniqId', $purchase_id)->first();
+                    if ($Purchase) {
+                        $Purchase->status = 'completed';
+                        $Purchase->save();
+                    }
                 }
 
-
+                // استمر في إدراج البطائق حتى في حالة غياب purchase_id
                 if (Arma_Card::insert($cardsToInsert)) {
-                    $Purchase->status = 'completed';
-                    $Purchase->save();
                     Bell::create([
                         'bell_items' => json_encode($jsoncardsDetailes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT),
                         'bell_type' => 'cards_bell',
@@ -194,6 +195,7 @@ class PaymentController extends Controller
                         'user_id' => intval($userId)
                     ]);
                 }
+
                 $model->delete();
                 return redirect()->to(env('SUCCESS_PAYMENT_URL') . $paymentId);
             } else {
@@ -205,6 +207,7 @@ class PaymentController extends Controller
             ]);
         }
     }
+
 
 
 
@@ -246,14 +249,15 @@ class PaymentController extends Controller
                     'organization_id' => $data->organization_id,
                 ]);
 
-                $organization = organization::select('title_en', 'email', 'number_of_reservations')
+                $organization = organization::select('id', 'title_en', 'email', 'number_of_reservations')
                     ->findOrFail($data->organization_id);
-                $user = User::select('number_of_reservations')
-                    ->findOrFail($data->organization_id);
+                $user = User::select('id', 'number_of_reservations')
+                    ->findOrFail($data->user_id);
 
-                $organization->increment('number_of_reservations');
+
+                $organization->number_of_reservations += 1;
                 $organization->save();
-                $user->increment('number_of_reservations');
+                $user->number_of_reservations += 1;
                 $user->save();
                 // إرسال البريد
                 try {
@@ -281,6 +285,7 @@ class PaymentController extends Controller
                 FinancialTransactions::create([
                     'bell_id' => $bill->id,
                     'bell_type' => 'confirm_booked',
+                    'type_operation' => 'deposit',
                     'bell_items' => json_encode($data),
                     'account_type' => $accountType,
                     'amount' => floatval($Amount),
@@ -290,11 +295,10 @@ class PaymentController extends Controller
                 ]);
 
                 // تحديث الأرصدة تلقائيًا
-                $balance = balance::where('user_id', $data->user_id)
-                    ->orWhere('organization_id', $data->organization_id)
+                $balance = balance::where('organization_id', $data->organization_id)
                     ->firstOrNew([
-                        'user_id' => $data->user_id ?? null,
-                        'organization_id' => $data->organization_id ?? null,
+                        'user_id' =>  null,
+                        'organization_id' => $data->organization_id,
                     ]);
 
                 $balance->total_balance += floatval($Amount);

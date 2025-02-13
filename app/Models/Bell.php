@@ -18,4 +18,9 @@ class Bell extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function promoterCards()
+    {
+        return $this->hasMany(promotionalCard::class);
+    }
 }

@@ -48,6 +48,28 @@ class CardTypeController extends Controller
             return $this->errorResponse('Faild Error', ['message' => $e->getMessage()], 500);
         }
     }
+    public function getCardsbyPromotionalNumber()
+    {
+        try {
+            $cardtypes = CardType::select('id', 'image', 'title_en', 'number_of_promotional_purchases', 'category_id')->with('category:id,title_en,image')->orderBy('number_of_promotional_purchases', 'desc')->paginate(12);
+            if ($cardtypes->isEmpty()) {
+                return response()->json([
+                    'message' => 'No cardtypes Available !'
+                ], 404);
+            }
+            return response()->json([
+                'data' => $cardtypes->items(),
+                'pagination' => [
+                    'current_page' => $cardtypes->currentPage(),
+                    'last_page' => $cardtypes->lastPage(),
+                    'per_page' => $cardtypes->perPage(),
+                    'total' => $cardtypes->total(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Faild Error', ['message' => $e->getMessage()], 500);
+        }
+    }
 
 
     public function getCardsByCategory($categoryId)

@@ -30,6 +30,8 @@ class User extends Authenticatable
         'social_type',
         'is_signed',
         'is_promoter',
+        'user_gender',
+        'user_birthdate',
         'number_of_reservations',
         'account_type'
     ];
@@ -115,6 +117,10 @@ class User extends Authenticatable
     public function Cardvisitors()
     {
         return $this->hasMany(CardVisit::class, 'user_id');
+    }
+    public function newUsers()
+    {
+        return $this->hasMany(PromoterNewUser::class, 'user_id');
     }
     public function orgreviews()
     {

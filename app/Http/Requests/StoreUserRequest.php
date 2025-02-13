@@ -22,15 +22,17 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:users,name',
             'email' => 'required|email|unique:users,email',
             'password' => 'required',
             'location' => 'nullable',
-            'phone_number' => 'required|string|max:15',
+            'phone_number' => 'required|string|max:15|unique:users,phone_number',
             'image' => 'nullable|image|max:2048', // تحقق من أن الصورة صحيحة
             'role' => 'nullable|string|max:50',
             'account_type' => 'nullable',
             'is_signed' => 'nullable',
+            'user_gender' => 'required|in:male,female',
+            'user_birthdate' => 'required|date',
             'is_promoter' => 'nullable'
         ];
     }
@@ -47,7 +49,9 @@ class StoreUserRequest extends FormRequest
 
             'password.required' => 'يرجى إدخال كلمة المرور.',
 
+            'user_gender.required' => 'يرجى إدخال الجنس.',
 
+            'user_birthdate.required' => 'يرجى إدخال تاريخ الميلاد.',
 
             'phone_number.required' => 'يرجى إدخال رقم الهاتف.',
 

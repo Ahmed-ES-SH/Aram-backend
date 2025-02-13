@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Footer;
+use Illuminate\Support\Facades\DB;
 
 class FooterListSeeder extends Seeder
 {
@@ -14,6 +15,8 @@ class FooterListSeeder extends Seeder
      */
     public function run()
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+        DB::table('footers')->truncate();
         Footer::create([
             'list1' => json_encode([
                 ['name' => 'Home', 'url' => '/home'],
@@ -41,5 +44,6 @@ class FooterListSeeder extends Seeder
                 ['name' => 'Contact Sales', 'url' => '/contact-sales']
             ]),
         ]);
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
     }
 }

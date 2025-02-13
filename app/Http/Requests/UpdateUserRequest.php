@@ -30,6 +30,8 @@ class UpdateUserRequest extends FormRequest
             'location' => 'sometimes|string',
             'role' => 'sometimes|string|max:50',
             'account_type' => 'sometimes',
+            'user_gender' => 'sometimes|in:male,female',
+            'user_birthdate' => 'sometimes|date',
             'is_signed' => 'sometimes',
             'is_promoter' => 'sometimes',
         ];

@@ -39,4 +39,9 @@ class CardType extends Model
     {
         return $this->belongsTo(CardTypeCategory::class);
     }
+
+    public function promoterCards()
+    {
+        return $this->hasMany(promotionalCard::class);
+    }
 }

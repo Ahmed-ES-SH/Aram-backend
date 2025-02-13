@@ -35,6 +35,8 @@ class UsersTableSeeder extends Seeder
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
                 'image' => $imageurl,
+                'user_gender' => $faker->randomElement(['male', 'female']),
+                'user_birthday' => $faker->date('Y-m-d'),
                 'user_code' => Str::random(10),
                 'location' => '{"address":"Muzdalifah Road, كدي, محافظة مكة المكرمة, منطقة مكة المكرمة, 24243, السعودية","latitude":21.40281772305478,"longitude":39.84603881835938}',
                 'phone_number' => $faker->phoneNumber,

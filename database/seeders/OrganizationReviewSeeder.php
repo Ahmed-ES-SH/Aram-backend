@@ -29,7 +29,7 @@ class OrganizationReviewSeeder extends Seeder
                 'stars' => $faker->numberBetween(1, 5),
                 'head_line' => $faker->sentence(6),
                 'content' => $faker->paragraph(3),
-                'like_counts' => $faker->optional()->numberBetween(0, 100) ?? 1,
+                'like_counts' => $faker->optional()->numberBetween(0, 100) ?? 0,
                 'user_id' => $faker->randomElement($userIds),
                 'organization_id' => 20,
                 'created_at' => now(),

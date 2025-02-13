@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             videoSeeder::class,
             ServiceCategorySeeder::class,
             ServicesSeeder::class,
+            CardTypeCategorySeeder::class,
             OrganizationsTableSeeder::class,
             ArticalCategoriesSeeder::class,
             ArticalsSeeder::class,
@@ -33,6 +34,7 @@ class DatabaseSeeder extends Seeder
             FinancialTransactionsSeeder::class,
             AffiliateCardTypeSeeder::class,
             PurchaseSeeder::class,
+            OrganizationReviewSeeder::class,
             CardVisitSeeder::class,
             VisitsSeeder::class,
         ]);

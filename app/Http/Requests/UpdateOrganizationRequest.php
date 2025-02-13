@@ -41,6 +41,8 @@ class UpdateOrganizationRequest extends FormRequest
             'account_type' => 'nullable',
             'is_signed' => 'nullable',
             'number_of_reservations' => 'nullable',
+            'open_at' => 'nullable',
+            'close_at' => 'nullable',
             'status' => 'sometimes|in:published,not_published,under_review'
         ];
     }

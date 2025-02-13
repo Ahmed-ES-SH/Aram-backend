@@ -33,7 +33,7 @@ class StoreOfferRequest extends FormRequest
             'end_date' => 'required|date|after_or_equal:start_date', // تاريخ النهاية (مطلوب، بعد أو يساوي تاريخ البداية)
             'is_active' => 'sometimes|boolean', // حالة العرض (اختياري، قيمة منطقية)
             'status' => 'string|in:waiting,expired,active', // حالة العرض (اختياري، قيمة منطقية)
-            'organization_id' => 'nullable', // معرف المنظمة (مطلوب، موجود في جدول المنظمات)
+            'organization_id' => 'required|exists:organizations,id', // معرف المنظمة (مطلوب، موجود في جدول المنظمات)
             'category_id' => 'required|exists:service_categories,id', // معرف الفئة (مطلوب، موجود في جدول الفئات)
         ];
     }

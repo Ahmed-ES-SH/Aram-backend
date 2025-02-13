@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // صاحب الكود
-            $table->foreignId('buyer_id')->nullable()->constrained('users')->onDelete('set null'); // المشتري (إذا كان مسجلاً)
+            $table->foreignId('bell_id')->constrained('bells', 'id')->onDelete('cascade'); // صاحب الكود
+            $table->foreignId('buyer_id')->nullable(); // المشتري (إذا كان مسجلاً)
+            $table->enum('buyer_type', ['user', 'User', 'organization', 'Organization']); // الكود الترويجي المستخدم
             $table->string('promo_code'); // الكود الترويجي المستخدم
             $table->string('uniqId'); // الكود الترويجي المستخدم
             $table->decimal('amount', 10, 2); // المبلغ المدفوع

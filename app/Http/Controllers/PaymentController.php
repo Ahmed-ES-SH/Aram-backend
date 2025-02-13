@@ -12,7 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PaymentSuccessNotification;
 use App\Models\balance;
+use App\Models\CardType;
 use App\Models\FinancialTransactions;
+use App\Models\promotionalCard;
 use App\Models\Purchase;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
@@ -34,6 +36,7 @@ class PaymentController extends Controller
             'invoiceValue' => 'required|numeric',
             'currentUserId' => 'required|numeric',
             'cardsDetailes' => 'required',
+            'currency' => 'required',
             'account_type' => 'required|in:user,User,organization',
             'purchase_id' => 'nullable',
         ]);
@@ -58,7 +61,7 @@ class PaymentController extends Controller
 
         $data = [
             'InvoiceValue' => $validated['invoiceValue'],
-            'currency' => "USD",
+            'currency' => $validated['currency'],
             'cardsDetailesId' => $uniqueDataId,
             'CustomerName' => $validated['customerName'],
             'currentUserId' => $validated['currentUserId'],
@@ -161,43 +164,83 @@ class PaymentController extends Controller
             // End Check For variables Errors
 
             if ($response['IsSuccess'] && $response['Data']['InvoiceStatus'] === 'Paid') {
-                $cardsToInsert = [];
-                foreach ($jsoncardsDetailes as $card) {
-                    for ($i = 0; $i < $card->quantity; $i++) {
-                        $cardsToInsert[] = [
-                            'user_id' => $userId,
-                            'card_number' => null,
-                            'price' => $card->price,
-                            'issue_date' => $card->duration,
-                            'expiry_date' => null,
-                            'cvv' => null,
-                            'cardtype_id' => $card->id,
-                        ];
+                try {
+                    $cardsToInsert = [];
+                    $cards = [];
+                    foreach ($jsoncardsDetailes as $card) {
+                        for ($i = 0; $i < $card->quantity; $i++) {
+                            $cardsToInsert[] = [
+                                'user_id' => $userId,
+                                'card_number' => null,
+                                'price' => $card->price,
+                                'issue_date' => $card->duration,
+                                'expiry_date' => null,
+                                'cvv' => null,
+                                'cardtype_id' => $card->id,
+                            ];
+                        }
+                        $cards[] = ["id" => $card->id, "quantity" => $card->quantity];
                     }
-                }
 
-                // في حال عدم وجود purchase_id، استمر في العمليات التالية
-                if ($purchase_id) {
-                    $Purchase = Purchase::where('uniqId', $purchase_id)->first();
-                    if ($Purchase) {
-                        $Purchase->status = 'completed';
-                        $Purchase->save();
+                    // في حال عدم وجود purchase_id، استمر في العمليات التالية
+
+
+                    // استمر في إدراج البطائق حتى في حالة غياب purchase_id
+                    if (Arma_Card::insert($cardsToInsert)) {
+                        $bell =  Bell::create([
+                            'bell_items' => json_encode($jsoncardsDetailes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT),
+                            'bell_type' => 'cards_bell',
+                            'account_type' => $accountType,
+                            'amount' => floatval($Amount),
+                            'user_id' => intval($userId)
+                        ]);
+                        $bell->save();
+
+                        if ($purchase_id  &&  $bell) {
+                            $Purchase = Purchase::where('uniqId', $purchase_id)->first();
+                            if ($Purchase) {
+                                $Purchase->status = 'completed';
+                                $Purchase->bell_id = $bell->id;
+                                $Purchase->save();
+                            }
+                            $cardIds = array_column($cards, 'id');
+                            $cardsFounded = CardType::whereIn('id', $cardIds)->get();
+                            $promotionalCardsToInsert = [];
+                            foreach ($cardsFounded as $cardType) {
+                                foreach ($cards as $card) {
+                                    if ($card['id'] == $cardType->id) {
+                                        $cardType->number_of_promotional_purchases += $card['quantity'];
+                                        $cardType->save();
+
+                                        $promotionalCardsToInsert[] = [
+                                            'card_id' => $card['id'],
+                                            'bell_id' => $bell->id,
+                                            'promoter_code' => $Purchase->promo_code,
+                                            'order_quantity' => $card['quantity'],
+                                            'created_at' => now(),
+                                            'updated_at' => now(),
+                                        ];
+
+                                        break; // لا داعي لمواصلة البحث بعد التحديث
+                                    }
+                                }
+                            }
+
+                            if (!empty($promotionalCardsToInsert)) {
+                                promotionalCard::insert($promotionalCardsToInsert);
+                            } else {
+                                return response()->json(['message' => 'no cards.'], 400);
+                            }
+                        }
                     }
-                }
 
-                // استمر في إدراج البطائق حتى في حالة غياب purchase_id
-                if (Arma_Card::insert($cardsToInsert)) {
-                    Bell::create([
-                        'bell_items' => json_encode($jsoncardsDetailes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT),
-                        'bell_type' => 'cards_bell',
-                        'account_type' => $accountType,
-                        'amount' => floatval($Amount),
-                        'user_id' => intval($userId)
+                    $model->delete();
+                    return redirect()->to(env('SUCCESS_PAYMENT_URL') . $paymentId);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'error' => $e->getMessage()
                     ]);
                 }
-
-                $model->delete();
-                return redirect()->to(env('SUCCESS_PAYMENT_URL') . $paymentId);
             } else {
                 return redirect()->to(env('ERROR_PAYMENT_URL'));
             }

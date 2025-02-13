@@ -133,7 +133,7 @@ class UserController extends Controller
         try {
 
             $user = new User();
-            $user->fill($request->only(['name', 'email', 'phone_number', 'role']));
+            $user->fill($request->only(['name', 'email', 'phone_number', 'role', 'user_gender', 'user_birthdate']));
             if ($request->filled('password')) {
                 $user->password = Hash::make($request->password);
             }

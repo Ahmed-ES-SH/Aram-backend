@@ -233,7 +233,7 @@ class OrganizationController extends Controller
             $decodedAddress = urldecode($address);
 
             // جلب جميع المؤسسات بدون Pagination
-            $models = Organization::orderBy('created_at', 'desc')->get();
+            $models = Organization::where('status', 'published')->orderBy('created_at', 'desc')->get();
 
             // تحويل المنظمات إلى Collection
             $orgs = collect($models);
@@ -311,11 +311,60 @@ class OrganizationController extends Controller
 
 
 
-    public function organizationsByServiceCategory($id)
+    public function AllorganizationsByServiceCategory($id)
     {
         try {
             // جلب جميع الـ categories_ids فقط من الجدول
             $dataForFilter = Organization::orderBy('created_at', 'desc')->select('id', 'categories_ids')->get();
+
+            // تصفية المنظمات التي تحتوي على الفئة المطلوبة
+            $filteredIds = $dataForFilter->filter(function ($org) use ($id) {
+                $categoryIds = is_string($org->categories_ids) ? json_decode($org->categories_ids, true) : $org->categories_ids;
+                return is_array($categoryIds) && in_array($id, $categoryIds);
+            })->pluck('id'); // استخراج IDs فقط
+
+            // جلب البيانات الكاملة للمنظمات التي تتوافق مع الفلتر
+            $organizations = Organization::whereIn('id', $filteredIds)->orderBy('created_at', 'desc')->get();
+
+            // جلب الأقسام المتوافقة مع categories_ids
+            $categoryIds = $organizations->pluck('categories_ids')->map(function ($categories) {
+                return is_string($categories) ? json_decode($categories, true) : $categories;
+            })->filter()->flatten()->unique();
+
+            $categories = ServiceCategory::whereIn('id', $categoryIds)->get()->keyBy('id');
+
+            // إضافة الأقسام الخاصة بكل منظمة
+            $organizations->each(function ($org) use ($categories) {
+                $categoryIds = is_string($org->categories_ids) ? json_decode($org->categories_ids, true) : $org->categories_ids;
+                $org->categories = collect($categoryIds)->map(function ($categoryId) use ($categories) {
+                    return $categories->get($categoryId);
+                })->filter();
+            });
+
+            // تطبيق Pagination يدوي
+            $perPage = 8; // عدد العناصر في كل صفحة
+            $currentPage = request()->get('page', 1); // الحصول على رقم الصفحة من الطلب
+            $paginatedOrgs = $organizations->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+            // إرجاع الاستجابة مع المنظمات والـ pagination المناسب
+            return response()->json([
+                'data' => $paginatedOrgs,
+                'pagination' => [
+                    'current_page' => (int)$currentPage,
+                    'last_page' => ceil($organizations->count() / $perPage),
+                    'per_page' => $perPage,
+                    'total' => $organizations->count(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Failed Error", ['message' => $e->getMessage()], 500);
+        }
+    }
+    public function organizationsByServiceCategory($id)
+    {
+        try {
+            // جلب جميع الـ categories_ids فقط من الجدول
+            $dataForFilter = Organization::where('status', 'published')->orderBy('created_at', 'desc')->select('id', 'categories_ids')->get();
 
             // تصفية المنظمات التي تحتوي على الفئة المطلوبة
             $filteredIds = $dataForFilter->filter(function ($org) use ($id) {
@@ -366,7 +415,7 @@ class OrganizationController extends Controller
     {
         try {
             // جلب جميع البيانات مع تحديد الحقول المطلوبة
-            $orgs = Organization::select('id', 'location')->paginate(30);
+            $orgs = Organization::where('status', 'published')->select('id', 'status',  'location')->paginate(30);
 
             // فك ترميز الموقع من JSON إلى كائن PHP
             $locations = $orgs->getCollection()->transform(function ($org) {
@@ -407,7 +456,7 @@ class OrganizationController extends Controller
         try {
 
             // البحث في العمودين title_en و title_ar
-            $organizations = Organization::where('title_en', 'like', '%' . $title . '%')
+            $organizations = Organization::where('status', 'published')->where('title_en', 'like', '%' . $title . '%')
                 ->orWhere('title_ar', 'like', '%' . $title . '%')
                 ->orderBy('created_at', 'desc')
                 ->paginate(8);

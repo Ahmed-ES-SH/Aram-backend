@@ -13,7 +13,8 @@ class PurchaseController extends Controller
         $request->validate([
             'promo_code' => 'required|string|exists:users,user_code',
             'amount' => 'required|numeric|min:1',
-            'user_id' => 'required|exists:users,id'
+            'buyer_id' => 'required|exists:users,id',
+            'buyer_type' => 'required|in:user,User,organization,Organization'
         ]);
 
         // العثور على صاحب الكود
@@ -26,7 +27,8 @@ class PurchaseController extends Controller
         // تسجيل عملية الشراء
         $purchase = Purchase::create([
             'user_id' => $user->id,
-            'buyer_id' => $request->user_id, // إذا كان المستخدم مسجلاً
+            'buyer_id' => $request->buyer_id, // إذا كان المستخدم مسجلاً
+            'buyer_type' => $request->buyer_type, // إذا كان المستخدم مسجلاً
             'promo_code' => $request->promo_code,
             'amount' => $request->amount,
             'uniqId' => $unqieID
@@ -72,10 +74,33 @@ class PurchaseController extends Controller
     public function getPurchasesByUserId($userId)
     {
         try {
-            // جلب جميع عمليات الشراء للمستخدم مع شرط الحالة "مكتملة" مع التصفح
-            $purchases = Purchase::where('user_id', $userId) // البحث باستخدام id المستخدم
-                ->where('status', 'completed') // شرط الحالة المكتملة
-                ->paginate(20); // عدد العناصر في كل صفحة
+            // جلب عمليات الشراء للمستخدم مع الحالة "مكتملة"
+            $purchases = Purchase::where('user_id', $userId)
+                ->where('status', 'completed')
+                ->with([
+                    'user:id,name,image,user_code',
+                    'buyerUser:id,name,image,account_type',
+                    'buyerOrganization:id,title_en,icon,account_type',
+                    'bell'
+                ])
+                ->select('id', 'bell_id', 'user_id', 'amount',  'buyer_id', 'buyer_type', 'status', 'created_at') // اختيار الحقول فقط
+                ->paginate(20);
+
+            // تعديل البيانات لإرجاع buyer المناسب فقط
+            $purchases->getCollection()->transform(function ($purchase) {
+                return [
+                    'id' => $purchase->id,
+                    'user_id' => $purchase->user_id,
+                    'buyer_type' => $purchase->buyer_type,
+                    'amount' => $purchase->amount,
+                    'status' => $purchase->status,
+                    'created_at' => $purchase->created_at,
+                    'user' => $purchase->user,
+                    'bell' => $purchase->bell,
+                    'buyer' => $purchase->buyer_type === 'User' ? $purchase->buyerUser : $purchase->buyerOrganization,
+                    'created_at' => $purchase->created_at,
+                ];
+            });
 
             return response()->json([
                 'data' => $purchases->items(), // إرجاع العناصر فقط
@@ -85,11 +110,13 @@ class PurchaseController extends Controller
                     'total' => $purchases->total(),
                     'last_page' => $purchases->lastPage(),
                 ]
-            ]);
+            ]); // إرجاع البيانات بعد التعديل
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
         }
     }
+
+
 
 
     public function getPurchaseCountByUserId($userId)

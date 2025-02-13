@@ -39,13 +39,14 @@ class CardTypeCategorySeeder extends Seeder
 
         foreach ($categories as $category) {
             $imageuser = $imagesarray[array_rand($imagesarray)];
-            $imageurl = $urlimage . '/'  . $path . '/' . $imageuser;
-            // $imageurl = $urlimage . '/' . 'public/' . $path . '/' . $imageuser;
+            // $imageurl = $urlimage . '/'  . $path . '/' . $imageuser;
+            $imageurl = $urlimage . '/' . 'public/' . $path . '/' . $imageuser;
             DB::table('card_type_categories')->insert([
                 'title_en' => $category['title_en'],
                 'title_ar' => $category['title_ar'],
                 'image' => $imageurl,
             ]);
         }
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
     }
 }

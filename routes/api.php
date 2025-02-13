@@ -43,6 +43,9 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\VisitController;
 use App\Http\Controllers\WithdrawalrequestController;
 use App\Http\Controllers\ReviewLikesCheckController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\PromoterNewUserController;
+use App\Http\Controllers\PromotionalCardController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -57,6 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', 'logout');
     });
 });
+
+
+// -------------------------------------
+//  Password Forgeten Routes -----------
+// -------------------------------------
+
+Route::post('/send-verification-code', [ForgotPasswordController::class, 'sendVerificationCode']);
+Route::post('/verify-code', [ForgotPasswordController::class, 'verifyCode']);
+Route::post('/update-password', [ForgotPasswordController::class, 'updatePassword']);
 
 // -------------------------
 //  google Routes -----------
@@ -79,7 +91,6 @@ Route::get('/auth/facebook/callback', [AuthController::class, 'handleFacebookCal
 //  Users Routes -----------
 // -------------------------
 Route::controller(UserController::class)->group(function () {
-    Route::get('/users', 'index');
     Route::get('/get-user-coupones/{id}', 'getUserCoupons');
     Route::get('/users-by-number-of-reservations', 'usersByNumberOfReservations');
     Route::get('/users-count', 'usersCount');
@@ -91,6 +102,12 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/user/{id}', 'show');
     Route::post('/check-password/{id}', 'checkPassword');
     Route::delete('/user/{id}', 'destroy');
+});
+
+Route::middleware(['checkAdmin'])->group(function () {
+    Route::controller(UserController::class)->group(function () {
+        Route::get('/users', 'index');
+    });
 });
 
 
@@ -236,6 +253,7 @@ Route::controller(OrganizationController::class)->group(function () {
     Route::get('/orgs-by-number-of-reservations', 'orgsbynumberofreservations');
     Route::get('/organizations-count', 'organizationsCount');
     Route::get('/organizations-by-service/{id}', 'organizationsByServiceCategory');
+    Route::get('/all-organizations-by-service/{id}', 'AllorganizationsByServiceCategory');
     Route::get('/organizations-by-location/{address}', 'organizationsByLocation');
     Route::get('/organizations-by-title/{title}', 'searchOrganizations');
     Route::get('/active-organizations', 'activeorganizations');
@@ -325,6 +343,7 @@ Route::controller(CardTypeCategoryController::class)->group(function () {
 // -------------------------------
 Route::controller(CardTypeController::class)->group(function () {
     Route::get('/card-types', 'index');
+    Route::get('/card-types-by-numbers', 'getCardsbyPromotionalNumber');
     Route::get('/cards-by-category/{categoryId}', 'getCardsByCategory');
     Route::get('/active-card-types', 'activecards');
     Route::get('/update-active/{id}/{active}', 'updateactivestate');
@@ -334,6 +353,16 @@ Route::controller(CardTypeController::class)->group(function () {
     Route::delete('/card-type/{id}', 'destroy');
 });
 
+
+
+// -------------------------------
+//  Cards types Routes -----------
+// -------------------------------
+
+Route::controller(PromotionalCardController::class)->group(function () {
+    Route::get('/cards-statics', 'getStatics');
+    Route::get('/card-statics/{id}', 'getStaticsByCardId');
+});
 
 
 
@@ -667,7 +696,16 @@ Route::get('/user-purchases-count', [PurchaseController::class, 'getUsersWithPur
 
 
 
+/////////////////////////////////////////
+// promoternewusers Routes //////////////
+/////////////////////////////////////////
 
+
+Route::controller(PromoterNewUserController::class)->group(function () {
+    Route::post('/promoter-new-member', 'store');
+    Route::get('/new-members-by-promoter/{promoterid}', 'getAllNewUsers');
+    Route::get('/new-members-count', 'getCountNewUsersForPromoter');
+});
 
 
 

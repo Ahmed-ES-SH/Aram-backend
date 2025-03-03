@@ -13,29 +13,38 @@ return new class extends Migration
     {
         Schema::create('company_detailes', function (Blueprint $table) {
             $table->id();  // تعريف العمود الرئيسي
-            $table->text('whatsapp_number');  // رقم واتساب الشركة
-            $table->string('gmail_account');  // حساب البريد الإلكتروني للشركة
-            $table->string('facebook_account');  // حساب البريد الإلكتروني للشركة
-            $table->string('x_account');  // حساب البريد الإلكتروني للشركة
-            $table->string('youtube_account');  // حساب البريد الإلكتروني للشركة
-            $table->string('instgram_account');  // حساب البريد الإلكتروني للشركة
-            $table->string('snapchat_account');  // حساب البريد الإلكتروني للشركة
-            $table->text('about_ar');  // محتوى عن الشركة بالعربية
-            $table->text('about_en');  // محتوى عن الشركة بالإنجليزية
-            $table->text('vision_ar');  // رؤية الشركة بالعربية
-            $table->text('vision_en');  // رؤية الشركة بالإنجليزية
-            $table->text('goals_ar');  // أهداف الشركة بالعربية
-            $table->text('goals_en');  // أهداف الشركة بالإنجليزية
-            $table->text('values_en');  // قيم الشركة بالإنجليزية
-            $table->text('values_ar');  // قيم الشركة بالعربية
-            $table->text('cooperation_pdf');  // قيم الشركة بالعربية
-            $table->boolean('show_map');  // إظهار الخريطة
+            $table->text('whatsapp_number')->nullable();  // رقم واتساب الشركة
+            $table->string('gmail_account')->nullable();  // حساب البريد الإلكتروني للشركة
+            $table->string('facebook_account')->nullable();  // حساب البريد الإلكتروني للشركة
+            $table->string('x_account')->nullable();  // حساب البريد الإلكتروني للشركة
+            $table->string('youtube_account')->nullable();  // حساب البريد الإلكتروني للشركة
+            $table->string('instgram_account')->nullable();  // حساب البريد الإلكتروني للشركة
+            $table->string('snapchat_account')->nullable();  // حساب البريد الإلكتروني للشركة
+            $table->string('first_section_title_ar')->nullable(); //
+            $table->string('first_section_title_en')->nullable(); //
+            $table->string('second_section_title_ar')->nullable(); //
+            $table->string('second_section_title_en')->nullable(); //
+            $table->string('thired_section_title_ar')->nullable(); //
+            $table->string('thired_section_title_en')->nullable(); //
+            $table->string('fourth_section_title_ar')->nullable(); //
+            $table->string('fourth_section_title_en')->nullable(); //
+            $table->text('first_section_content_ar')->nullable();  // محتوى عن الشركة بالعربية
+            $table->text('first_section_content_en')->nullable();  // محتوى عن الشركة بالإنجليزية
+            $table->text('second_section_content_ar')->nullable();  // رؤية الشركة بالعربية
+            $table->text('second_section_content_en')->nullable();  // رؤية الشركة بالإنجليزية
+            $table->text('thired_section_content_ar')->nullable();  // أهداف الشركة بالعربية
+            $table->text('thired_section_content_en')->nullable();  // أهداف الشركة بالإنجليزية
+            $table->text('fourth_section_content_en')->nullable();  // قيم الشركة بالإنجليزية
+            $table->text('fourth_section_content_ar')->nullable();  // قيم الشركة بالعربية
+            $table->text('cooperation_pdf')->nullable();  // قيم الشركة بالعربية
+            $table->boolean('show_map')->nullable();  // إظهار الخريطة
             $table->string('address')->nullable();  // عنوان الشركة (اختياري)
-            $table->string('about_image')->nullable();  // مسار صورة "عن الشركة" (اختياري)
-            $table->string('vision_image')->nullable();  // مسار صورة الرؤية
-            $table->string('goals_image')->nullable();  // مسار صورة الأهداف
-            $table->string('values_image')->nullable();  // مسار صورة القيم
-            $table->string('main_video')->nullable();  // مسار الفيديو الرئيسي (اختياري)
+            $table->string('first_section_image')->nullable();  // مسار صورة "عن الشركة" (اختياري)
+            $table->string('second_section_image')->nullable();  // مسار صورة الرؤية
+            $table->string('thired_section_image')->nullable();  // مسار صورة الأهداف
+            $table->string('fourth_section_image')->nullable();  // مسار صورة القيم
+            $table->text('main_video')->nullable();  // مسار الفيديو الرئيسي (اختياري)
+            $table->text('link_video')->nullable();  // مسار الفيديو الرئيسي (اختياري)
             $table->timestamps();  // تسجيل تاريخ الإنشاء والتحديث
         });
     }

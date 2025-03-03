@@ -160,7 +160,7 @@ class CompanyDetailesController extends Controller
             $detailes->fill($data);
 
             // معالجة الصور
-            $imageFields = ['about_image', 'vision_image', 'goals_image', 'values_image'];
+            $imageFields = ['first_section_image', 'second_section_image', 'thired_section_image', 'fourth_section_image'];
             foreach ($imageFields as $field) {
                 if ($request->has($field)) {
                     $this->imageservice->ImageUploaderwithvariable($request, $detailes, 'images/companydetailes', $field);

@@ -64,6 +64,68 @@ class PromotionalCardController extends Controller
     }
 
 
+    public function getOperationsByPromoterCode($promoterCode)
+    {
+        try {
+            // جلب العمليات مع بيانات المروج والكيانات المرتبطة
+            $data = PromotionalCard::where('promoter_code', $promoterCode)
+                ->with([
+                    'promoter:id,name,image,user_code',
+                    'bell:id,amount,bell_items,bell_type,created_at',
+                    'card:id,image,title_en'
+                ])
+                ->paginate(15);
+
+            return response()->json([
+                'data' => $data->items(), // إرجاع العمليات فقط
+                'pagination' => [
+                    'current_page' => $data->currentPage(),
+                    'per_page' => $data->perPage(),
+                    'total' => $data->total(),
+                    'last_page' => $data->lastPage(),
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to get operations', ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+    public function getOperationsCountForAllPromoters()
+    {
+        try {
+            // جلب عدد العمليات لكل مروج مع بيانات المستخدم من جدول users
+            $operationsCount = PromotionalCard::select(
+                'promoter_code',
+                DB::raw('COUNT(*) as count')
+            )
+                ->with('promoter:id,image,name,email,phone_number,user_code') // جلب بيانات المروج
+                ->groupBy('promoter_code')
+                ->get();
+
+            // إعادة تشكيل البيانات لإضافة id الخاص بالمروج
+            $formattedData = $operationsCount->map(function ($item) {
+                return [
+                    'id' => optional($item->promoter)->id, // استخراج ID المروج
+                    'promoter_code' => $item->promoter_code,
+                    'count' => $item->count,
+                    'promoter' => $item->promoter, // تضمين بيانات المروج
+                ];
+            });
+
+            return response()->json([
+                'data' => $formattedData
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to get operations count', ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+
+
 
     public function getStaticsByCardId($cardId)
     {

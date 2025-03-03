@@ -245,6 +245,28 @@ class AffiliateServiceController extends Controller
     }
 
 
+    public function getRandomPublishedAffiliatedServices()
+    {
+        try {
+            $affiliate_services = AffiliateService::where('status', true)
+                ->with('organization', function ($org) {
+                    $org->select('id', 'icon', 'title_en', 'title_ar');
+                })
+                ->with('category')
+                ->inRandomOrder() // 🔥 ترتيب عشوائي
+                ->limit(8) // 🔥 جلب 8 عناصر فقط
+                ->get();
+
+            return response()->json([
+                'data' => $affiliate_services,
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Failed Error", ['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
 
     /**
      * Store a newly created resource in storage.

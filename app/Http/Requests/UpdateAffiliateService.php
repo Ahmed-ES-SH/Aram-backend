@@ -30,6 +30,7 @@ class UpdateAffiliateService extends FormRequest
             'features_en' => 'sometimes',
             'image' => 'sometimes',
             'icon' => 'sometimes',
+            'discount_percent' => 'sometimes',
             'status' => 'sometimes',
             'check_status' => 'sometimes',
             'confirmation_price' => 'sometimes|numeric|min:0',

@@ -22,25 +22,25 @@ class StoreorganizationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
+            'email' => 'required|email|unique:organizations,email',
             'password' => 'required',
-            'title_ar' => 'required|string|max:255',
-            'title_en' => 'required|string|max:255',
-            'description_ar' => 'required|string',
-            'description_en' => 'required|string',
-            'location' => 'required|string',
-            'categories_ids' => 'required', // التأكد من أن الفئة موجودة
-            'features' => 'required|string',
+            'title_ar' => 'required|string|max:255|unique:organizations,title_en',
+            'title_en' => 'required|string|max:255|unique:organizations,title_ar',
+            'description_ar' => 'nullable|string',
+            'description_en' => 'nullable|string',
+            'location' => 'nullable|string',
+            'categories_ids' => 'nullable', // التأكد من أن الفئة موجودة
+            'features' => 'nullable|string',
             'accaptable_message' => 'string|nullable',
             'unaccaptable_message' => 'string|nullable',
             'category_id' => 'nullable', // التأكد من أن الفئة موجودة
             'confirmation_price' => 'nullable', // التأكد من أن الفئة موجودة
-            'open_at' => 'required', // التأكد من أن الفئة موجودة
-            'close_at' => 'required', // التأكد من أن الفئة موجودة
-            'phone_number' => 'required|string|max:15|regex:/^[0-9+\-\s]+$/', // قبول أرقام الهواتف فقط
+            'open_at' => 'nullable', // التأكد من أن الفئة موجودة
+            'close_at' => 'nullable', // التأكد من أن الفئة موجودة
+            'phone_number' => 'nullable|string|max:15|regex:/^[0-9+\-\s]+$/', // قبول أرقام الهواتف فقط
             'url' => 'nullable|url', // التأكد من صحة الرابط إذا وُجد
-            'image' => 'required|image|file', // التأكد من أن الملف صورة
-            'icon' => 'required|image|file', // التأكد من أن الملف أيقونة
+            'image' => 'nullable|image|file', // التأكد من أن الملف صورة
+            'icon' => 'nullable|image|file', // التأكد من أن الملف أيقونة
             'account_type' => 'nullable',
             'is_signed' => 'nullable'
         ];
@@ -55,6 +55,9 @@ class StoreorganizationRequest extends FormRequest
     {
         return [
             'email.required' => 'يجب إدخال البريد الإلكترونى.',
+            'email.unique' => 'البريد الإلكترونى مستخدم بالفعل .',
+            'title_en.unique' => ' هذا الاسم مستخدم بالفعل مستخدم بالفعل .',
+            'title_ar.unique' => ' هذا الاسم مستخدم مستخدم بالفعل .',
             'image.required' => 'يجب إدخال  صورة رئيسية للمركز.',
             'icon.required' => 'يجب إدخال  شعار المركز.',
             'password.required' => 'يجب إدخال كلمة السر   .',

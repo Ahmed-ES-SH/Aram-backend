@@ -36,6 +36,7 @@ class organization extends Model
         'status',
         'image',
         'icon',
+        'booking_status',
         'is_signed',
         'Number_of_reservations',
         'account_type',

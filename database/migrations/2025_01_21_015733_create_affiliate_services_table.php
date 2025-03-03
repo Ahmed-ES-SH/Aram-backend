@@ -26,6 +26,7 @@ return new class extends Migration
             $table->boolean('confirmation_status')->default(0);
             $table->decimal('confirmation_price')->nullable();
             $table->integer('number_of_orders')->default(0);
+            $table->integer('discount_percent')->default(0);
             $table->foreignId('organization_id')->constrained('organizations', 'id')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('category_id')->constrained('service_categories', 'id')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();

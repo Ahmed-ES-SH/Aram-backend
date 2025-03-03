@@ -20,6 +20,7 @@ class AffiliateService extends Model
         'confirmation_status',
         "number_of_orders",
         "organization_id",
+        "discount_percent",
         "category_id",
         "check_status"
     ];

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOfferRequest;
 use App\Http\Requests\UpdateOfferRequest;
+use App\Models\Arma_Card;
+use App\Models\CardType;
 use App\Models\Copone;
+use App\Models\copones_used;
 use App\Services\ImageService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -256,6 +259,74 @@ class CoponeController extends Controller
             return $this->successResponse([], 'Offer deleted Successfully', 200);
         } catch (\Exception $e) {
             return $this->errorResponse("Faild Error", ['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function CheckCopuneForFreeCard(Request $request)
+    {
+        try {
+            // التحقق من البيانات المدخلة
+            $request->validate([
+                'card_type_id' => 'required|exists:card_types,id',
+                'copune_code' => 'required|string|exists:copones,code',
+                'user_id' => 'required|exists:users,id',
+                'account_type' => 'required|string',
+            ]);
+
+            // جلب بيانات الكوبون والبطاقة
+            $coupon = Copone::where('code', $request->copune_code)->first();
+
+
+            $card = CardType::find($request->card_type_id);
+
+            // التحقق من وجود البطاقة
+            if (!$card) {
+                return $this->errorResponse("Failed Error", ['message' => 'Invalid Card Type'], 404);
+            }
+
+            // التحقق من وجود الكوبون
+            if (!$coupon) {
+                return $this->errorResponse("Failed Error", ['message' => 'Invalid Coupon Code'], 404);
+            }
+
+            // التأكد من أن الكوبون يعطي خصم 100%
+            if ($coupon->discount_value != 100) {
+                return $this->errorResponse("Failed Error", ['message' => 'Coupon is not Free'], 404);
+            }
+
+            // التحقق من أن المستخدم لم يستخدم الكوبون من قبل
+            $existingCard = copones_used::where('user_id', $request->user_id)
+                ->where('copone_id', $coupon->id)
+                ->first();
+
+            if ($existingCard) {
+                return $this->errorResponse("Failed Error", ['message' => 'User has already used this coupon'], 400);
+            }
+
+            // إنشاء البطاقة للمستخدم
+            Arma_Card::create([
+                'user_id' => $request->user_id,
+                'card_number' => null,
+                'cvv' => null,
+                'price' => $card->price,
+                'issue_date' => $card->duration,
+                'expiry_date' => null,
+                'status' => 'inactive',
+                'cardtype_id' => $request->card_type_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            copones_used::create([
+                'user_id' => $request->user_id,
+                'copone_id' => $coupon->id,
+            ]);
+
+            return response()->json([
+                'message' => 'The Card has been successfully created for the selected user.',
+            ], 201);
+        } catch (\Exception $e) {
+            return $this->errorResponse("Failed Error", ['message' => $e->getMessage()], 500);
         }
     }
 }

@@ -39,6 +39,15 @@ return [
                 'useTLS' => true,
             ],
         ],
+
+        'pusher_app_2' => [
+            'key' => env('PUSHER__APP_2_KEY'),
+            'secret' => env('PUSHER__APP_2_SECRET'),
+            'app_id' => env('PUSHER_APP_2_ID'),
+            'cluster' => env('PUSHER__APP_2_CLUSTER'),
+            'useTLS' => true,
+        ],
+
     ],
 
 

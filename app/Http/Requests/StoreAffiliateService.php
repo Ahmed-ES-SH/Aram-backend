@@ -29,6 +29,7 @@ class StoreAffiliateService extends FormRequest
             'features_ar' => 'required|json',
             'features_en' => 'required|json',
             'image' => 'required',
+            'discount_percent' => 'required',
             'icon' => 'nullable',
             'status' => 'required',
             'confirmation_price' => 'required|numeric|min:0',
@@ -48,6 +49,10 @@ class StoreAffiliateService extends FormRequest
             'title_ar.required' => [
                 'AR' => 'العنوان بالعربية مطلوب.',
                 'EN' => 'The Arabic title is required.',
+            ],
+            'discount_percent.required' => [
+                'AR' => ' نسبة الخصم للخدمة مطلوبة.',
+                'EN' => 'The Discount Percent is  required.',
             ],
             'title_ar.string' => [
                 'AR' => 'العنوان بالعربية يجب أن يكون نصًا.',

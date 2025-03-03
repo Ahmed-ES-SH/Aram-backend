@@ -76,12 +76,12 @@ class MessageController extends Controller
                 'is_read' => 0,
             ];
             $pusher = new Pusher(
-                env('PUSHER__APP_2_KEY'),
-                env('PUSHER__APP_2_SECRET'),
-                env('PUSHER_APP_2_ID'),
+                config('broadcasting.connections.pusher_app_2.key'),
+                config('broadcasting.connections.pusher_app_2.secret'),
+                config('broadcasting.connections.pusher_app_2.app_id'),
                 [
-                    'cluster' => env('PUSHER__APP_2_CLUSTER'),
-                    'useTLS' => true,
+                    'cluster' => config('broadcasting.connections.pusher_app_2.cluster'),
+                    'useTLS' => config('broadcasting.connections.pusher_app_2.useTLS'),
                 ]
             );
 

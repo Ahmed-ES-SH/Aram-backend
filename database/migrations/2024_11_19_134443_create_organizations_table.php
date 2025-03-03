@@ -31,6 +31,7 @@ return new class extends Migration
             $table->longText('url')->nullable();
             $table->string('image')->nullable();
             $table->string('icon')->nullable();
+            $table->boolean('booking_status')->default(0);
             $table->boolean('email_verified')->default(0);
             $table->text('email_verification_token ')->nullable();
             $table->boolean('active')->default(0);

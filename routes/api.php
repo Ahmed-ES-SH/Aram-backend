@@ -377,6 +377,8 @@ Route::controller(CardTypeController::class)->group(function () {
 
 Route::controller(PromotionalCardController::class)->group(function () {
     Route::get('/cards-statics', 'getStatics');
+    Route::get('/cards-detailes-for-promoter/{promotercode}', 'getOperationsByPromoterCode');
+    Route::get('/cards-statics-count-for-all-promoters', 'getOperationsCountForAllPromoters');
     Route::get('/cards-statics-count-for-promoter/{promotercode}', 'getOperationsCountByPromoterCode');
     Route::get('/card-statics/{id}', 'getStaticsByCardId');
 });
@@ -646,6 +648,7 @@ Route::controller(CoponeController::class)->group(function () {
     Route::get('/get-copone', 'show');
     Route::post('/update-copone/{id}', 'update');
     Route::delete('/destroy-copone/{id}', 'destroy');
+    Route::post('/check-copone-for-free-card', 'CheckCopuneForFreeCard');
 });
 
 
@@ -658,6 +661,7 @@ Route::controller(AffiliateServiceController::class)->group(function () {
     Route::get('/all-affiliate-services', 'index');
     Route::get('/all-affiliate-services-by-status/{status}', 'getDataByCheckState');
     Route::get('/active-affiliate-services', 'getPublishedAffiliatedServices');
+    Route::get('/active-random-affiliate-services', 'getRandomPublishedAffiliatedServices');
     Route::post('/affiliate-services-by-search', 'getAffiliateServicesByText');
     Route::get('/affiliate-services-by-category/{id}', 'getAffiliateServicesByCategory');
     Route::get('/organization-affiliate-services/{id}', 'getAffiliateServicesByorganization');

@@ -26,7 +26,7 @@ class UpdateOrganizationRequest extends FormRequest
             'title_en' => 'sometimes|string|max:255',
             'description_ar' => 'sometimes|string',
             'description_en' => 'sometimes|string',
-            'features' => 'required|string|nullable',
+            'features' => 'nullable|string|nullable',
             'accaptable_message' => 'string|nullable',
             'unaccaptable_message' => 'string|nullable',
             'confirmation_status' => 'string|nullable',
@@ -42,6 +42,7 @@ class UpdateOrganizationRequest extends FormRequest
             'is_signed' => 'nullable',
             'number_of_reservations' => 'nullable',
             'open_at' => 'nullable',
+            'booking_status' => 'nullable', //
             'close_at' => 'nullable',
             'status' => 'sometimes|in:published,not_published,under_review'
         ];

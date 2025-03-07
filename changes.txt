@@ -1,0 +1,2 @@
+change cardtype_id to null  in php myadmin 
+

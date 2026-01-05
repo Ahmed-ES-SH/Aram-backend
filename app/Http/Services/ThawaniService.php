@@ -55,6 +55,15 @@ class ThawaniService
             ]];
         }
 
+
+        if ($dto->dataType === 'deal_service' && $currentDetails) {
+            return [[
+                'name' => mb_substr($currentDetails['slug'] ?? 'Service', 0, 34, 'UTF-8') . '...',
+                'quantity' => 1,
+                'unit_amount' => (int) round(($currentDetails['price_after_deal'] ?? 0) * 1000),
+            ]];
+        }
+
         if (empty($currentDetails)) {
             return [];
         }

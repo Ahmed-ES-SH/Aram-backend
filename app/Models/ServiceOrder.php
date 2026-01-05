@@ -10,6 +10,9 @@ class ServiceOrder extends Model
         'user_id',
         'user_type',
         'invoice_id',
+        'deal_status',
+        'price_after_deal',
+        'is_deal',
         'service_page_id',
         'metadata',
         'status',
@@ -32,6 +35,16 @@ class ServiceOrder extends Model
     public function organization()
     {
         return $this->belongsTo(Organization::class, 'user_id');
+    }
+
+
+    public function owner()
+    {
+        return $this->morphTo(
+            name: 'owner',
+            type: 'user_type',
+            id: 'user_id'
+        );
     }
 
     public function service()
@@ -64,6 +77,10 @@ class ServiceOrder extends Model
 
         $query->when($filters['payment_status'] ?? null, function ($q, $paymentStatus) {
             $q->where('payment_status', $paymentStatus);
+        });
+
+        $query->when($filters['order_type'] ?? null, function ($q, $orderType) {
+            $q->where('is_deal', $orderType);
         });
 
         $query->when($filters['subscription_status'] ?? null, function ($q, $subscriptionStatus) {

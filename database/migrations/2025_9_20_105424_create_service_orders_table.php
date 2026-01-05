@@ -16,11 +16,14 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->enum('user_type', ['user', 'organization']);
             $table->enum('status', ['pending', 'confirmed', 'in_progress', 'on_hold', 'completed', 'canceled', 'refunded'])->default('pending');
+            $table->enum('deal_status', ['pending', 'approved', 'rejected'])->nullable();
+            $table->decimal('price_after_deal', 10, 2)->nullable();
             $table->enum('subscription_status', ['active', 'expired'])->nullable();
             $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
-            $table->foreignId('invoice_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('invoice_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('service_page_id')->constrained()->cascadeOnDelete();
             $table->json('metadata')->nullable();
+            $table->boolean('is_deal')->default(false);
             $table->dateTime('subscription_start_time')->nullable();
             $table->dateTime('subscription_end_time')->nullable();
             $table->timestamps();

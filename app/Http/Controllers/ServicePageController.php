@@ -238,8 +238,8 @@ class ServicePageController extends Controller
     {
         try {
 
-           if (
-            ServicePage::where('order', $request->order)
+            if (
+                ServicePage::where('order', $request->order)
                 ->where('id', '!=', $id)
                 ->exists()
             ) {
@@ -298,6 +298,7 @@ class ServicePageController extends Controller
             'price_before_discount' => $page->price_before_discount,
             'description' => $hero?->{"description_{$locale}"} ?? $hero?->description_en,
             'type' => $page->type,
+            'payment_type' => $page->payment_type,
             'category' => $page->category,
             'status' => $page->status,
             'is_active' => $page->is_active,
@@ -325,6 +326,7 @@ class ServicePageController extends Controller
             'price' => $page->price,
             'price_before_discount' => $page->price_before_discount,
             'type' => $page->type,
+            'payment_type' => $page->payment_type,
             'category' => $page->category,
             'order' => $page->order,
             'status' => $page->status,

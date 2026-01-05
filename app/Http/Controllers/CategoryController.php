@@ -251,19 +251,19 @@ class CategoryController extends Controller
 
 
 
-    public function multiDestroy(Request $request)
-    {
-        try {
-            $ids = $request->ids;
+    // public function multiDestroy(Request $request)
+    // {
+    //     try {
+    //         $ids = $request->ids;
 
-            if (is_string($ids)) {
-                $ids = json_decode($ids, true);
-            }
+    //         if (is_string($ids)) {
+    //             $ids = json_decode($ids, true);
+    //         }
 
-            Category::whereIn('id', $ids)->delete();
-            return $this->successResponse(['message' => 'Deleted successfully'], 200);
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
-        }
-    }
+    //         Category::whereIn('id', $ids)->delete();
+    //         return $this->successResponse(['message' => 'Deleted successfully'], 200);
+    //     } catch (\Exception $e) {
+    //         return $this->errorResponse($e->getMessage(), 500);
+    //     }
+    // }
 }

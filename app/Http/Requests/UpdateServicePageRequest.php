@@ -24,6 +24,7 @@ class UpdateServicePageRequest extends FormRequest
             'price_before_discount' => 'sometimes|numeric',
             'category_id' => 'sometimes|exists:service_categories,id',
             'type' => 'sometimes|in:one_time,subscription',
+            'payment_type' => 'sometimes|in:direct,after_deal',
             'order' => 'sometimes|integer',
             'status' => 'sometimes|in:active,inactive',
             'whatsapp_number' => 'nullable|string|max:255',
@@ -102,7 +103,7 @@ class UpdateServicePageRequest extends FormRequest
 
             // CTA Section
             'cta_section' => 'nullable|array',
-          
+
 
             // Service Form
             'form' => 'nullable|array',

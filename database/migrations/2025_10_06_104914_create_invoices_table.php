@@ -20,8 +20,9 @@ return new class extends Migration
             $table->decimal('total_invoice', 10, 2);
             $table->decimal('before_discount', 10, 2)->nullable();
             $table->decimal('discount', 10, 2)->nullable();
+            $table->decimal('tax_amount', 10, 2)->nullable();
             $table->string('ref_code')->nullable();
-            $table->enum('invoice_type', ["cards", "book", "service"]);
+            $table->enum('invoice_type', ["cards", "book", "service", 'deal_service']);
             $table->unsignedBigInteger('owner_id');
             $table->enum('owner_type', ['user', 'organization']);
             $table->enum('status', ['pending', 'canceled', 'paid'])->default('pending');

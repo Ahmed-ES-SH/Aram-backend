@@ -47,6 +47,7 @@ class UpdateAboutContentRequest extends FormRequest
             'main_video'        => 'nullable',
             'link_video'        => 'nullable',
             'cooperation_pdf'        => 'nullable',
+            'logo'        => 'nullable|file|max:5096',
 
         ];
     }

@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Http\Services\PaymentService;
 use App\Http\Services\ProcessBookPaymentService;
 use App\Http\Services\ProcessCardsPaymentService;
+use App\Http\Services\ProcessServiceDealPayment;
 use App\Http\Services\ProcessServicePayment;
 use App\Http\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -23,16 +24,20 @@ class PaymentController extends Controller
     protected $proccessBookPaymentService;
     protected $processServicePayment;
 
+    protected $processServiceDealPayment;
+
     public function __construct(
         PaymentService $paymentService,
         ProcessCardsPaymentService $proccessCardsPaymentService,
         ProcessBookPaymentService $proccessBookPaymentService,
-        ProcessServicePayment $processServicePayment
+        ProcessServicePayment $processServicePayment,
+        ProcessServiceDealPayment $processServiceDealPayment
     ) {
         $this->paymentService = $paymentService;
         $this->proccessCardsPaymentService = $proccessCardsPaymentService;
         $this->proccessBookPaymentService = $proccessBookPaymentService;
         $this->processServicePayment = $processServicePayment;
+        $this->processServiceDealPayment = $processServiceDealPayment;
     }
 
     public function createSession(Request $request)
@@ -55,7 +60,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'provisionalData_id' => 'required|exists:provisional_data,uniqueId',
             'invoice_number' => 'required',
-            'payment_type' => 'required|in:cards,book,service',
+            'payment_type' => 'required|in:cards,book,service,deal_service',
             'payment_id' => 'nullable',
             'session_id' => 'nullable',
         ]);
@@ -67,6 +72,7 @@ class PaymentController extends Controller
                 'cards' => $this->proccessCardsPaymentService->processCardsPayment($request),
                 'book' => $this->proccessBookPaymentService->processBookPayment($request),
                 'service' => $this->processServicePayment->processServicePayment($request),
+                'deal_service' => $this->processServiceDealPayment->processServiceDealPayment($request),
                 default => throw new Exception('Invalid payment type provided.', 422),
             };
 

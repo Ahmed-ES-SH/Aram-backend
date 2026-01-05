@@ -20,14 +20,15 @@ class StoreServicePageRequest extends FormRequest
             'price' => 'required|numeric',
             'price_before_discount' => 'required|numeric',
             'type' => 'required|in:one_time,subscription',
+            'payment_type' => 'required|in:direct,after_deal',
             'status' => 'required|in:active,inactive',
             'order' => 'required|integer',
             'category_id' => 'required|integer',
             'whatsapp_number' => 'nullable|string|max:255',
             'hero_image' => 'required',
 
-        // Hero Section
-        'hero_section' => 'nullable|array',
+            // Hero Section
+            'hero_section' => 'nullable|array',
 
 
             // Problem Section

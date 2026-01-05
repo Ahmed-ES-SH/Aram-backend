@@ -27,6 +27,7 @@ class ServicePageResource extends JsonResource
             'form' => $this->formatForm($locale),
             'video' => $this->video,
             'price' => $this->price,
+            'payment_type' => $this->payment_type,
             'price_before_discount' => $this->price_before_discount,
             'whatsapp_number' => $this->whatsapp_number ?? null,
             'messages' => $this->contactMessages,
@@ -116,7 +117,7 @@ class ServicePageResource extends JsonResource
                 'name' => $t->{"name_{$locale}"} ?? $t->name_en,
                 'text' => $t->{"text_{$locale}"} ?? $t->text_en,
                 'rating' => $t->rating,
-                'avatar' => $t->avatar ? asset('storage/' . $t->avatar) : null,
+                'avatar' => $t->avatar ? $t->avatar : null,
             ])->toArray(),
         ];
     }

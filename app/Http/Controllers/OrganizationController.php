@@ -198,28 +198,28 @@ class OrganizationController extends Controller
     }
 
 
-    public function multiDestroy(Request $request)
-    {
-        $request->validate([
-            'ids' => 'required',
-            'ids.*' => 'required|exists:organizations,id'
-        ]);
+    // public function multiDestroy(Request $request)
+    // {
+    //     $request->validate([
+    //         'ids' => 'required',
+    //         'ids.*' => 'required|exists:organizations,id'
+    //     ]);
 
-        $ids = $request->input('ids');
+    //     $ids = $request->input('ids');
 
-        // إذا كانت ids نص JSON
-        if (is_string($ids)) {
-            $ids = json_decode($ids, true);
-        }
+    //     // إذا كانت ids نص JSON
+    //     if (is_string($ids)) {
+    //         $ids = json_decode($ids, true);
+    //     }
 
-        foreach ($ids as $id) {
-            $this->deleteOrganizationService->destroy($id);
-        }
+    //     foreach ($ids as $id) {
+    //         $this->deleteOrganizationService->destroy($id);
+    //     }
 
-        return response()->json([
-            'message' => 'Organizations deleted successfully'
-        ], 200);
-    }
+    //     return response()->json([
+    //         'message' => 'Organizations deleted successfully'
+    //     ], 200);
+    // }
 
 
     public function getAllOrgsWithoutTimes()

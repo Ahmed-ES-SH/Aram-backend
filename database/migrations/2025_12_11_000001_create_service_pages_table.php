@@ -14,11 +14,12 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->decimal('price_before_discount', 10, 2);
             $table->enum('type', ['one_time', 'subscription']);
+            $table->enum('payment_type', ['direct', 'after_deal']);
             $table->enum('status', ['active', 'inactive']);
             $table->boolean('is_active')->default(true);
-            $table->integer('order');
             $table->string('whatsapp_number')->nullable();
             $table->integer('orders_count')->default(0);
+            $table->integer('order');
             $table->foreignId('category_id')->nullable()->constrained('service_categories', 'id')->nullOnDelete()->onUpdate('cascade');
             $table->index('order');
             $table->timestamps();

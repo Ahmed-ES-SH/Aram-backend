@@ -281,7 +281,7 @@ Route::controller(OrganizationController::class)->group(function () {
     Route::post('/register-org', 'StoreOgranizationWithOffer');
     Route::post('/validate-org-email', 'validateEmail');
     Route::get('/organizations-locations', 'getLocations');
-    Route::delete('/multi-delete', 'multiDestroy');
+    // Route::delete('/multi-delete', 'multiDestroy');
     Route::get('/all-org-without-times', 'getAllOrgsWithoutTimes');
 });
 
@@ -289,7 +289,7 @@ Route::controller(OrganizationController::class)->group(function () {
 
 Route::controller(CategoryController::class)->group(function () {
     Route::get('/categories-by-state', 'activeCategories');
-    Route::delete('/multi-cats-delete', 'multiDestroy');
+    // Route::delete('/multi-cats-delete', 'multiDestroy');
     Route::get('/categories-with-subcategories', 'activeCategoriesWithSubCategories');
 });
 
@@ -351,6 +351,7 @@ Route::get('/organiztions-terms', [OrganizationTermsConditionController::class, 
 // -------------------------
 
 Route::get('/details', [AboutController::class, 'index']);
+Route::get('/get-logo', [AboutController::class, 'getLogo']);
 Route::get('/get-cooperation-file', [AboutController::class, 'getcooperation_pdf']);
 
 
@@ -503,6 +504,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // ----------------------------
 
     Route::get('/user-service-orders', [ServiceOrderController::class, 'userServiceOrders']);
+    Route::post('/store-service-order', [ServiceOrderController::class, 'StoreServiceOrder']);
     Route::get('/user-service-orders/{serviceOrder}', [ServiceOrderController::class, 'showOrder']);
 
 
@@ -764,6 +766,7 @@ Route::middleware(['auth:sanctum', 'checkAdmin'])->group(function () {
 
     Route::get('/get-service-orders-options', [ServiceOrderController::class, 'getFilterOptions']);
     Route::get('/all-service-orders', [ServiceOrderController::class, 'index']);
+    Route::post('/service-orders/create-invoice', [ServiceOrderController::class, 'createServiceOrderInvoice']);
     Route::get('/service-orders/{serviceOrder}', [ServiceOrderController::class, 'adminShow']);
     Route::post('/service-orders/{serviceOrder}/update-status', [ServiceOrderController::class, 'updateStatus']);
 

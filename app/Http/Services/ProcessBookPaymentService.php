@@ -115,6 +115,11 @@ class ProcessBookPaymentService
 
 
             $invoice->update(['status' => 'paid', 'payment_date' => now()]);
+
+            $organization->update([
+                'number_of_reservations' => $organization->number_of_reservations + 1
+            ]);
+
             $provisionalData->delete();
 
             DB::commit();

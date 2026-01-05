@@ -16,6 +16,7 @@ class ServicePage extends Model
         'is_active',
         'price',
         'type',
+        'payment_type',
         'price_before_discount',
         'status',
         'category_id',
@@ -71,6 +72,12 @@ class ServicePage extends Model
     public function galleryImages(): HasMany
     {
         return $this->hasMany(ServicePageGalleryImage::class)->orderBy('order');
+    }
+
+
+    public function firstImage()
+    {
+        return $this->hasOne(ServicePageGalleryImage::class)->oldest(); // أو latest()
     }
 
     public function stats(): HasMany

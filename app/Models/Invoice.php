@@ -10,6 +10,7 @@ class Invoice extends Model
         'invoice_number',
         'total_invoice',
         'invoice_type',
+        'tax_amount',
         'owner_id',
         'owner_type',
         'status',

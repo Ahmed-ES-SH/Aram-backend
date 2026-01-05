@@ -2,22 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateServiceOrderInvoiceRequest;
+use App\Http\Requests\StoreServiceOrderRequest;
 use App\Http\Resources\ServiceOrderResource;
 use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
+use App\Http\Services\StoreServiceOrderService;
+use App\Models\Organization;
 use App\Models\ServiceOrder;
 use App\Models\User;
-use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Exception;
+use Throwable;
 
 class ServiceOrderController extends Controller
 {
     use ApiResponse;
     protected $notificationService;
+    protected $storeServiceOrderService;
 
-    public function __construct(NotificationService $notificationService)
+
+    public function __construct(NotificationService $notificationService, StoreServiceOrderService $storeServiceOrderService)
     {
         $this->notificationService = $notificationService;
+        $this->storeServiceOrderService = $storeServiceOrderService;
     }
 
 
@@ -29,8 +38,24 @@ class ServiceOrderController extends Controller
             $orders = ServiceOrder::filter($filters)
                 ->with([
                     'service',
-                    'service.galleryImages',
-                    'invoice'
+                    'service.firstImage',
+                    'invoice',
+                    'owner' => function (MorphTo $morphTo) {
+                        $morphTo->constrain([
+                            User::class => function ($query) {
+                                $query->select('id', 'name', 'email', 'image', 'account_type');
+                            },
+                            Organization::class => function ($query) {
+                                $query->select(
+                                    'id',
+                                    'email',
+                                    'title as name',
+                                    'logo as image',
+                                    'account_type'
+                                );
+                            },
+                        ]);
+                    },
                 ])
                 ->withCount('tracking')
                 ->paginate($request->get('per_page', 15));
@@ -46,6 +71,37 @@ class ServiceOrderController extends Controller
 
             return $this->paginationResponse($orders, 200);
         } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+
+
+    public function getDealOrders(Request $request)
+    {
+        try {
+            $filters = $request->all();
+            $query = ServiceOrder::where('is_deal', true);
+
+            $orders = $query->with([
+                'service',
+                'service.firstImage',
+                'invoice'
+            ])
+                ->withCount('tracking')
+                ->filter($filters)
+                ->paginate($request->get('per_page', 15));
+
+            if ($orders->total() === 0) {
+                return $this->noContentResponse();
+            }
+
+            $orders->getCollection()->transform(function ($order) {
+                return $this->normalizeOrder($order);
+            });
+
+            return $this->paginationResponse($orders, 200);
+        } catch (Throwable $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
@@ -68,10 +124,26 @@ class ServiceOrderController extends Controller
 
             $serviceOrder->load([
                 'service',
-                'service.galleryImages',
+                'service.firstImage',
                 'tracking',
                 'tracking.files',
                 'invoice',
+                'owner' => function (MorphTo $morphTo) {
+                    $morphTo->constrain([
+                        User::class => function ($query) {
+                            $query->select('id', 'name', 'email', 'image', 'account_type');
+                        },
+                        Organization::class => function ($query) {
+                            $query->select(
+                                'id',
+                                'email',
+                                'title as name',
+                                'logo as image',
+                                'account_type'
+                            );
+                        },
+                    ]);
+                },
             ]);
 
             if ($serviceOrder->user_type === 'user') {
@@ -87,6 +159,40 @@ class ServiceOrderController extends Controller
                 200
             );
         } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+
+
+    public function StoreServiceOrder(StoreServiceOrderRequest $request)
+    {
+        try {
+            $order = $this->storeServiceOrderService->store($request);
+
+            if (!$order) {
+                return $this->errorResponse('Order creation failed', 422);
+            }
+
+            $order->load('tracking', 'tracking.files', 'service:id,slug');
+            return $this->successResponse($order, 201);
+        } catch (Throwable  $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+
+    public function createServiceOrderInvoice(CreateServiceOrderInvoiceRequest $request)
+    {
+        try {
+            $invoice = $this->storeServiceOrderService->createInvoice($request);
+
+            if (!$invoice) {
+                return $this->errorResponse('Invoice creation failed', 422);
+            }
+
+            return $this->successResponse($invoice, 201);
+        } catch (Throwable  $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
     }

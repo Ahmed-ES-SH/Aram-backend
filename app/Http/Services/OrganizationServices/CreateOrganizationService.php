@@ -311,22 +311,13 @@ class CreateOrganizationService
         $ratios = PromoterRatio::find(1);
 
         if ($promoter) {
-            // Create Referral Record
-            Referral::create([
-                'promoter_id' => $promoter->id,
-                'referred_user_id' => $organization->id,
-                'ip' => $ip,
-                'status' => 'converted', // Or pending if you want to verify something first
-                'converted_at' => now(),
-            ]);
-
             // Increment Signups
             $promoter->increment('total_signups');
 
             // Log Activity
             PromotionActivity::create([
                 'promoter_type' => $promoter->promoter_type,
-                'promoter_id' => $promoter->id,
+                'promoter_id' => $promoter->promoter_id,
                 'member_id' => $organization->id,
                 'member_type' => 'organization',
                 'activity_type' => 'signup',

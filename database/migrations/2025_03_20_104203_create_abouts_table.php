@@ -39,6 +39,7 @@ return new class extends Migration
             $table->text('main_video')->nullable();  // مسار الفيديو الرئيسي (اختياري)
             $table->text('link_video')->nullable();  // مسار الفيديو الرئيسي (اختياري)
             $table->text('cooperation_pdf')->nullable();  // مسار الفيديو الرئيسي (اختياري)
+            $table->text('logo')->nullable();  // مسار الفيديو الرئيسي (اختياري)
             $table->timestamps();  // تسجيل تاريخ الإنشاء والتحديث
         });
     }

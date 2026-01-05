@@ -12,6 +12,9 @@ class ServiceOrderResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status,
+            'metadata' => $this->metadata,
+            'owner' => $this->owner,
+            'is_deal' => $this->is_deal,
             'created_at' => $this->created_at?->toISOString(),
 
             'invoice' => $this->whenLoaded('invoice', fn() => [
@@ -29,7 +32,7 @@ class ServiceOrderResource extends JsonResource
                 'type' => $this->service->type,
                 'is_active' => $this->service->is_active,
                 'whatsapp_number' => $this->service->whatsapp_number,
-                'image' => $this->service->galleryImages[0]->path,
+                'image' => $this->service->firstImage->path,
 
                 // 'tracking_files' => $this->service->trackings->flatMap(fn($track) => $track->files),
             ]),
@@ -38,7 +41,7 @@ class ServiceOrderResource extends JsonResource
                 ? $this->whenLoaded('user')
                 : $this->whenLoaded('organization'),
 
-            'trackings' => $this->service->trackings->map(fn($track) => [
+            'trackings' => $this->whenLoaded('tracking', fn() => $this->tracking->map(fn($track) => [
                 'id' => $track->id,
                 'status' => $track->status,
                 'phase' => $track->current_phase,
@@ -46,25 +49,25 @@ class ServiceOrderResource extends JsonResource
                 'end_time' => $track->end_time,
                 'metadata' => $this->isJson($track->metadata) ? json_decode($track->metadata) : $track->metadata,
                 'files' => $track->files,
-            ]),
+            ])),
 
             'form_data' => $this->extractFormData(),
         ];
     }
 
-   private function extractFormData(): array
-{
-    return collect($this->metadata['items']['metadata'] ?? [])
-        ->map(fn($item) => is_array($item) ? [
-            'key' => $item['key'] ?? null,
-            'label' => $item['label'] ?? null,
-            'value' => $item['value'] ?? null,
-            'type' => $item['type'] ?? null,
-        ] : null) // إذا كان $item نص، نحوله إلى null
-        ->filter() // إزالة العناصر null
-        ->values()
-        ->all();
-}
+    private function extractFormData(): array
+    {
+        return collect($this->metadata['items']['metadata'] ?? [])
+            ->map(fn($item) => is_array($item) ? [
+                'key' => $item['key'] ?? null,
+                'label' => $item['label'] ?? null,
+                'value' => $item['value'] ?? null,
+                'type' => $item['type'] ?? null,
+            ] : null) // إذا كان $item نص، نحوله إلى null
+            ->filter() // إزالة العناصر null
+            ->values()
+            ->all();
+    }
 
 
     private function isJson($value): bool

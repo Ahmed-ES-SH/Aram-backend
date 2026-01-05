@@ -48,6 +48,7 @@ class ServicePageService
                 'price_before_discount' => $data['price_before_discount'] ?? null,
                 'category_id' => $data['category_id'] ?? null,
                 'type' => $data['type'] ?? 'one_time',
+                'payment_type' => $data['payment_type'] ?? 'direct',
                 'order' => $data['order'] ?? $order,
                 'status' => $data['status'] ?? 'active',
                 'whatsapp_number' => $data['whatsapp_number'] ?? null,
@@ -116,6 +117,7 @@ class ServicePageService
                 'price_before_discount' => $data['price_before_discount'] ?? $servicePage->price_before_discount,
                 'category_id' => $data['category_id'] ?? $servicePage->category_id,
                 'type' => $data['type'] ?? $servicePage->type,
+                'payment_type' => $data['payment_type'] ?? $servicePage->payment_type,
                 'order' => $data['order'] ?? $servicePage->order,
                 'status' => $data['status'] ?? $servicePage->status,
                 'whatsapp_number' => $data['whatsapp_number'] ?? $servicePage->whatsapp_number,
@@ -182,7 +184,7 @@ class ServicePageService
                 $this->updateTestimonials($servicePage, $data['testimonials']);
             }
             if (isset($data['cta_section'])) {
-                Log::info( 'all_data', $data);
+                Log::info('all_data', $data);
                 $this->updateCtaSection($servicePage, $data['cta_section']);
             }
 

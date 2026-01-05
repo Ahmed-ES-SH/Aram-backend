@@ -67,7 +67,7 @@ class AboutController extends Controller
             $detailes->fill($data);
 
             // معالجة الصور
-            $imageFields = ['first_section_image', 'second_section_image', 'thired_section_image', 'fourth_section_image', 'cooperation_pdf'];
+            $imageFields = ['first_section_image', 'second_section_image', 'thired_section_image', 'fourth_section_image', 'cooperation_pdf', 'logo'];
             foreach ($imageFields as $field) {
                 if ($request->has($field)) {
                     $this->imageservice->ImageUploaderwithvariable($request, $detailes, 'images/companydetailes', $field);
@@ -81,5 +81,12 @@ class AboutController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
+    }
+
+
+    public function getLogo()
+    {
+        $logo = About::where('id', 1)->select('id', 'logo')->first();
+        return $this->successResponse($logo, 200);
     }
 }

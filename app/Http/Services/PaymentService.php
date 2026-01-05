@@ -41,7 +41,7 @@ class PaymentService
                 $provisionalData = $this->provisionalService->create(
                     $dto,
                     $invoice->invoice_number,
-                    $order?->id
+                    $dto->order_id ?? $order?->id
                 );
 
                 $this->promotionService->process($dto, $provisionalData);

@@ -36,6 +36,7 @@ class About extends Model
         'main_video',
         'link_video',
         'show_map',
+        'logo',
         'address',
     ];
 }

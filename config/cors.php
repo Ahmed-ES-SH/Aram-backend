@@ -17,9 +17,13 @@ return [
         'sanctum/csrf-cookie'
     ],
 
-    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://aram-gulf.com' , 'http://localhost:3000'],
+    'allowed_origins' => [
+        'https://aram-gulf.com',
+        'https://www.aram-gulf.com',
+      	'http://localhost:3000'
+    ],
 
     'allowed_origins_patterns' => [],
 

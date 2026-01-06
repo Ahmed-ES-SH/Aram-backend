@@ -172,7 +172,7 @@ class ConversationService
             : collect();
 
         $orgsById = !empty($otherOrgIds)
-            ? Organization::whereIn('id', $otherOrgIds)->get(['id', 'title', 'logo', 'account_type'])->keyBy('id')
+            ? Organization::whereIn('id', $otherOrgIds)->get(['id', 'title as name', 'logo as image', 'account_type'])->keyBy('id')
             : collect();
 
         // Format result

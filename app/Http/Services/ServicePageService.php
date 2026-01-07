@@ -431,60 +431,91 @@ class ServicePageService
             $deletedImages = json_decode($deletedImages, true);
         }
 
+        $storagePath = 'images/service-pages/gallery';
+
+        // 1. Delete images marked for deletion
         foreach ($deletedImages as $image) {
             Log::info('deleted_image', $image);
-            $old_image = $image['path'];
-            $storagePath = 'images/service-pages/gallery';
-            // Delete old image
+            $old_image = $image['path'] ?? null;
+
+            // Delete old image file
             if ($old_image) {
-                $model = ServicePageGalleryImage::find($image['id']);
                 $old_image_name = basename(parse_url($old_image, PHP_URL_PATH));
                 $file_path = public_path($storagePath . '/' . $old_image_name);
 
                 if (File::exists($file_path)) {
                     File::delete($file_path);
                 }
+            }
 
-                $model->delete();
+            // Delete record
+            if (isset($image['id'])) {
+                ServicePageGalleryImage::where('id', $image['id'])->delete();
             }
         }
 
+        // 2. Process new/updated images
         foreach ($newImages as $image) {
-            Log::info('new_image', $image);
-            if (!isset($image['file'])) {
-                continue; // صورة قديمة → تجاهلها هنا
+            Log::info('processing_image', $image);
+
+            $id = $image['id'] ?? null;
+            $file = $image['file'] ?? null;
+
+            // Calculate order
+            $order = $image['order'] ?? (ServicePageGalleryImage::max('order') + 1);
+
+            if ($id) {
+                // --- UPDATE EXISTING ---
+                $galleryImage = ServicePageGalleryImage::find($id);
+                if ($galleryImage) {
+                    $updateData = [
+                        'alt_en' => $image['alt_en'] ?? $galleryImage->alt_en,
+                        'alt_ar' => $image['alt_ar'] ?? $galleryImage->alt_ar,
+                        'order' => $order,
+                    ];
+
+                    // If a new file is uploaded, replace the old one
+                    if ($file instanceof \Illuminate\Http\UploadedFile) {
+                        // Delete old file
+                        $oldPath = $galleryImage->path;
+                        if ($oldPath) {
+                            $oldName = basename(parse_url($oldPath, PHP_URL_PATH));
+                            $oldFilePath = public_path($storagePath . '/' . $oldName);
+                            if (File::exists($oldFilePath)) {
+                                File::delete($oldFilePath);
+                            }
+                        }
+
+                        // Upload new file
+                        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                        $extension = $file->getClientOriginalExtension();
+                        $filename = $originalName . '_' . uniqid() . '.' . $extension;
+                        $file->move(public_path($storagePath), $filename);
+
+                        $updateData['path'] = url('/') . '/' . $storagePath . '/' . $filename;
+                    }
+
+                    $galleryImage->update($updateData);
+                }
+            } else {
+                // --- CREATE NEW ---
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = $originalName . '_' . uniqid() . '.' . $extension;
+
+                    $file->move(public_path($storagePath), $filename);
+                    $fullImagePath = url('/') . '/' . $storagePath . '/' . $filename;
+
+                    ServicePageGalleryImage::create([
+                        'service_page_id' => $servicePage->id,
+                        'order' => $order,
+                        'path' => $fullImagePath,
+                        'alt_en' => $image['alt_en'] ?? "",
+                        'alt_ar' => $image['alt_ar'] ?? "",
+                    ]);
+                }
             }
-
-            $maxOrder = ServicePageGalleryImage::max('order') ?? 0;
-            $order = $maxOrder + 1;
-
-            $file = $image['file'];
-
-            if (!$file instanceof \Illuminate\Http\UploadedFile) {
-                continue; // أمان إضافي
-            }
-
-            $storagePath = 'images/service-pages/gallery';
-
-            $originalName = pathinfo(
-                $file->getClientOriginalName(),
-                PATHINFO_FILENAME
-            );
-            $extension = $file->getClientOriginalExtension();
-
-            $filename = $originalName . '_' . uniqid() . '.' . $extension;
-
-            $file->move(public_path($storagePath), $filename);
-
-            $fullImagePath = url('/') . '/' . $storagePath . '/' . $filename;
-
-            ServicePageGalleryImage::create([
-                'service_page_id' => $servicePage->id,
-                'order' => $order,
-                'path' => $fullImagePath,
-                'alt_en' => $image['alt_en'] ?? "",
-                'alt_ar' => $image['alt_ar'] ?? "",
-            ]);
         }
     }
 

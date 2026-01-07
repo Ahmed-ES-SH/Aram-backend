@@ -45,9 +45,18 @@ class UpdateOfferRequest extends FormRequest
 
             'organization_id' => 'sometimes|nullable|exists:organizations,id',
             'category_id' => 'sometimes|required|exists:categories,id',
+            'categories' => 'nullable|array',
+            'categories.*' => 'integer|exists:categories,id',
 
             'code' => "sometimes|nullable|string|max:50|unique:offers,code,{$offerId}",
         ];
+    }
+
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'categories' => json_decode($this->categories, true),
+        ]);
     }
 
     public function messages(): array

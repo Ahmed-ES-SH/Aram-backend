@@ -28,9 +28,28 @@ class Offer extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_offer');
+    }
+
 
     public function organization()
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function scopeFilterByCategories($query, $categories)
+    {
+        if (empty($categories)) {
+            return $query;
+        }
+
+        // Convert single ID to array if necessary
+        $categories = is_array($categories) ? $categories : [$categories];
+
+        return $query->whereHas('categories', function ($q) use ($categories) {
+            $q->whereIn('categories.id', $categories);
+        });
     }
 }

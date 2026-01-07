@@ -270,6 +270,7 @@ Route::controller(CardController::class)->group(function () {
 
 Route::controller(OrganizationController::class)->group(function () {
     Route::get('/public-organizations', 'publishedOrganizations');
+    Route::get('/categories-for-org/{organization}', 'categoriesForOrg');
     Route::get('/organizations-for-selection-table', 'OrganizationsForSelectionTable');
     Route::get('/top-public-organizations', 'TopTenPublicOrganizations');
     Route::get('/public-organizations-with-selected-data', 'publishedOrganizationswithSelectedData');

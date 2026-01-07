@@ -86,6 +86,7 @@ class OrganizationController extends Controller
         return $this->fetchOrganizationService->activeOrganizations($request);
     }
 
+
     // ===============================
     // Case 7: Get published organizations with selected fields
     // ===============================
@@ -264,5 +265,15 @@ class OrganizationController extends Controller
     public function OrganizationsForSelectionTable()
     {
         return $this->fetchOrganizationService->OrganizationsForSelectionTable();
+    }
+
+
+
+    public function categoriesForOrg(Organization $organization)
+    {
+        $orgCats = $organization->select('id')->with('categories:id,title_en,title_ar,icon_name')->first();
+        $data = $orgCats->categories;
+
+        return $this->successResponse($data, 200);
     }
 }

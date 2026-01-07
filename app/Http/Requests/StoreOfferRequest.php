@@ -35,8 +35,18 @@ class StoreOfferRequest extends FormRequest
             'status' => 'nullable|in:waiting,active,expired',
             'organization_id' => 'required|exists:organizations,id',
             'category_id' => 'required|exists:categories,id',
+            'categories' => 'required|array',
+            'categories.*' => 'integer|exists:categories,id',
             'code' => 'nullable|string|max:50|unique:offers,code',
         ];
+    }
+
+
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'categories' => json_decode($this->categories, true),
+        ]);
     }
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Services\OrganizationServices;
 
+use App\Http\Resources\SelectedOrganizationDataResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\Organization;
 use Illuminate\Support\Facades\Cache;
@@ -218,6 +219,7 @@ class FetchOrganizationsData
             // جلب البطاقات النشطة مع التصفح (pagination)
             $orgsQuery = Organization::where('status', 'published')
                 ->orderBy('order', 'asc')
+                ->with('categories:id')
                 ->select('id', 'logo', 'description', 'title', 'email');
 
 
@@ -234,7 +236,15 @@ class FetchOrganizationsData
 
 
             // إرسال البطاقات مع تفاصيل التصفح
-            return $this->paginationResponse($orgs, 200);
+            return response()->json([
+                'data' => SelectedOrganizationDataResource::collection($orgs),
+                'pagination' => [
+                    'current_page' => $orgs->currentPage(),
+                    'last_page'    => $orgs->lastPage(),
+                    'per_page'     => $orgs->perPage(),
+                    'total'        => $orgs->total(),
+                ],
+            ], 200);
         } catch (Exception $e) {
             // في حال حدوث خطأ، يتم إرجاع استجابة خطأ
             return $this->errorResponse($e->getMessage(), 500);

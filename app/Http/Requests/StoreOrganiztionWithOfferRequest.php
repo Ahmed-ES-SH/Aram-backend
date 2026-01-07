@@ -51,6 +51,8 @@ class StoreOrganiztionWithOfferRequest extends FormRequest
             'offer.end_date' => 'required|date|after:offer.start_date',
             'offer.code' => 'required|string',
             'offer.category_id' => 'required|integer|exists:categories,id',
+            'offer.categories' => 'required|array',
+            'offer.categories.*' => 'integer|exists:categories,id',
             'offer.image' => 'required|file|max:5048',
             'ref_code' => 'nullable|string',
         ];
@@ -121,6 +123,7 @@ class StoreOrganiztionWithOfferRequest extends FormRequest
             'offer.end_date.after' => 'تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية',
             'offer.code.required' => 'كود العرض مطلوب',
             'offer.category_id.required' => 'التصنيف مطلوب',
+            'offer.categories.required' => 'التصنيفات الإضافية مطلوبة',
             'offer.category_id.exists' => 'التصنيف غير موجود',
             'offer.image.required' => 'صورة العرض مطلوبة',
         ];

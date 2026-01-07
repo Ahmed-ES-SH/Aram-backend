@@ -137,6 +137,11 @@ class CreateOrganizationService
                 // Create offer linked to this organization
                 Log::info('🎁 Creating offer', ['offer_data' => $offerData]);
                 $offer = $organization->offers()->create($offerData);
+
+                if (isset($offerData['categories'])) {
+                    $offer->categories()->sync($offerData['categories']);
+                }
+
                 Log::info('✅ Offer created', ['offer_id' => $offer->id]);
 
                 // Handle offer image upload directly

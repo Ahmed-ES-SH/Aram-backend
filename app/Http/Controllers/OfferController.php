@@ -39,7 +39,7 @@ class OfferController extends Controller
             $normalizedDescription = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(description, 'ة', 'ه'), 'ى', 'ي'), 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ؤ', 'و'))";
 
             // ✅ Start building the query
-            $builder = Offer::with(['organization:id,title,description,image,rating', 'category'])
+            $builder = Offer::with(['organization:id,title,description,image,rating', 'category', 'categories'])
                 ->when($query, function ($q) use ($normalizedQuery, $normalizedTitle, $normalizedDescription) {
                     $q->where(function ($subQ) use ($normalizedQuery, $normalizedTitle, $normalizedDescription) {
                         $subQ->whereRaw("$normalizedTitle LIKE ?", ["%$normalizedQuery%"])
@@ -50,7 +50,7 @@ class OfferController extends Controller
                     $q->where('status', $request->status);
                 })
                 ->when($request->filled('category_id'), function ($q) use ($request) {
-                    $q->where('category_id', $request->category_id);
+                    $q->filterByCategories($request->category_id);
                 })
                 ->when($request->filled('discount_type'), function ($q) use ($request) {
                     $q->where('discount_type',   $request->discount_type);
@@ -108,7 +108,7 @@ class OfferController extends Controller
             $normalizedDescription = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(description, 'ة', 'ه'), 'ى', 'ي'), 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ؤ', 'و'))";
 
             // ✅ Start building the query
-            $builder = Offer::with(['organization:id,title,description,image,rating', 'category:id,title_en,title_ar,bg_color,icon_name'])
+            $builder = Offer::with(['organization:id,title,description,image,rating', 'category:id,title_en,title_ar,bg_color,icon_name', 'categories'])
                 ->where('status', 'active') // ✅ تثبيت الحالة على active فقط
                 ->when($query, function ($q) use ($normalizedQuery, $normalizedTitle, $normalizedDescription) {
                     $q->where(function ($subQ) use ($normalizedQuery, $normalizedTitle, $normalizedDescription) {
@@ -117,7 +117,7 @@ class OfferController extends Controller
                     });
                 })
                 ->when($request->filled('category'), function ($q) use ($request) {
-                    $q->where('category_id', $request->category);
+                    $q->filterByCategories($request->category);
                 });
 
             // ✅ Apply sorting based on sort_by parameter
@@ -175,7 +175,7 @@ class OfferController extends Controller
             $offers = Offer::where('organization_id', $id)
                 ->where('status', 'active')
                 ->whereDate('end_date', '>=', now()) // ✅ Check that offer is still active (not expired)
-                ->with(['organization:id,title,description,image,rating', 'category:id,title_en,title_ar,bg_color,icon_name'])
+                ->with(['organization:id,title,description,image,rating', 'category:id,title_en,title_ar,bg_color,icon_name', 'categories'])
                 ->orderByRaw("
                 CASE
                     WHEN discount_type = 'percentage' THEN CAST(discount_value AS DECIMAL(10,2))
@@ -211,7 +211,7 @@ class OfferController extends Controller
             ]);
 
 
-            $offers = Offer::with(['category', 'organization:id,title,description,image,rating'])
+            $offers = Offer::with(['category', 'categories', 'organization:id,title,description,image,rating'])
                 ->where('organization_id', $request->id)
                 ->orderByDesc('created_at')
                 ->paginate(12);
@@ -243,7 +243,11 @@ class OfferController extends Controller
                 $this->imageservice->ImageUploaderwithvariable($request, $offer, 'images/offers', 'image');
             }
 
-            return $this->successResponse($offer, 201);
+            if ($request->has('categories')) {
+                $offer->categories()->sync($request->categories);
+            }
+
+            return $this->successResponse($offer->load('categories'), 201);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }
@@ -255,7 +259,16 @@ class OfferController extends Controller
     public function show($id)
     {
         try {
-            $offer = Offer::with(['category', 'organization:id,title,description,image,rating'])->findOrFail($id);
+            $offer = Offer::with([
+                'category',
+                'categories:id',
+                'organization:id,title,description,image,rating'
+            ])->findOrFail($id);
+
+            $offer->setRelation(
+                'categories',
+                $offer->categories->pluck('id')->values()
+            );
 
             return $this->successResponse($offer, 200);
         } catch (\Exception $e) {
@@ -271,7 +284,7 @@ class OfferController extends Controller
     public function update(UpdateOfferRequest $request, $id)
     {
         try {
-            $offer = Offer::with(['category', 'organization:id,title,description,image,rating'])->findOrFail($id);
+            $offer = Offer::with(['category', 'categories', 'organization:id,title,description,image,rating'])->findOrFail($id);
             $data = $request->validated();
 
             $offer->update($data);
@@ -281,7 +294,11 @@ class OfferController extends Controller
                 $this->imageservice->ImageUploaderwithvariable($request, $offer, 'images/offers', 'image');
             }
 
-            return $this->successResponse($offer, 200);
+            if ($request->has('categories')) {
+                $offer->categories()->sync($request->categories);
+            }
+
+            return $this->successResponse($offer->load('categories'), 200);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }

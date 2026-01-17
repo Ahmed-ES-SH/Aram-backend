@@ -207,6 +207,7 @@ Route::get('/sub-categories', [SubCategoryController::class, 'index']);
 // ----------------------------------------
 
 Route::get('/public-card-categories', [CardCategoryController::class, 'publicCategories']);
+Route::get('/card-categories-by-state', [CardCategoryController::class, 'activeCategories']);
 Route::get('/all-card-categories', [CardCategoryController::class, 'AllCategories']);
 Route::get('/all-card-public-categories', [CardCategoryController::class, 'AllPublicCategories']);
 Route::get('/card-categories', [CardCategoryController::class, 'index']);
@@ -1008,7 +1009,6 @@ Route::middleware(['auth:sanctum', 'checkAdmin'])->group(function () {
     Route::controller(CardCategoryController::class)->group(function () {
         Route::post('/add-card-category', 'store');
         Route::post('/card-categories/search', 'search');
-        Route::get('/card-categories-by-state', 'activeCategories');
         Route::get('/card-category/{id}', 'show');
         Route::post('/update-card-category/{id}', 'update');
         Route::post('/update-card-category-state/{id}', 'updateState');

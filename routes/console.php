@@ -12,3 +12,11 @@ Artisan::command('inspire', function () {
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('subscriptions:check-expired')->hourly();
+
+
+Schedule::command('app:expire-cards-command')
+    ->hourly()
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        logger()->error('Expire cards command failed');
+    });

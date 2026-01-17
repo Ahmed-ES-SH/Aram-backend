@@ -81,11 +81,15 @@ class ServicePageService
             $this->createSolutionSection($servicePage, $data['solution_section'] ?? null);
 
             // Handle Gallery Creation (reuse update logic for file handling)
-            if ($request->has('gallery_images')) {
+            if ($request->has('gallery_images') || $request->file('gallery_images')) {
+                // Get files from the request - they might be in gallery_images[*][file] or gallery_images_files[*]
+                $galleryFiles = $this->extractGalleryFiles($request);
+
                 $this->updateGallerySection(
                     $servicePage,
                     [], // No deleted images for new creation
-                    $request->gallery_images
+                    $request->gallery_images ?? [],
+                    $galleryFiles
                 );
             }
 
@@ -126,7 +130,7 @@ class ServicePageService
             // Update sections
             if (isset($data['hero_section'])) {
 
-                $old_image = $servicePage->heroSection->hero_image;
+                $old_image = $servicePage->heroSection?->hero_image;
                 $this->updateHeroSection($servicePage, $data['hero_section']);
 
                 // Check image upload
@@ -169,11 +173,15 @@ class ServicePageService
             }
 
             // Handle Gallery Update
-            if ($request->has('deleted_images') || $request->has('gallery_images')) {
+            if ($request->has('deleted_images') || $request->has('gallery_images') || $request->file('gallery_images')) {
+                // Get files from the request
+                $galleryFiles = $this->extractGalleryFiles($request);
+
                 $this->updateGallerySection(
                     $servicePage,
-                    $request->deleted_images,
-                    $request->gallery_images,
+                    $request->deleted_images ?? [],
+                    $request->gallery_images ?? [],
+                    $galleryFiles
                 );
             }
 
@@ -250,6 +258,40 @@ class ServicePageService
             'category',
             'contactMessages',
         ];
+    }
+
+    /**
+     * Extract gallery files from the request
+     * Files can be sent as gallery_images[index][file] or gallery_images_files[index]
+     */
+    protected function extractGalleryFiles(Request $request): array
+    {
+        $files = [];
+
+        // Method 1: Files embedded in gallery_images array (gallery_images[0][file], gallery_images[1][file], etc.)
+        $galleryImages = $request->file('gallery_images');
+        if (is_array($galleryImages)) {
+            foreach ($galleryImages as $index => $imageData) {
+                if (is_array($imageData) && isset($imageData['file']) && $imageData['file'] instanceof UploadedFile) {
+                    $files[$index] = $imageData['file'];
+                } elseif ($imageData instanceof UploadedFile) {
+                    // Direct file: gallery_images[0], gallery_images[1], etc.
+                    $files[$index] = $imageData;
+                }
+            }
+        }
+
+        // Method 2: Separate files array (gallery_images_files[0], gallery_images_files[1], etc.)
+        $separateFiles = $request->file('gallery_images_files');
+        if (is_array($separateFiles)) {
+            foreach ($separateFiles as $index => $file) {
+                if ($file instanceof UploadedFile && !isset($files[$index])) {
+                    $files[$index] = $file;
+                }
+            }
+        }
+
+        return $files;
     }
 
     // =========================================================================
@@ -425,17 +467,26 @@ class ServicePageService
 
 
 
-    protected function updateGallerySection(ServicePage $servicePage, array $deletedImages, $newImages): void
+    protected function updateGallerySection(ServicePage $servicePage, array $deletedImages, $newImages, ?array $galleryFiles = null): void
     {
         if (is_string($deletedImages)) {
-            $deletedImages = json_decode($deletedImages, true);
+            $deletedImages = json_decode($deletedImages, true) ?? [];
+        }
+
+        if (is_string($newImages)) {
+            $newImages = json_decode($newImages, true) ?? [];
+        }
+
+        // Ensure newImages is an array
+        if (!is_array($newImages)) {
+            $newImages = [];
         }
 
         $storagePath = 'images/service-pages/gallery';
 
         // 1. Delete images marked for deletion
         foreach ($deletedImages as $image) {
-            Log::info('deleted_image', $image);
+            Log::info('deleted_image', is_array($image) ? $image : ['value' => $image]);
             $old_image = $image['path'] ?? null;
 
             // Delete old image file
@@ -455,50 +506,65 @@ class ServicePageService
         }
 
         // 2. Process new/updated images
-        foreach ($newImages as $image) {
+        foreach ($newImages as $index => $image) {
+            // Ensure image is an array
+            if (!is_array($image)) {
+                Log::warning('Skipping non-array gallery image', ['index' => $index, 'value' => $image]);
+                continue;
+            }
+
             Log::info('processing_image', $image);
 
             $id = $image['id'] ?? null;
+
+            // Check for file in the image array first, then in separate galleryFiles array
             $file = $image['file'] ?? null;
+            if (!$file && $galleryFiles && isset($galleryFiles[$index])) {
+                $file = $galleryFiles[$index];
+            }
 
             // Calculate order
             $order = $image['order'] ?? (ServicePageGalleryImage::max('order') + 1);
 
+            // Try to find existing record in database (not just check if ID is present)
+            $galleryImage = null;
             if ($id) {
-                // --- UPDATE EXISTING ---
                 $galleryImage = ServicePageGalleryImage::find($id);
-                if ($galleryImage) {
-                    $updateData = [
-                        'alt_en' => $image['alt_en'] ?? $galleryImage->alt_en,
-                        'alt_ar' => $image['alt_ar'] ?? $galleryImage->alt_ar,
-                        'order' => $order,
-                    ];
+            }
 
-                    // If a new file is uploaded, replace the old one
-                    if ($file instanceof \Illuminate\Http\UploadedFile) {
-                        // Delete old file
-                        $oldPath = $galleryImage->path;
-                        if ($oldPath) {
-                            $oldName = basename(parse_url($oldPath, PHP_URL_PATH));
-                            $oldFilePath = public_path($storagePath . '/' . $oldName);
-                            if (File::exists($oldFilePath)) {
-                                File::delete($oldFilePath);
-                            }
+            if ($galleryImage) {
+                // --- UPDATE EXISTING (record found in database) ---
+                $updateData = [
+                    'alt_en' => $image['alt_en'] ?? $galleryImage->alt_en,
+                    'alt_ar' => $image['alt_ar'] ?? $galleryImage->alt_ar,
+                    'order' => $order,
+                ];
+
+                // If a new file is uploaded, replace the old one
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    // Delete old file
+                    $oldPath = $galleryImage->path;
+                    if ($oldPath) {
+                        $oldName = basename(parse_url($oldPath, PHP_URL_PATH));
+                        $oldFilePath = public_path($storagePath . '/' . $oldName);
+                        if (File::exists($oldFilePath)) {
+                            File::delete($oldFilePath);
                         }
-
-                        // Upload new file
-                        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                        $extension = $file->getClientOriginalExtension();
-                        $filename = $originalName . '_' . uniqid() . '.' . $extension;
-                        $file->move(public_path($storagePath), $filename);
-
-                        $updateData['path'] = url('/') . '/' . $storagePath . '/' . $filename;
                     }
 
-                    $galleryImage->update($updateData);
+                    // Upload new file
+                    $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = $originalName . '_' . uniqid() . '.' . $extension;
+                    $file->move(public_path($storagePath), $filename);
+
+                    $updateData['path'] = url('/') . '/' . $storagePath . '/' . $filename;
                 }
+
+                $galleryImage->update($updateData);
+                Log::info('Updated gallery image', ['id' => $id]);
             } else {
-                // --- CREATE NEW ---
+                // --- CREATE NEW (no existing record found) ---
                 if ($file instanceof \Illuminate\Http\UploadedFile) {
                     $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                     $extension = $file->getClientOriginalExtension();
@@ -507,13 +573,16 @@ class ServicePageService
                     $file->move(public_path($storagePath), $filename);
                     $fullImagePath = url('/') . '/' . $storagePath . '/' . $filename;
 
-                    ServicePageGalleryImage::create([
+                    $newImage = ServicePageGalleryImage::create([
                         'service_page_id' => $servicePage->id,
                         'order' => $order,
                         'path' => $fullImagePath,
                         'alt_en' => $image['alt_en'] ?? "",
                         'alt_ar' => $image['alt_ar'] ?? "",
                     ]);
+                    Log::info('Created new gallery image', ['id' => $newImage->id, 'path' => $fullImagePath]);
+                } else {
+                    Log::warning('No valid file for new gallery image', ['index' => $index, 'image' => $image, 'frontend_id' => $id]);
                 }
             }
         }

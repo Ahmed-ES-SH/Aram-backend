@@ -1,13 +1,12 @@
 {
-    "name": "ahmed-es-sh/laravel-backend-template",
+    "name": "aram/backend",
     "type": "project",
-    "description": "My custom Laravel backend template",
+    "description": "Aram backend",
     "license": "MIT",
     "keywords": [
         "laravel",
         "starter",
-        "backend",
-        "template"
+        "backend"
     ],
     "$schema": "https://getcomposer.org/schema.json",
     "require": {
@@ -19,7 +18,6 @@
         "laravel/scout": "^10.15",
         "laravel/socialite": "^5.18",
         "laravel/tinker": "^2.10.1",
-        "masbug/flysystem-google-drive-ext": "^2.4",
         "meilisearch/meilisearch-php": "^1.15",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-backup": "^9.3"

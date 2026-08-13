@@ -3,7 +3,7 @@
 namespace App\Http\Services;
 
 use Pusher\Pusher;
-use App\Models\Notification;
+use App\Modules\Conversation\Models\Notification;
 
 class NotificationService
 {

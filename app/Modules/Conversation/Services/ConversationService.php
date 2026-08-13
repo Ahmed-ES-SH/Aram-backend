@@ -2,9 +2,9 @@
 
 namespace App\Modules\Conversation\Services;
 
-use App\Models\Conversation;
-use App\Models\ConversationBlock;
-use App\Models\Message;
+use App\Modules\Conversation\Models\Conversation;
+use App\Modules\Conversation\Models\ConversationBlock;
+use App\Modules\Conversation\Models\Message;
 use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\Cache;

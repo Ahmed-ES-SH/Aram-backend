@@ -6,10 +6,10 @@ namespace App\Modules\User\Models;
 
 use App\Helpers\TextNormalizer;
 use App\Modules\Service\Models\Appointment;
-use App\Models\Conversation;
+use App\Modules\Conversation\Models\Conversation;
 use App\Modules\Coupon\Models\Coupon;
-use App\Models\Message;
-use App\Models\Notification;
+use App\Modules\Conversation\Models\Message;
+use App\Modules\Conversation\Models\Notification;
 use App\Modules\Promotion\Models\Promoter;
 use App\Modules\Payment\Models\Wallet;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\SocialAccount;
+use App\Modules\Conversation\Models\SocialAccount;
 
 class SocialContactInfoSeeder extends Seeder
 {

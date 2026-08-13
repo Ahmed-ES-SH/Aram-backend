@@ -65,12 +65,12 @@
 - [x] PromoterTrackingController (`app/Modules/Promotion/Controllers`)
 - [x] PromotionActivityController (`app/Modules/Promotion/Controllers`)
 
-## Conversation / Messaging — [x] services moved to `app/Modules/Conversation/Services`
-- [ ] ConversationController
-- [ ] MessageController
-- [ ] NotificationController
-- [ ] SMSController
-- [ ] SocialAccountController
+## Conversation / Messaging — [x] DONE
+- [x] ConversationController (`app/Modules/Conversation/Controllers`)
+- [x] MessageController (`app/Modules/Conversation/Controllers`)
+- [x] NotificationController (`app/Modules/Conversation/Controllers`)
+- [x] SMSController (`app/Modules/Conversation/Controllers`)
+- [x] SocialAccountController (`app/Modules/Conversation/Controllers`)
 
 ## Content / Static Pages
 - [ ] AboutController
@@ -93,6 +93,6 @@
 - [ ] TempUploadController
 
 ---
-**Totals:** 62 controllers — 42 refactored `[x]`, 20 pending `[ ]`.
+**Totals:** 62 controllers — 47 refactored `[x]`, 15 pending `[ ]`.
 
-> Services: 22 of 26 moved to `app/Modules/*/Services` (`Service` 6, `Payment` 8, `Coupon` 5, `Promotion` 1, `Conversation` 2). Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`, `SMSService`.
+> Services: 23 of 26 moved to `app/Modules/*/Services` (`Service` 6, `Payment` 8, `Coupon` 5, `Promotion` 1, `Conversation` 3). Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`.

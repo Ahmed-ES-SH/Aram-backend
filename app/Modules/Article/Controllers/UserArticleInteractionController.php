@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Article\Controllers;
 
-use App\Models\UserArticleInteraction;
+use App\Http\Controllers\Controller;
+use App\Modules\Article\Models\UserArticleInteraction;
 use Illuminate\Http\Request;
 
 class UserArticleInteractionController extends Controller

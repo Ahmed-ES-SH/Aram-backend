@@ -3,10 +3,10 @@
 use App\Http\Controllers\AboutController; 
 use App\Http\Controllers\ServicePageController;
 use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\ArticleCategoryController; 
-use App\Http\Controllers\ArticleCommentController; 
-use App\Http\Controllers\ArticleController; 
-use App\Http\Controllers\ArticleInteractionsController; 
+use App\Modules\Article\Controllers\ArticleCategoryController; 
+use App\Modules\Article\Controllers\ArticleCommentController; 
+use App\Modules\Article\Controllers\ArticleController; 
+use App\Modules\Article\Controllers\ArticleInteractionsController; 
 use App\Modules\Auth\Controllers\AuthController; 
 use App\Http\Controllers\CardCategoryController;
 use App\Http\Controllers\CardController;

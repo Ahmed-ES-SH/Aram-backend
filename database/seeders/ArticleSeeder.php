@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Article;
-use App\Models\ArticleTag;
+use App\Modules\Article\Models\Article;
+use App\Modules\Article\Models\ArticleTag;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

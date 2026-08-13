@@ -12,10 +12,10 @@
 - [x] MemberController (newsletter subscribers)
 
 ## Article
-- [ ] ArticleController
-- [ ] ArticleCategoryController
-- [ ] ArticleCommentController
-- [ ] ArticleInteractionsController
+- [x] ArticleController
+- [x] ArticleCategoryController
+- [x] ArticleCommentController
+- [x] ArticleInteractionsController
 - [ ] TagController
 - [ ] KeywordController
 
@@ -87,4 +87,4 @@
 - [ ] TempUploadController
 
 ---
-**Totals:** 59 controllers — 3 refactored `[x]`, 56 pending `[ ]`.
+**Totals:** 59 controllers — 7 refactored `[x]`, 52 pending `[ ]`.

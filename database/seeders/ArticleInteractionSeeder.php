@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\ArticleInteractions;
+use App\Modules\Article\Models\ArticleInteractions;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

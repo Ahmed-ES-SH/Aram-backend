@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Promotion\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\PromoterRatio;
+use App\Http\Controllers\Controller;
+use App\Modules\Promotion\Models\PromoterRatio;
 use Illuminate\Http\Request;
 use Exception;
 

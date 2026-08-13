@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\Promotion\Models;
 
 use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;

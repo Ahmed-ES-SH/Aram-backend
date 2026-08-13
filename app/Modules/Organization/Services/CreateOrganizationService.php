@@ -5,8 +5,8 @@ namespace App\Modules\Organization\Services;
 use App\Http\Traits\ApiResponse;
 use App\Mail\VerifyEmail;
 use App\Modules\Organization\Models\Organization;
-use App\Models\Promoter;
-use App\Models\PromotionActivity;
+use App\Modules\Promotion\Models\Promoter;
+use App\Modules\Promotion\Models\PromotionActivity;
 use App\Models\Referral;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\File;
 use App\Http\Services\ImageService;
-use App\Models\PromoterRatio;
+use App\Modules\Promotion\Models\PromoterRatio;
 
 class CreateOrganizationService
 {

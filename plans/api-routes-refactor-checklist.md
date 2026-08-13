@@ -54,15 +54,16 @@
 - [x] PaymentController (`app/Modules/Payment/Controllers`)
 - [x] WithdrawRequestController (`app/Modules/Payment/Controllers`)
 
-## Coupon — [x] services moved to `app/Modules/Coupon/Services`
-- [ ] CouponController
+## Coupon — [x] DONE
+- [x] CouponController (`app/Modules/Coupon/Controllers`)
+- [x] CouponUsageController (`app/Modules/Coupon/Controllers`)
 
-## Offer / Promotion — [x] services moved to `app/Modules/Promotion/Services`
-- [ ] OfferController
-- [ ] PromoterController
-- [ ] PromoterRatioController
-- [ ] PromoterTrackingController
-- [ ] PromotionActivityController
+## Offer / Promotion — [x] DONE
+- [x] OfferController (`app/Modules/Promotion/Controllers`)
+- [x] PromoterController (`app/Modules/Promotion/Controllers`)
+- [x] PromoterRatioController (`app/Modules/Promotion/Controllers`)
+- [x] PromoterTrackingController (`app/Modules/Promotion/Controllers`)
+- [x] PromotionActivityController (`app/Modules/Promotion/Controllers`)
 
 ## Conversation / Messaging — [x] services moved to `app/Modules/Conversation/Services`
 - [ ] ConversationController
@@ -92,6 +93,6 @@
 - [ ] TempUploadController
 
 ---
-**Totals:** 62 controllers — 35 refactored `[x]`, 27 pending `[ ]`.
+**Totals:** 62 controllers — 42 refactored `[x]`, 20 pending `[ ]`.
 
 > Services: 22 of 26 moved to `app/Modules/*/Services` (`Service` 6, `Payment` 8, `Coupon` 5, `Promotion` 1, `Conversation` 2). Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`, `SMSService`.

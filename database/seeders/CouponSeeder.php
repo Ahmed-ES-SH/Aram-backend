@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Coupon;
-use App\Models\CouponCategory;
+use App\Modules\Coupon\Models\Coupon;
+use App\Modules\Coupon\Models\CouponCategory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Coupon\Controllers;
 
-use App\Http\Requests\StoreCouponRequest;
-use App\Http\Requests\UpdateCouponRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Coupon\Requests\StoreCouponRequest;
+use App\Modules\Coupon\Requests\UpdateCouponRequest;
 use App\Modules\Coupon\Services\CouponAuthorizationService;
 use App\Modules\Coupon\Services\CouponFetchService;
 use App\Modules\Coupon\Services\CouponService;
 use App\Modules\Coupon\Services\CouponUsageService;
 use App\Modules\Coupon\Services\CouponValidationService;
 use App\Http\Traits\ApiResponse;
-use App\Models\Coupon;
-use App\Models\CouponOrganization;
-use App\Models\CouponUsage;
-use App\Models\CouponUser;
+use App\Modules\Coupon\Models\Coupon;
+use App\Modules\Coupon\Models\CouponOrganization;
+use App\Modules\Coupon\Models\CouponUsage;
+use App\Modules\Coupon\Models\CouponUser;
 use Exception;
 use Illuminate\Http\Request;
 

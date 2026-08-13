@@ -3,10 +3,10 @@
 namespace App\Modules\Coupon\Services;
 
 use App\Modules\Card\Models\Card;
-use App\Models\Coupon;
-use App\Models\CouponOrganization;
-use App\Models\CouponUsage;
-use App\Models\CouponUser;
+use App\Modules\Coupon\Models\Coupon;
+use App\Modules\Coupon\Models\CouponOrganization;
+use App\Modules\Coupon\Models\CouponUsage;
+use App\Modules\Coupon\Models\CouponUser;
 use App\Modules\Card\Models\OwnedCard;
 use App\Modules\User\Models\User;
 use Carbon\Carbon;

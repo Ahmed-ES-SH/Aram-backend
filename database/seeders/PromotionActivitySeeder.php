@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\PromotionActivity;
-use App\Models\Promoter;
+use App\Modules\Promotion\Models\PromotionActivity;
+use App\Modules\Promotion\Models\Promoter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 

@@ -4,10 +4,10 @@ namespace App\Modules\Coupon\Services;
 
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
-use App\Models\Coupon;
-use App\Models\CouponCategory;
-use App\Models\CouponOrganization;
-use App\Models\CouponUser;
+use App\Modules\Coupon\Models\Coupon;
+use App\Modules\Coupon\Models\CouponCategory;
+use App\Modules\Coupon\Models\CouponOrganization;
+use App\Modules\Coupon\Models\CouponUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;

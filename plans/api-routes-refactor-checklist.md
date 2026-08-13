@@ -72,27 +72,27 @@
 - [x] SMSController (`app/Modules/Conversation/Controllers`)
 - [x] SocialAccountController (`app/Modules/Conversation/Controllers`)
 
-## Content / Static Pages
-- [ ] AboutController
-- [ ] HomePageController
-- [ ] DashboardMainPageController
-- [ ] SlideController
-- [ ] WebsiteVideoController
-- [ ] NewsletterController
-- [ ] ContactMessageController
-- [ ] QuestionAnswerController
-- [ ] PrivacyPolicyController
-- [ ] TermsConditionController
-- [ ] FooterLinkController
-- [ ] CategoryController
-- [ ] SubCategoryController
-- [ ] VariableDataController
+## Content / Static Pages — [x] DONE
+- [x] AboutController (`app/Modules/Content/Controllers`)
+- [x] HomePageController (`app/Modules/Content/Controllers`)
+- [x] DashboardMainPageController (`app/Modules/Content/Controllers`)
+- [x] SlideController (`app/Modules/Content/Controllers`)
+- [x] WebsiteVideoController (`app/Modules/Content/Controllers`)
+- [x] NewsletterController (`app/Modules/Content/Controllers`)
+- [x] ContactMessageController (`app/Modules/Content/Controllers`)
+- [x] QuestionAnswerController (`app/Modules/Content/Controllers`)
+- [x] PrivacyPolicyController (`app/Modules/Content/Controllers`)
+- [x] TermsConditionController (`app/Modules/Content/Controllers`)
+- [x] FooterLinkController (`app/Modules/Content/Controllers`)
+- [x] CategoryController (`app/Modules/Content/Controllers`)
+- [x] SubCategoryController (`app/Modules/Content/Controllers`)
+- [x] VariableDataController (`app/Modules/Content/Controllers`)
 
 ## Misc / Shared
 - [ ] TodoController
 - [ ] TempUploadController
 
 ---
-**Totals:** 62 controllers — 47 refactored `[x]`, 15 pending `[ ]`.
+**Totals:** 62 controllers — 61 refactored `[x]`, 1 pending `[ ]`.
 
 > Services: 23 of 26 moved to `app/Modules/*/Services` (`Service` 6, `Payment` 8, `Coupon` 5, `Promotion` 1, `Conversation` 3). Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`.

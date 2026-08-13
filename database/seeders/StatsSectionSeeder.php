@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\VariableData;
+use App\Modules\Content\Models\VariableData;
 use Illuminate\Database\Seeder;
 
 class StatsSectionSeeder extends Seeder

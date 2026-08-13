@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Slide;
+use App\Modules\Content\Models\Slide;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

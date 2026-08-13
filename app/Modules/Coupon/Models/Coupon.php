@@ -2,8 +2,8 @@
 
 namespace App\Modules\Coupon\Models;
 
-use App\Models\Category;
-use App\Models\SubCategory;
+use App\Modules\Content\Models\Category;
+use App\Modules\Content\Models\SubCategory;
 use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Model;

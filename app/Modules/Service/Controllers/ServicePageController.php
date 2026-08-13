@@ -10,7 +10,7 @@ use App\Modules\Service\Services\ServicePageService;
 use App\Http\Traits\ApiResponse;
 use App\Modules\Service\Models\ServicePage;
 use App\Modules\Service\Models\ServiceForm;
-use App\Models\WebsiteVideo;
+use App\Modules\Content\Models\WebsiteVideo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

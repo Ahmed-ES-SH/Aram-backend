@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
     //     });
 
     //     Relation::morphMap([
-    //         'user' => \App\Models\User::class,
+    //         'user' => \App\Modules\User\Models\User::class,
     //         'organization' => \App\Models\Organization::class,
     //     ]);
     // }
@@ -41,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Relation::morphMap([
-            'user' => \App\Models\User::class,
+            'user' => \App\Modules\User\Models\User::class,
             'organization' => \App\Models\Organization::class,
         ]);
 

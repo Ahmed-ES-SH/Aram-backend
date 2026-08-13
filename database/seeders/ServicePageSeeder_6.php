@@ -13,7 +13,7 @@ use App\Models\ServicePageStat;
 use App\Models\ServicePageTestimonial;
 use App\Models\ServicePageCtaSection;
 use App\Models\ServiceTracking;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\Models\Organization;
 use Illuminate\Database\Seeder;
 

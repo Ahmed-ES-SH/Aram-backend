@@ -7,7 +7,7 @@ use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
 use App\Models\ServicePage;
 use App\Models\ServicePageContactMessage;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 

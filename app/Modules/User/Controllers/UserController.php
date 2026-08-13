@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\User\Controllers;
 
 
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Controllers\Controller;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
 use App\Mail\VerifyEmail;
@@ -13,7 +12,9 @@ use App\Models\Promoter;
 use App\Models\PromoterRatio;
 use App\Models\PromotionActivity;
 use App\Models\Referral;
-use App\Models\User;
+use App\Modules\User\Models\User;
+use App\Modules\User\Requests\StoreUserRequest;
+use App\Modules\User\Requests\UpdateUserRequest;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\EntityOkResponse;
 use App\OpenApi\Responses\ErrorResponse;

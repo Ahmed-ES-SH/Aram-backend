@@ -4,7 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\Appointment;
 use App\Models\Organization;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\Http\Requests\SendNotificationRequest;
 use Carbon\Carbon;
 use Exception;

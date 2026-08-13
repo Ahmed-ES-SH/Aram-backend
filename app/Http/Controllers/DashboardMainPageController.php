@@ -8,7 +8,7 @@ use App\Models\Offer;
 use App\Models\Organization;
 use App\Models\Promoter;
 use App\Models\ServicePage;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;

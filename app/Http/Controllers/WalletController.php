@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Models\Organization;
 use App\Models\Transaction;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\Models\Wallet;
 use App\Models\WithdrawRequest;
 use Illuminate\Http\Request;

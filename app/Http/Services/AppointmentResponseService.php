@@ -5,7 +5,7 @@ namespace App\Http\Services;
 use App\Http\Traits\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Organization;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;

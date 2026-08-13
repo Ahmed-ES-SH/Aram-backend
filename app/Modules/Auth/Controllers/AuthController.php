@@ -8,7 +8,7 @@ use App\Modules\Auth\Mail\SendOTPCode;
 use App\Models\Notification;
 use App\Models\Organization;
 use App\Models\PromotionActivity;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\EntityOkResponse;
 use App\OpenApi\Responses\ErrorResponse;

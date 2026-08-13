@@ -8,7 +8,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\PromotionActivity;
 use Illuminate\Http\Request;
 use App\Models\Promoter;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\Models\Organization;
 use App\Models\PromoterRatio;
 use Carbon\Carbon;

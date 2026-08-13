@@ -9,7 +9,7 @@ use App\Http\Services\CancelAppointmentService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Organization;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;

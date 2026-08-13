@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\TextNormalizer;
+use App\Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Promoter extends Model

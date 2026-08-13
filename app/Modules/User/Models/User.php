@@ -1,15 +1,24 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\User\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Helpers\TextNormalizer;
+use App\Models\Appointment;
+use App\Models\Conversation;
+use App\Models\Coupon;
+use App\Models\Message;
+use App\Models\Notification;
+use App\Models\Promoter;
+use App\Models\Wallet;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+#[UseFactory(\Database\Factories\UserFactory::class)]
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */

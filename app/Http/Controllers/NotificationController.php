@@ -8,7 +8,7 @@ use App\Http\Traits\ApiResponse;
 use App\Http\Services\NotificationService;
 use App\Models\Notification;
 use App\Models\Organization;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\ErrorResponse;
 use App\OpenApi\Responses\NoContentResponse;

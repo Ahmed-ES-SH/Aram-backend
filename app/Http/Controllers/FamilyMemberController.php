@@ -7,7 +7,7 @@ use App\Http\Requests\StoreFamilyMemberRequest;
 use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
 use App\Models\FamilyMember;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

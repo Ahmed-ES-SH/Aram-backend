@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Todo;
-use App\Models\User;
+use App\Modules\User\Models\User;
 
 class TodoSeeder extends Seeder
 {

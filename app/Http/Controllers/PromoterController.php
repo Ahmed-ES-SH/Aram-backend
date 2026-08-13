@@ -7,7 +7,7 @@ use App\Http\Requests\StorePromoterRequest;
 use App\Http\Traits\ApiResponse;
 use App\Models\Organization;
 use App\Models\Promoter;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\CreatedResponse;

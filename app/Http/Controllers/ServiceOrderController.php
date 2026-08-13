@@ -11,7 +11,7 @@ use App\Http\Traits\ApiResponse;
 use App\Http\Services\StoreServiceOrderService;
 use App\Models\Organization;
 use App\Models\ServiceOrder;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Exception;

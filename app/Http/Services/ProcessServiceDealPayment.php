@@ -10,7 +10,7 @@ use App\Models\ProvisionalData;
 use App\Models\ServiceOrder;
 use App\Models\ServicePage;
 use App\Models\Transaction;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 

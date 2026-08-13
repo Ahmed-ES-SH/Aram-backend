@@ -8,8 +8,8 @@
 
 ## User — [x] DONE
 - [x] UserController (`app/Modules/User`)
-- [x] FamilyMemberController
-- [x] MemberController (newsletter subscribers)
+- [x] FamilyMemberController (`app/Modules/FamilyMember`)
+- [x] MemberController (`app/Modules/Member`, newsletter subscribers)
 
 ## Article
 - [x] ArticleController
@@ -17,7 +17,7 @@
 - [x] ArticleCommentController
 - [x] ArticleInteractionsController
 - [x] TagController (`app/Modules/Article`)
-- [ ] KeywordController
+- [x] KeywordController (`app/Modules/Keyword`)
 
 ## Keyword — [x] DONE
 - [x] KeywordController (`app/Modules/Keyword`)
@@ -29,22 +29,24 @@
 - [x] OrganizationTermsConditionController (`app/Modules/Organization`)
 - [x] ReviewLikesCheckController (`app/Modules/Organization`)
 
-## Service — [x] services moved to `app/Modules/Service/Services`
-- [ ] ServicePageController
-- [ ] ServicePageContactMessageController
-- [ ] ServiceCategoryController
-- [ ] ServiceFormController
-- [ ] ServiceFormFieldController
-- [ ] ServiceFormSubmissionController
-- [ ] ServiceOrderController
-- [ ] ServiceTrackingController
-- [ ] AppointmentController
+## Service — [x] DONE
+- [x] ServicePageController (`app/Modules/Service/Controllers`)
+- [x] ServicePageContactMessageController (`app/Modules/Service/Controllers`)
+- [x] ServiceCategoryController (`app/Modules/Service/Controllers`)
+- [x] ServiceFormController (`app/Modules/Service/Controllers`)
+- [x] ServiceFormFieldController (`app/Modules/Service/Controllers`)
+- [x] ServiceFormSubmissionController (`app/Modules/Service/Controllers`)
+- [x] ServiceOrderController (`app/Modules/Service/Controllers`)
+- [x] ServiceTrackingController (`app/Modules/Service/Controllers`)
+- [x] AppointmentController (`app/Modules/Service/Controllers`)
+- [x] PendingServiceOrderFileController (`app/Modules/Service/Controllers`)
+- [x] ServiceTrackingFileController (`app/Modules/Service/Controllers`)
 
-## Card
-- [ ] CardController
-- [ ] CardCategoryController
-- [ ] OwnedCardController
-- [ ] CurrencyController
+## Card — [x] DONE
+- [x] CardController (`app/Modules/Card/Controllers`)
+- [x] CardCategoryController (`app/Modules/Card/Controllers`)
+- [x] OwnedCardController (`app/Modules/Card/Controllers`)
+- [x] CurrencyController (`app/Modules/Card/Controllers`)
 
 ## Wallet / Payment — [x] services moved to `app/Modules/Payment/Services`
 - [ ] WalletController
@@ -90,6 +92,6 @@
 - [ ] TempUploadController
 
 ---
-**Totals:** 59 controllers — 14 refactored `[x]`, 45 pending `[ ]`.
+**Totals:** 62 controllers — 31 refactored `[x]`, 31 pending `[ ]`.
 
-> Services: 22 of 26 moved to `app/Modules/*/Services`. Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`, `SMSService`.
+> Services: 22 of 26 moved to `app/Modules/*/Services` (`Service` 6, `Payment` 8, `Coupon` 5, `Promotion` 1, `Conversation` 2). Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`, `SMSService`.

@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Card\Controllers;
 
 use App\Helpers\TextNormalizer;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
-use App\Models\CardCategory;
+use App\Modules\Card\Models\CardCategory;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\EntityOkResponse;
 use App\OpenApi\Responses\ErrorResponse;

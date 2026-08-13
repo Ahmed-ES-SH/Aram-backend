@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\OwnedCard;
+use App\Modules\Card\Models\OwnedCard;
 use Illuminate\Console\Command;
 
 class ExpireCardsCommand extends Command

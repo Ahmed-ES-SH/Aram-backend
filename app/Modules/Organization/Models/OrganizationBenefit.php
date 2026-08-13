@@ -2,7 +2,7 @@
 
 namespace App\Modules\Organization\Models;
 
-use App\Models\Card;
+use App\Modules\Card\Models\Card;
 use Illuminate\Database\Eloquent\Model;
 
 class OrganizationBenefit extends Model

@@ -4,7 +4,7 @@ namespace App\Modules\Payment\Services;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Invoice;
-use App\Models\OwnedCard;
+use App\Modules\Card\Models\OwnedCard;
 use App\Models\PromoterRatio;
 use App\Models\PromotionActivity;
 use App\Models\ProvisionalData;

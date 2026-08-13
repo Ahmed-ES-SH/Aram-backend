@@ -2,7 +2,7 @@
 
 namespace App\Modules\Keyword\Models;
 
-use App\Models\Card;
+use App\Modules\Card\Models\Card;
 use Illuminate\Database\Eloquent\Model;
 
 class Keyword extends Model

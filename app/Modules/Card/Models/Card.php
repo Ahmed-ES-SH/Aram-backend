@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\Card\Models;
 
 use App\Modules\Keyword\Models\Keyword;
 use Illuminate\Database\Eloquent\Model;

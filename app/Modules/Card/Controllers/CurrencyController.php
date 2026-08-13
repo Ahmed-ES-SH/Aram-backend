@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Card\Controllers;
 
-use App\Http\Requests\StoreCurrencyRequest;
-use App\Http\Requests\UpdateCurrencyRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Card\Requests\StoreCurrencyRequest;
+use App\Modules\Card\Requests\UpdateCurrencyRequest;
 use App\Http\Traits\ApiResponse;
-use App\Models\Currency;
+use App\Modules\Card\Models\Currency;
 use Illuminate\Http\Request;
 
 use App\OpenApi\Responses\CreatedResponse;

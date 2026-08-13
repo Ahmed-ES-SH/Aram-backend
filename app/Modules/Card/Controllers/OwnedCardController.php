@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Card\Controllers;
 
+use App\Http\Controllers\Controller;
 use OpenApi\Attributes as OA;
 use App\Http\Traits\ApiResponse;
 use App\Modules\Organization\Models\Organization;
-use App\Models\OwnedCard;
+use App\Modules\Card\Models\OwnedCard;
 use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\Request;

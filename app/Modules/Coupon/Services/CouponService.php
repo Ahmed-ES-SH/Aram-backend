@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Coupon\Services;
 
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;

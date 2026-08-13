@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Payment\Services;
 
 use App\DTOs\PaymentDTO;
 use App\Http\Traits\ApiResponse;
+use App\Modules\Promotion\Services\PromotionService;
 use App\Models\PendingServiceOrderFile;
 use App\Models\ServiceOrder;
 use Illuminate\Http\Request;

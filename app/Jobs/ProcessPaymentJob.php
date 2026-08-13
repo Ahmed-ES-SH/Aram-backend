@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
-use App\Http\Services\ProcessBookPaymentService;
-use App\Http\Services\ProcessCardsPaymentService;
-use App\Http\Services\ProcessServicePayment;
+use App\Modules\Payment\Services\ProcessBookPaymentService;
+use App\Modules\Payment\Services\ProcessCardsPaymentService;
+use App\Modules\Payment\Services\ProcessServicePayment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

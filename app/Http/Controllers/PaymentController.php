@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use OpenApi\Attributes as OA;
 use App\Models\Invoice;
-use App\Http\Services\PaymentService;
-use App\Http\Services\ProcessBookPaymentService;
-use App\Http\Services\ProcessCardsPaymentService;
-use App\Http\Services\ProcessServiceDealPayment;
-use App\Http\Services\ProcessServicePayment;
+use App\Modules\Payment\Services\PaymentService;
+use App\Modules\Payment\Services\ProcessBookPaymentService;
+use App\Modules\Payment\Services\ProcessCardsPaymentService;
+use App\Modules\Payment\Services\ProcessServiceDealPayment;
+use App\Modules\Payment\Services\ProcessServicePayment;
 use App\Http\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;

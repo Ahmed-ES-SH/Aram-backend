@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreServicePageRequest;
 use App\Http\Requests\UpdateServicePageRequest;
 use App\Http\Resources\ServicePageResource;
-use App\Http\Services\ServicePageService;
+use App\Modules\Service\Services\ServicePageService;
 use App\Http\Traits\ApiResponse;
 use App\Models\ServicePage;
 use App\Models\ServiceForm;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Service\Services;
 
 use App\Models\ServiceOrder;
 use App\Events\SubscriptionExpired;

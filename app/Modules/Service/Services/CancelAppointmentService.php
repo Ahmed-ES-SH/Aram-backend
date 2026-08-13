@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Service\Services;
 
 use App\Http\Services\NotificationService;
 use App\Models\Appointment;

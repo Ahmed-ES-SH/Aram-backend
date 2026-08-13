@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Coupon\Services;
 
 use App\Models\Card;
 use App\Models\Coupon;

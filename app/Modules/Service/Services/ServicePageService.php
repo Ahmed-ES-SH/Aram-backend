@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Service\Services;
 
+use App\Http\Services\ImageService;
 use App\Models\ServicePage;
 use App\Models\ServicePageHeroSection;
 use App\Models\ServicePageProblemSection;

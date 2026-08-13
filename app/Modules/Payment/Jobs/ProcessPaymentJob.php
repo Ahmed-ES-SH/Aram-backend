@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Modules\Payment\Jobs;
 
 use App\Modules\Payment\Services\ProcessBookPaymentService;
 use App\Modules\Payment\Services\ProcessCardsPaymentService;

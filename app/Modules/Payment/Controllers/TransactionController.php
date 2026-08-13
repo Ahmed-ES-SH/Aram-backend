@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Payment\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
-use App\Models\Transaction;
+use App\Modules\Payment\Models\Transaction;
 use Illuminate\Http\Request;
 
 use App\OpenApi\Responses\PaginatedOkResponse;

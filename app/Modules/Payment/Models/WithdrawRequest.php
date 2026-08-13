@@ -1,24 +1,18 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\Payment\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class WithdrawRequest extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'account_type',
-        'type',
-        'direction',
         'amount',
         'status',
-        'source_type',
-        'source_id',
+        'bank_number',
         'note',
         'meta',
     ];
@@ -30,5 +24,15 @@ class Transaction extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+
+
+
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class, function ($q) {
+            $q->where('type', 'withdrawal');
+        }, 'id', 'source_id')->where('source_type', 'withdraw_requests');
     }
 }

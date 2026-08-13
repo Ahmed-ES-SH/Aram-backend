@@ -2,7 +2,7 @@
 
 namespace App\Modules\Promotion\Services;
 
-use App\DTOs\PaymentDTO;
+use App\Modules\Payment\DTOs\PaymentDTO;
 use App\Models\Promoter;
 use App\Models\PromotionActivity;
 use App\Models\ProvisionalData;

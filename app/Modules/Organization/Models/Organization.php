@@ -11,7 +11,7 @@ use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Offer;
 use App\Models\SubCategory;
-use App\Models\Wallet;
+use App\Modules\Payment\Models\Wallet;
 use App\Modules\Keyword\Models\Keyword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

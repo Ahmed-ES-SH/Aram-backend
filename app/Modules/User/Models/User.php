@@ -11,7 +11,7 @@ use App\Models\Coupon;
 use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Promoter;
-use App\Models\Wallet;
+use App\Modules\Payment\Models\Wallet;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;

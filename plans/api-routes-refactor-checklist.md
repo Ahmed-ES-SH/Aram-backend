@@ -22,12 +22,12 @@
 ## Keyword — [x] DONE
 - [x] KeywordController (`app/Modules/Keyword`)
 
-## Organization
-- [ ] OrganizationController
-- [ ] OrganizationReviewController
-- [ ] OrganizationPrivacyPolicyController
-- [ ] OrganizationTermsConditionController
-- [ ] ReviewLikesCheckController
+## Organization — [x] DONE
+- [x] OrganizationController (`app/Modules/Organization`)
+- [x] OrganizationReviewController (`app/Modules/Organization`)
+- [x] OrganizationPrivacyPolicyController (`app/Modules/Organization`)
+- [x] OrganizationTermsConditionController (`app/Modules/Organization`)
+- [x] ReviewLikesCheckController (`app/Modules/Organization`)
 
 ## Service
 - [ ] ServicePageController
@@ -90,4 +90,4 @@
 - [ ] TempUploadController
 
 ---
-**Totals:** 59 controllers — 9 refactored `[x]`, 50 pending `[ ]`.
+**Totals:** 59 controllers — 14 refactored `[x]`, 45 pending `[ ]`.

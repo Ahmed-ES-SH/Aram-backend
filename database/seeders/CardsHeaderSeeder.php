@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\VariableData;
+use App\Modules\Content\Models\VariableData;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

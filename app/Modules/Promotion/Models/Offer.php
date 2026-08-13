@@ -2,7 +2,7 @@
 
 namespace App\Modules\Promotion\Models;
 
-use App\Models\Category;
+use App\Modules\Content\Models\Category;
 use App\Modules\Organization\Models\Organization;
 use Illuminate\Database\Eloquent\Model;
 

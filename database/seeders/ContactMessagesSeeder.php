@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\ContactMessage;
+use App\Modules\Content\Models\ContactMessage;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
 use Illuminate\Support\Facades\DB;

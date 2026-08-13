@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\FooterLink;
-use App\Models\FooterList;
+use App\Modules\Content\Models\FooterLink;
+use App\Modules\Content\Models\FooterList;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

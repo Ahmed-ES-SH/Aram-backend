@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\QuestionAnswer;
+use App\Modules\Content\Models\QuestionAnswer;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

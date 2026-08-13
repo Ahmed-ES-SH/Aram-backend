@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\TermsCondition;
+use App\Modules\Content\Models\TermsCondition;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

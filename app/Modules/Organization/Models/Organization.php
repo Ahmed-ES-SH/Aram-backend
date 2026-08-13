@@ -4,13 +4,13 @@ namespace App\Modules\Organization\Models;
 
 use App\Helpers\TextNormalizer;
 use App\Modules\Service\Models\Appointment;
-use App\Models\Category;
+use App\Modules\Content\Models\Category;
 use App\Modules\Conversation\Models\Conversation;
 use App\Modules\Coupon\Models\Coupon;
 use App\Modules\Conversation\Models\Message;
 use App\Modules\Conversation\Models\Notification;
 use App\Modules\Promotion\Models\Offer;
-use App\Models\SubCategory;
+use App\Modules\Content\Models\SubCategory;
 use App\Modules\Payment\Models\Wallet;
 use App\Modules\Keyword\Models\Keyword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

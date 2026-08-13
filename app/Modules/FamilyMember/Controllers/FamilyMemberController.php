@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\FamilyMember\Controllers;
 
 use OpenApi\Attributes as OA;
-use App\Http\Requests\StoreFamilyMemberRequest;
+use App\Http\Controllers\Controller;
 use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
-use App\Models\FamilyMember;
+use App\Modules\FamilyMember\Models\FamilyMember;
+use App\Modules\FamilyMember\Requests\StoreFamilyMemberRequest;
 use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -110,7 +111,7 @@ class FamilyMemberController extends Controller
      *
      * Validation is handled by StoreFamilyMemberRequest.
      *
-     * @param  \App\Http\Requests\StoreFamilyMemberRequest  $request
+     * @param  \App\Modules\FamilyMember\Requests\StoreFamilyMemberRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     #[OA\Post(

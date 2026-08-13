@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Member\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
-use App\Models\Member;
+use App\Modules\Member\Models\Member;
 use Illuminate\Http\Request;
 
 use App\OpenApi\Responses\OkResponse;

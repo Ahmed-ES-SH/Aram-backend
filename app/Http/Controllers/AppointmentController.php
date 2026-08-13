@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use OpenApi\Attributes as OA;
-use App\Http\Services\AppointmentResponseService;
-use App\Http\Services\AppointmentService;
-use App\Http\Services\CancelAppointmentService;
+use App\Modules\Service\Services\AppointmentResponseService;
+use App\Modules\Service\Services\AppointmentService;
+use App\Modules\Service\Services\CancelAppointmentService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Appointment;
 use App\Modules\Organization\Models\Organization;

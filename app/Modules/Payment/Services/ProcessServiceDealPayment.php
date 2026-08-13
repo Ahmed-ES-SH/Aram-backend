@@ -1,25 +1,21 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Payment\Services;
 
-use App\DTOs\PaymentDTO;
+use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Invoice;
-use App\Models\PendingServiceOrderFile;
 use App\Models\PromoterRatio;
 use App\Models\PromotionActivity;
 use App\Models\ProvisionalData;
 use App\Models\ServiceOrder;
 use App\Models\ServicePage;
-use App\Models\ServiceTracking;
-use App\Models\ServiceTrackingFile;
 use App\Models\Transaction;
 use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\DB;
-use Exception;
-use Illuminate\Support\Facades\Log;
+use Throwable;
 
-class ProcessServicePayment
+class ProcessServiceDealPayment
 {
     use ApiResponse;
     protected $notificationService;
@@ -29,7 +25,8 @@ class ProcessServicePayment
         $this->notificationService = $notificationService;
     }
 
-    public function processServicePayment($data)
+
+    public function processServiceDealPayment($data)
     {
         try {
             $user = $data->user();
@@ -37,97 +34,55 @@ class ProcessServicePayment
             $sender = null;
 
             DB::transaction(function () use ($data, $user, &$notificationData, &$sender) {
-
-                // 1. Lock invoice first
-                $invoice = Invoice::where('invoice_number', $data['invoice_number'])
-                    ->lockForUpdate()
-                    ->firstOrFail();
-
-                // 2. If already paid → exit
-                if ($invoice->status === 'paid') {
-                    throw new Exception("This Invoice is already finished.");
-                }
-
-                // 3. Validate provisional data
                 $provisionalData = ProvisionalData::where('uniqueId', $data['provisionalData_id'])
                     ->firstOrFail();
 
+
                 $decodedMetadata = json_decode($provisionalData['metadata'], true);
-                $service_id = $decodedMetadata['items']['service_id'];
+                $service_id = $decodedMetadata['items']['id'];
                 $activityId = $decodedMetadata['activity_id'] ?? null;
+
 
                 $service = ServicePage::where('id', $service_id)->firstOrFail();
                 $order = ServiceOrder::where('id', $provisionalData->service_order_id)->firstOrFail();
+                $invoice = Invoice::where('invoice_number', $data['invoice_number'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
                 $activity = $activityId
                     ? PromotionActivity::where('id', $activityId)->firstOrFail()
                     : null;
 
+
                 $ratios = PromoterRatio::find(1);
-
-                // 4. Update invoice → paid
-                $invoice->update([
-                    'status' => 'paid',
-                    'payment_date' => now(),
-                ]);
-
-                // 5. Create service tracking
-                $serviceTracking = ServiceTracking::create([
-                    'service_id' => $service_id,
-                    'user_id' => $user->id,
-                    'user_type' => $user->account_type,
-                    'service_order_id' => $order->id,
-                    'invoice_id' => $invoice->id,
-                    'status' => ServiceTracking::STATUS_PENDING,
-                    'current_phase' => ServiceTracking::PHASE_INITIATION,
-                    'metadata' => ['initial_setup' => true],
-                ]);
-
-                // 6. Attach files
-                $pendingOrderFiles = PendingServiceOrderFile::where('service_order_id', $order->id)->get();
-
-                foreach ($pendingOrderFiles as $file) {
-                    $isImage = in_array($file->mime_type, ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']);
-                    ServiceTrackingFile::create([
-                        'service_tracking_id' => $serviceTracking->id,
-                        'file_type' => $isImage ? 'design_file' : 'attachment',
-                        'path' => $file->file_path,
-                        'original_name' => $file->original_name,
-                        'mime_type' => $file->mime_type,
-                        'size' => $file->size,
-                        'uploaded_by' => $user->id,
-                        'uploaded_by_type' => $user->account_type,
-                    ]);
-                    $file->delete();
-                }
-
-                // 7. Update order
                 $order->update([
                     'payment_status' => 'paid',
+                    'deal_status' => 'approved',
+                    'invoice_id' => $invoice->id,
                     'subscription_status' => $service->type === 'one_time' ? null : 'active',
                     'subscription_start_time' => now(),
                     'subscription_end_time' => $service->type === 'one_time' ? null : now()->addDays(30),
                 ]);
 
-
-                //8. orders count 
-
                 $service->update([
                     'orders_count' => $service->orders_count + 1,
                 ]);
 
-                // 10. Create transaction
+                $invoice->update([
+                    'status' => 'paid',
+                    'payment_date' => now(),
+                ]);
+
 
                 Transaction::create([
                     "user_id" => $user->id,
                     "account_type" => $user->account_type,
                     "type" => "purchase",
                     "direction" => "out",
-                    "amount" => $service->price,
+                    "amount" => $order->price_after_deal,
                     "status" => "completed",
                 ]);
 
-                // 11. Update activity
                 if ($activity) {
                     $ip = $decodedMetadata['ip_address'] ?? ($data ? $data->ip() : null);
                     $device = $decodedMetadata['device_type'] ?? ($data ? $data->header('User-Agent') : null);
@@ -142,7 +97,7 @@ class ProcessServicePayment
                     ]);
                 }
 
-                // 12. Delete provisional data
+
                 $provisionalData->delete();
 
                 // Prepare notification data for afterCommit
@@ -154,7 +109,7 @@ class ProcessServicePayment
                 $notificationData = [
                     'user_ids' => $allAdminIds,
                     'sender_type' => 'user',
-                    'content' => "تم ارسال طلب خدمة جديدة حيث تم طلب الخدمه : " . $service->slug,
+                    'content' => "تم اتمام عملية الدفع الخاصة بالطلب ذو الرقم " . $invoice->invoice_number . "والذى يتعلق بالخدمه" . $service->slug,
                 ];
 
 
@@ -162,11 +117,9 @@ class ProcessServicePayment
             });
 
 
-
-
-            return $this->successResponse("Service Payment Processed Successfully.");
-        } catch (Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
+            return $this->successResponse("Service Deal Payment Processed Successfully.");
+        } catch (Throwable $th) {
+            return $this->errorResponse($th->getMessage(), 500);
         }
     }
 }

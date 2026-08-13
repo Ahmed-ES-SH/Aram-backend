@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Payment\Services;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Invoice;

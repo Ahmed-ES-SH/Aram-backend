@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCouponRequest;
 use App\Http\Requests\UpdateCouponRequest;
-use App\Http\Services\CouponAuthorizationService;
-use App\Http\Services\CouponFetchService;
-use App\Http\Services\CouponService;
-use App\Http\Services\CouponUsageService;
-use App\Http\Services\CouponValidationService;
+use App\Modules\Coupon\Services\CouponAuthorizationService;
+use App\Modules\Coupon\Services\CouponFetchService;
+use App\Modules\Coupon\Services\CouponService;
+use App\Modules\Coupon\Services\CouponUsageService;
+use App\Modules\Coupon\Services\CouponValidationService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Coupon;
 use App\Models\CouponOrganization;

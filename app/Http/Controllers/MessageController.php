@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use OpenApi\Attributes as OA;
 use App\Http\Requests\StoreMessageRequest;
-use App\Http\Services\ChatService;
+use App\Modules\Conversation\Services\ChatService;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Conversation;

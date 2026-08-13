@@ -7,7 +7,7 @@ use App\Http\Requests\Conversation\BlockUserRequest;
 use App\Http\Requests\Conversation\GetConversationRequest;
 use App\Http\Requests\Conversation\SetActiveConversationRequest;
 use App\Http\Requests\Conversation\StoreConversationRequest;
-use App\Http\Services\ConversationService;
+use App\Modules\Conversation\Services\ConversationService;
 use App\Http\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

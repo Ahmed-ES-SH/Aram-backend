@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Payment\Services;
 
 use App\DTOs\PaymentDTO;
 use App\Models\Invoice;

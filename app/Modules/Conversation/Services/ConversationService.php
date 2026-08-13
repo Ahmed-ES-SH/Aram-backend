@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Conversation\Services;
 
 use App\Models\Conversation;
 use App\Models\ConversationBlock;

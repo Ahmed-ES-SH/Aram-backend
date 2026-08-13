@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Modules\Payment\Services;
 
+use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Invoice;

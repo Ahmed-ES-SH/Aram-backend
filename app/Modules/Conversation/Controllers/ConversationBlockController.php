@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Conversation\Controllers;
 
-use App\Models\ConversationBlock;
+use App\Http\Controllers\Controller;
+use App\Modules\Conversation\Models\ConversationBlock;
 use Illuminate\Http\Request;
 
 class ConversationBlockController extends Controller

@@ -5,7 +5,7 @@ namespace App\Modules\Auth\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Modules\Auth\Mail\SendOTPCode;
-use App\Models\Notification;
+use App\Modules\Conversation\Models\Notification;
 use App\Modules\Organization\Models\Organization;
 use App\Modules\Promotion\Models\PromotionActivity;
 use App\Modules\User\Models\User;

@@ -6,7 +6,7 @@ use App\Http\Services\NotificationService;
 use App\Modules\Service\Models\Appointment;
 use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
-use App\Http\Requests\SendNotificationRequest;
+use App\Modules\Conversation\Requests\SendNotificationRequest;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;

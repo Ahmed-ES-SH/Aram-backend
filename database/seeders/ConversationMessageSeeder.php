@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Message;
+use App\Modules\Conversation\Models\Message;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

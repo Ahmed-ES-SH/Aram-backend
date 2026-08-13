@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Conversation\Controllers;
 
 use OpenApi\Attributes as OA;
-use App\Http\Requests\SendNotificationRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Conversation\Requests\SendNotificationRequest;
 use App\Http\Traits\ApiResponse;
 use App\Http\Services\NotificationService;
-use App\Models\Notification;
+use App\Modules\Conversation\Models\Notification;
 use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Illuminate\Http\Request;

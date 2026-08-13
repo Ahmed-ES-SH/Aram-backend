@@ -3,8 +3,8 @@
 namespace App\Modules\Conversation\Services;
 
 use App\Http\Services\ImageService;
-use App\Models\Conversation;
-use App\Models\Message;
+use App\Modules\Conversation\Models\Conversation;
+use App\Modules\Conversation\Models\Message;
 use Illuminate\Support\Arr;
 use Pusher\Pusher;
 use Illuminate\Support\Facades\Cache;

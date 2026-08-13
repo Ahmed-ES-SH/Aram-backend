@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Conversation\Controllers;
 
 use OpenApi\Attributes as OA;
-use App\Http\Requests\StoreMessageRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Conversation\Requests\StoreMessageRequest;
 use App\Modules\Conversation\Services\ChatService;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
-use App\Models\Conversation;
-use App\Models\Message;
+use App\Modules\Conversation\Models\Conversation;
+use App\Modules\Conversation\Models\Message;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\ErrorResponse;

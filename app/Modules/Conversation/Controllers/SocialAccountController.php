@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Conversation\Controllers;
 
-use App\Http\Requests\UpdateSocialAccountsRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Conversation\Requests\UpdateSocialAccountsRequest;
 use App\Http\Traits\ApiResponse;
-use App\Models\SocialAccount;
+use App\Modules\Conversation\Models\SocialAccount;
 use Illuminate\Http\Request;
 
 use App\OpenApi\Responses\OkResponse;

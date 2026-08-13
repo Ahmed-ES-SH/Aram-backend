@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Conversation\Controllers;
 
 use OpenApi\Attributes as OA;
-use App\Http\Requests\Conversation\BlockUserRequest;
-use App\Http\Requests\Conversation\GetConversationRequest;
-use App\Http\Requests\Conversation\SetActiveConversationRequest;
-use App\Http\Requests\Conversation\StoreConversationRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Conversation\Requests\BlockUserRequest;
+use App\Modules\Conversation\Requests\GetConversationRequest;
+use App\Modules\Conversation\Requests\SetActiveConversationRequest;
+use App\Modules\Conversation\Requests\StoreConversationRequest;
 use App\Modules\Conversation\Services\ConversationService;
 use App\Http\Traits\ApiResponse;
 use Illuminate\Http\Request;

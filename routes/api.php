@@ -7,7 +7,7 @@ use App\Http\Controllers\ArticleCategoryController;
 use App\Http\Controllers\ArticleCommentController; 
 use App\Http\Controllers\ArticleController; 
 use App\Http\Controllers\ArticleInteractionsController; 
-use App\Http\Controllers\AuthController; 
+use App\Modules\Auth\Controllers\AuthController; 
 use App\Http\Controllers\CardCategoryController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CategoryController; 

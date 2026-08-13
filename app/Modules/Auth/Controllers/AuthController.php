@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Auth\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
-use App\Mail\SendOTPCode;
+use App\Modules\Auth\Mail\SendOTPCode;
 use App\Models\Notification;
 use App\Models\Organization;
 use App\Models\PromotionActivity;

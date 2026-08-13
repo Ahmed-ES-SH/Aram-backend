@@ -16,8 +16,11 @@
 - [x] ArticleCategoryController
 - [x] ArticleCommentController
 - [x] ArticleInteractionsController
-- [ ] TagController
+- [x] TagController (`app/Modules/Article`)
 - [ ] KeywordController
+
+## Keyword — [x] DONE
+- [x] KeywordController (`app/Modules/Keyword`)
 
 ## Organization
 - [ ] OrganizationController
@@ -87,4 +90,4 @@
 - [ ] TempUploadController
 
 ---
-**Totals:** 59 controllers — 7 refactored `[x]`, 52 pending `[ ]`.
+**Totals:** 59 controllers — 9 refactored `[x]`, 50 pending `[ ]`.

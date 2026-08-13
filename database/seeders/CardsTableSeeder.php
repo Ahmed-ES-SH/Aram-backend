@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Card;
 use App\Models\CardBenefit;
-use App\Models\Keyword;
 use App\Models\Service;
+use App\Modules\Keyword\Models\Keyword;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

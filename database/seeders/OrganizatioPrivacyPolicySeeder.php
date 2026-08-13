@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\OrganizationPrivacyPolicy;
+use App\Modules\Organization\Models\OrganizationPrivacyPolicy;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

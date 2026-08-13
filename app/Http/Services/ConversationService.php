@@ -5,7 +5,7 @@ namespace App\Http\Services;
 use App\Models\Conversation;
 use App\Models\ConversationBlock;
 use App\Models\Message;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\Cache;
 

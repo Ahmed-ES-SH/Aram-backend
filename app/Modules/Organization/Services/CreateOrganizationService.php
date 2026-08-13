@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Services\OrganizationServices;
+namespace App\Modules\Organization\Services;
 
 use App\Http\Traits\ApiResponse;
 use App\Mail\VerifyEmail;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\Promoter;
 use App\Models\PromotionActivity;
 use App\Models\Referral;

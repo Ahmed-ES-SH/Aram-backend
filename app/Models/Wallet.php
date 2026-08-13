@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 

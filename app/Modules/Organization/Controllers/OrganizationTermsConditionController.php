@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Organization\Controllers;
+use App\Http\Controllers\Controller;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\OrganizationTermsCondition;
+use App\Modules\Organization\Models\OrganizationTermsCondition;
 use Illuminate\Http\Request;
 
 use App\OpenApi\Responses\ListOkResponse;

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\Category;
 
 class RealOrganizationdSeeder extends Seeder

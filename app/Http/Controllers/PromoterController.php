@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use OpenApi\Attributes as OA;
 use App\Http\Requests\StorePromoterRequest;
 use App\Http\Traits\ApiResponse;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\Promoter;
 use App\Modules\User\Models\User;
 use Exception;

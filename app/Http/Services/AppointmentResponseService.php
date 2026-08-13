@@ -4,7 +4,7 @@ namespace App\Http\Services;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Appointment;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

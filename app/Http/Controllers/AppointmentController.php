@@ -8,7 +8,7 @@ use App\Http\Services\AppointmentService;
 use App\Http\Services\CancelAppointmentService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Appointment;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Carbon\Carbon;
 use Exception;

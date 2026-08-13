@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\OrganizationReview;
+use App\Modules\Organization\Models\OrganizationReview;
 use App\Modules\User\Models\User;
-use App\Models\Organization; // لو عندك موديل المنظمات
+use App\Modules\Organization\Models\Organization; // لو عندك موديل المنظمات
 use Faker\Factory as Faker;
 
 class OrganizationReviewSeeder extends Seeder

@@ -3,7 +3,7 @@
 namespace App\Http\Services;
 
 use App\Models\Appointment;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use App\Http\Requests\SendNotificationRequest;
 use Carbon\Carbon;

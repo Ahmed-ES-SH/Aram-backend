@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Modules\Organization\Models\Organization;
 use Illuminate\Database\Eloquent\Model;
 
 class SubCategory extends Model

@@ -72,7 +72,7 @@ return [
 
         'organizations' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Organization::class,
+            'model' => App\Modules\Organization\Models\Organization::class,
         ],
 
         // 'users' => [

@@ -8,8 +8,21 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
 use App\Models\CardCategory;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\RefOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class CardCategoryController extends Controller
 {
@@ -22,9 +35,16 @@ class CardCategoryController extends Controller
         $this->imageservice = $imageService;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    #[OA\Get(
+        path: '/card-categories',
+        summary: 'List all card categories (paginated)',
+        tags: ['Card Categories'],
+        responses: [
+            new PaginatedOkResponse('CardCategory'),
+            new NotFoundResponse('No card categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function index()
     {
         try {
@@ -39,6 +59,25 @@ class CardCategoryController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/card-categories-by-state',
+        summary: 'List card categories by activity state (paginated)',
+        tags: ['Card Categories'],
+        parameters: [
+            new OA\Parameter(
+                name: 'state',
+                in: 'query',
+                required: true,
+                schema: new OA\Schema(type: 'boolean'),
+                example: true,
+            ),
+        ],
+        responses: [
+            new PaginatedOkResponse('CardCategory'),
+            new NotFoundResponse('No card categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function activeCategories(Request $request)
     {
         try {
@@ -63,6 +102,26 @@ class CardCategoryController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/card-categories/search',
+        summary: 'Search card categories by title (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Card Categories'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['query'],
+                properties: [
+                    new OA\Property(property: 'query', type: 'string', example: 'عضوية'),
+                ],
+            ),
+        ),
+        responses: [
+            new PaginatedOkResponse('CardCategory'),
+            new UnprocessableResponse('Search query is required'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function search(Request $request)
     {
         try {
@@ -93,6 +152,16 @@ class CardCategoryController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/public-card-categories',
+        summary: 'List public card categories (limit 12)',
+        tags: ['Card Categories'],
+        responses: [
+            new ListOkResponse('CardCategory'),
+            new NotFoundResponse('No card categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function publicCategories()
     {
         try {
@@ -108,6 +177,16 @@ class CardCategoryController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/all-card-categories',
+        summary: 'List all card categories',
+        tags: ['Card Categories'],
+        responses: [
+            new ListOkResponse('CardCategory'),
+            new NotFoundResponse('No card categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function AllCategories()
     {
         try {
@@ -122,6 +201,16 @@ class CardCategoryController extends Controller
     }
 
     
+    #[OA\Get(
+        path: '/all-card-public-categories',
+        summary: 'List all card categories (public)',
+        tags: ['Card Categories'],
+        responses: [
+            new ListOkResponse('CardCategory'),
+            new NotFoundResponse('No card categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function AllPublicCategories()
     {
         try {
@@ -135,9 +224,23 @@ class CardCategoryController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[OA\Post(
+        path: '/add-card-category',
+        summary: 'Create a new card category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Card Categories'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/CategoryStoreRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('CardCategory', 'Created'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreCategoryRequest $request)
     {
         try {
@@ -153,9 +256,20 @@ class CardCategoryController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[OA\Get(
+        path: '/card-category/{id}',
+        summary: 'Show a single card category with its cards (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Card Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('CardCategory'),
+            new NotFoundResponse('Card category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
 
@@ -167,9 +281,27 @@ class CardCategoryController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    #[OA\Post(
+        path: '/update-card-category/{id}',
+        summary: 'Update a card category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Card Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/CategoryUpdateRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('CardCategory'),
+            new NotFoundResponse('Card category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function update($id, UpdateCategoryRequest $request)
     {
         try {
@@ -190,6 +322,29 @@ class CardCategoryController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/update-card-category-state/{id}',
+        summary: 'Toggle card category activity state (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Card Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['is_active'],
+                properties: [
+                    new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                ],
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('CardCategory'),
+            new NotFoundResponse('Card category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function updateState($id, Request $request)
     {
         try {
@@ -218,6 +373,21 @@ class CardCategoryController extends Controller
      */
 
 
+    #[OA\Delete(
+        path: '/delete-card-category/{id}',
+        summary: 'Delete a card category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Card Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Card category deleted'),
+            new NotFoundResponse('Card category not found'),
+            new ErrorResponse(400, 'Category linked to cards'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

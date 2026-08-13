@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Traits\ApiResponse;
 use App\Models\Organization;
 use App\Models\ServiceForm;
@@ -16,6 +17,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class ServiceFormSubmissionController extends Controller
 {
@@ -35,6 +45,31 @@ class ServiceFormSubmissionController extends Controller
     /**
      * Submit a service form (User)
      */
+    #[OA\Post(
+        path: '/submit-service-form/{serviceForm}',
+        summary: 'Submit a service form (fields are validated against the form schema)',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'serviceForm', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['fields'],
+                properties: [
+                    new OA\Property(property: 'fields', type: 'object', description: 'Dynamic keys per form field (field_key => value; files for file_upload/image_upload types)'),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Form submitted successfully'),
+            new ErrorResponse(400, 'This form is not available'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function submit(Request $request, ServiceForm $serviceForm): JsonResponse
     {
         try {
@@ -121,6 +156,21 @@ class ServiceFormSubmissionController extends Controller
     /**
      * Get user's form submissions (User)
      */
+    #[OA\Get(
+        path: '/my-form-submissions',
+        summary: 'List the authenticated account form submissions (paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Filter by submission status'),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Items per page (default 10)'),
+        ],
+        responses: [
+            new PaginatedOkResponse('ServiceFormSubmission'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function mySubmissions(Request $request): JsonResponse
     {
         try {
@@ -147,6 +197,22 @@ class ServiceFormSubmissionController extends Controller
     /**
      * Get single submission details (User)
      */
+    #[OA\Get(
+        path: '/my-form-submission/{submission}',
+        summary: 'Show one of the authenticated account form submissions',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'submission', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Submission with detailed values'),
+            new ForbiddenResponse(),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function mySubmissionShow(ServiceFormSubmission $submission, Request $request): JsonResponse
     {
         try {
@@ -174,6 +240,25 @@ class ServiceFormSubmissionController extends Controller
     /**
      * List all form submissions (Admin)
      */
+    #[OA\Get(
+        path: '/service-form-submissions',
+        summary: 'List all form submissions with filters (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'service_form_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'user_type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+            new OA\Parameter(name: 'from_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'to_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Items per page (default 15)'),
+        ],
+        responses: [
+            new PaginatedOkResponse('ServiceFormSubmission'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request): JsonResponse
     {
         try {
@@ -217,6 +302,20 @@ class ServiceFormSubmissionController extends Controller
     /**
      * Get single submission details (Admin)
      */
+    #[OA\Get(
+        path: '/service-form-submission/{submission}',
+        summary: 'Show a form submission with values and owner (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'submission', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Submission with values and owner'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show(ServiceFormSubmission $submission, Request $request): JsonResponse
     {
         try {
@@ -243,6 +342,30 @@ class ServiceFormSubmissionController extends Controller
     /**
      * Update submission status (Admin)
      */
+    #[OA\Post(
+        path: '/service-form-submission/{submission}/status',
+        summary: 'Update a form submission status (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'submission', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['status'],
+                properties: [
+                    new OA\Property(property: 'status', type: 'string', enum: ['pending', 'reviewed', 'approved', 'rejected']),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Status updated successfully'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateStatus(Request $request, ServiceFormSubmission $submission): JsonResponse
     {
         try {
@@ -265,6 +388,20 @@ class ServiceFormSubmissionController extends Controller
     /**
      * Delete a submission (Admin)
      */
+    #[OA\Delete(
+        path: '/delete-service-form-submission/{submission}',
+        summary: 'Delete a form submission and its files (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'submission', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Submission deleted successfully'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(ServiceFormSubmission $submission): JsonResponse
     {
         try {
@@ -288,6 +425,22 @@ class ServiceFormSubmissionController extends Controller
     /**
      * Get submission statistics (Admin)
      */
+    #[OA\Get(
+        path: '/service-form-submission-statistics',
+        summary: 'Get form submission statistics (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Forms'],
+        parameters: [
+            new OA\Parameter(name: 'service_form_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'from_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'to_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+        ],
+        responses: [
+            new OkResponse('Submission statistics'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function statistics(Request $request): JsonResponse
     {
         try {

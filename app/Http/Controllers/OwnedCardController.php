@@ -2,17 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Traits\ApiResponse;
 use App\Models\Organization;
 use App\Models\OwnedCard;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use App\OpenApi\Responses\NoContentResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class OwnedCardController extends Controller
 {
     use ApiResponse;
 
+    #[OA\Get(
+        path: '/cards-account',
+        summary: 'Get owned cards for a user or organization (paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Cards'],
+        parameters: [
+            new OA\Parameter(name: 'owner_id', in: 'query', required: true, schema: new OA\Schema(type: 'integer'), description: 'Owner account id'),
+            new OA\Parameter(name: 'owner_type', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['user', 'organization']), description: 'Owner account type'),
+        ],
+        responses: [
+            new OkResponse('Owned cards with owner info'),
+            new NoContentResponse(),
+            new NotFoundResponse(),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getAccountCards(Request $request)
     {
         try {

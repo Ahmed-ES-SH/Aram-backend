@@ -9,6 +9,15 @@ use App\Models\Newsletter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class NewsletterController extends Controller
 {
 
@@ -20,12 +29,52 @@ class NewsletterController extends Controller
         $this->imageservice = $imageservice;
     }
 
+    #[OA\Get(
+        path: '/newsletters',
+        summary: 'List all newsletters',
+        tags: ['Newsletters'],
+        responses: [
+            new ListOkResponse('Newsletter'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index()
     {
         $newsletters = Newsletter::latest()->get();
         return $this->successResponse($newsletters, 200);
     }
 
+    #[OA\Post(
+        path: '/newsletters',
+        summary: 'Create a new newsletter (multipart)',
+        tags: ['Newsletters'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'subject', type: 'string', maxLength: 255),
+                        new OA\Property(property: 'content', type: 'string'),
+                        new OA\Property(property: 'section_1_title', type: 'string'),
+                        new OA\Property(property: 'section_1_description', type: 'string'),
+                        new OA\Property(property: 'section_1_image', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'section_2_title', type: 'string'),
+                        new OA\Property(property: 'section_2_description', type: 'string'),
+                        new OA\Property(property: 'section_2_image', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'section_3_title', type: 'string'),
+                        new OA\Property(property: 'section_3_description', type: 'string'),
+                        new OA\Property(property: 'section_3_image', type: 'string', format: 'binary'),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Newsletter created'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -55,12 +104,58 @@ class NewsletterController extends Controller
         return $this->successResponse($newsletter, 201);
     }
 
+    #[OA\Get(
+        path: '/newsletters/{id}',
+        summary: 'Show a single newsletter',
+        tags: ['Newsletters'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('Newsletter'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
         $newsletter = Newsletter::findOrFail($id);
         return $this->successResponse($newsletter, 200);
     }
 
+    #[OA\Put(
+        path: '/newsletters/{id}',
+        summary: 'Update a newsletter (multipart)',
+        tags: ['Newsletters'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'subject', type: 'string', maxLength: 255),
+                        new OA\Property(property: 'content', type: 'string'),
+                        new OA\Property(property: 'section_1_title', type: 'string'),
+                        new OA\Property(property: 'section_1_description', type: 'string'),
+                        new OA\Property(property: 'section_1_image', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'section_2_title', type: 'string'),
+                        new OA\Property(property: 'section_2_description', type: 'string'),
+                        new OA\Property(property: 'section_2_image', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'section_3_title', type: 'string'),
+                        new OA\Property(property: 'section_3_description', type: 'string'),
+                        new OA\Property(property: 'section_3_image', type: 'string', format: 'binary'),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('Newsletter'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(Request $request, $id)
     {
         $newsletter = Newsletter::findOrFail($id);
@@ -91,6 +186,18 @@ class NewsletterController extends Controller
         return $this->successResponse($newsletter, 200);
     }
 
+    #[OA\Delete(
+        path: '/newsletters/{id}',
+        summary: 'Delete a newsletter',
+        tags: ['Newsletters'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Newsletter deleted'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         $newsletter = Newsletter::findOrFail($id);
@@ -99,6 +206,28 @@ class NewsletterController extends Controller
         return $this->successResponse(null, 200);
     }
 
+    #[OA\Post(
+        path: '/newsletters/{id}/send',
+        summary: 'Send a newsletter to a list of emails',
+        tags: ['Newsletters'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['emails'],
+                properties: [
+                    new OA\Property(property: 'emails', type: 'array', items: new OA\Items(type: 'string', format: 'email'), description: 'Array or JSON encoded string of emails'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Newsletter sent successfully'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function send(Request $request, $id)
     {
         $newsletter = Newsletter::findOrFail($id);

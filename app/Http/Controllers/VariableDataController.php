@@ -9,6 +9,14 @@ use App\Models\VariableData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class VariableDataController extends Controller
 {
     use ApiResponse;
@@ -20,6 +28,32 @@ class VariableDataController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/update-variable-data',
+        summary: 'Update variable data columns (admin, multipart)',
+        security: [['sanctum' => []]],
+        tags: ['Settings'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer'),
+                        new OA\Property(property: 'limit', type: 'integer', maximum: 30),
+                        new OA\Property(property: 'column_1', type: 'string', description: 'column_N values or files (images/videos) up to the given limit'),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new OkResponse('Variable data updated'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateVariablesData(Request $request)
     {
         try {
@@ -99,6 +133,20 @@ class VariableDataController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/get-variable-data',
+        summary: 'Get variable data columns of a section',
+        tags: ['Settings'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'query', required: true, schema: new OA\Schema(type: 'integer'), description: 'Variable data section id'),
+            new OA\Parameter(name: 'limit', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), example: 30),
+        ],
+        responses: [
+            new OkResponse('Variable data'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getVariablesData(Request $request)
     {
         try {
@@ -142,6 +190,15 @@ class VariableDataController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/get-main-sections',
+        summary: 'Get the main homepage sections data',
+        tags: ['Settings'],
+        responses: [
+            new OkResponse('Main sections'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getMainSections()
     {
         try {

@@ -15,10 +15,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class DashboardMainPageController extends Controller
 {
     use ApiResponse;
 
+    #[OA\Get(
+        path: '/dashboard-main-page-stats',
+        summary: 'Get dashboard summary statistics (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Dashboard'],
+        responses: [
+            new OkResponse('Dashboard statistics'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getStats()
     {
         try {
@@ -45,6 +64,18 @@ class DashboardMainPageController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/charts-data',
+        summary: 'Get dashboard charts data (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Dashboard'],
+        responses: [
+            new OkResponse('Charts data'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getChartsData()
     {
         try {

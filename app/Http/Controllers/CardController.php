@@ -8,7 +8,18 @@ use App\Http\Requests\UpdateCardRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Card;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class CardController extends Controller
 {
@@ -26,6 +37,27 @@ class CardController extends Controller
      * Display a listing of the resource.
      */
 
+    #[OA\Get(
+        path: '/dashboard/cards',
+        summary: 'List all cards (admin, paginated, filterable)',
+        security: [['sanctum' => []]],
+        tags: ['Cards'],
+        parameters: [
+            new OA\Parameter(name: 'query', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search in title/description'),
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'active', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
+            new OA\Parameter(name: 'min_price', in: 'query', required: false, schema: new OA\Schema(type: 'number')),
+            new OA\Parameter(name: 'max_price', in: 'query', required: false, schema: new OA\Schema(type: 'number')),
+            new OA\Parameter(name: 'duration', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'number_of_promotional_purchases', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new PaginatedOkResponse('Card'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request)
     {
         try {
@@ -98,6 +130,20 @@ class CardController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/public-cards',
+        summary: 'List active public cards (paginated, filterable)',
+        tags: ['Cards'],
+        parameters: [
+            new OA\Parameter(name: 'query', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search in title/description'),
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'limit', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), example: 12),
+        ],
+        responses: [
+            new PaginatedOkResponse('Card'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function publicCards(Request $request)
     {
         try {
@@ -149,6 +195,15 @@ class CardController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/eight-public-cards',
+        summary: 'Get the first 8 active public cards',
+        tags: ['Cards'],
+        responses: [
+            new ListOkResponse('Card'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function EightCards(Request $request)
     {
         try {
@@ -179,6 +234,26 @@ class CardController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[OA\Post(
+        path: '/dashboard/add-card',
+        summary: 'Create a new card (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Cards'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/CardStoreRequest'),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Card created'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreCardRequest $request)
     {
         try {
@@ -228,6 +303,19 @@ class CardController extends Controller
     /**
      * Display the specified resource.
      */
+    #[OA\Get(
+        path: '/get-card/{id}',
+        summary: 'Show a single card with its relations',
+        tags: ['Cards'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('Card'),
+            new NotFoundResponse('Card not found'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
         try {
@@ -248,6 +336,30 @@ class CardController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    #[OA\Post(
+        path: '/dashboard/update-card/{id}',
+        summary: 'Update an existing card (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Cards'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/CardStoreRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('Card'),
+            new NotFoundResponse('Card not found'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(UpdateCardRequest $request, $id)
     {
         try {
@@ -298,6 +410,22 @@ class CardController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/dashboard/delete-card/{id}',
+        summary: 'Delete a card (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Cards'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Card deleted successfully'),
+            new NotFoundResponse('Card not found'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

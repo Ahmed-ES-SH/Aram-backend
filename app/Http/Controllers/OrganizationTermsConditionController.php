@@ -6,10 +6,24 @@ use App\Http\Traits\ApiResponse;
 use App\Models\OrganizationTermsCondition;
 use Illuminate\Http\Request;
 
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class OrganizationTermsConditionController extends Controller
 {
     use ApiResponse;
 
+    #[OA\Get(
+        path: '/organiztions-terms',
+        summary: 'List organization terms and conditions points',
+        tags: ['Settings'],
+        responses: [
+            new ListOkResponse('PolicyPoint'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index()
     {
         try {

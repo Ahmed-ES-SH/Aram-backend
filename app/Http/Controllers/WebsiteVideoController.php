@@ -10,6 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class WebsiteVideoController extends Controller
 {
 
@@ -23,6 +31,19 @@ class WebsiteVideoController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/get-video',
+        summary: 'Get a website video by its video id',
+        tags: ['Settings'],
+        parameters: [
+            new OA\Parameter(name: 'video_id', in: 'query', required: true, schema: new OA\Schema(type: 'string')),
+        ],
+        responses: [
+            new OkResponse('Video'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getVideo(Request $request)
     {
         try {
@@ -44,6 +65,15 @@ class WebsiteVideoController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/get-main-page-videos',
+        summary: 'Get the main page and demo videos',
+        tags: ['Settings'],
+        responses: [
+            new OkResponse('Main page videos'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getMainPageVideos()
     {
         try {
@@ -63,6 +93,36 @@ class WebsiteVideoController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/update-video',
+        summary: 'Create or update a website video (admin, multipart)',
+        security: [['sanctum' => []]],
+        tags: ['Settings'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'video_id', type: 'string'),
+                        new OA\Property(property: 'video_image', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'video', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'video_url', type: 'string'),
+                        new OA\Property(property: 'aspect_ratio', type: 'string'),
+                        new OA\Property(property: 'video_type', type: 'string', enum: ['file', 'youtube']),
+                        new OA\Property(property: 'is_file', type: 'boolean'),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new OkResponse('Video updated'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateVideo(Request $request)
 {
     $validated = $request->validate([

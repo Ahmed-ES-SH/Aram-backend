@@ -7,10 +7,64 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\RequestException;
 
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class SMSController extends Controller
 {
 
 
+    #[OA\Post(
+        path: '/internal/send-sms',
+        summary: 'Send an SMS message via the gateway (internal, API key)',
+        tags: ['SMS'],
+        security: [['api_key' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['message', 'numbers'],
+                properties: [
+                    new OA\Property(property: 'message', type: 'string', maxLength: 918),
+                    new OA\Property(property: 'numbers', type: 'array', items: new OA\Items(type: 'string')),
+                    new OA\Property(property: 'lang', type: 'string', enum: ['0', '64'], description: '0 = English, 64 = Arabic'),
+                    new OA\Property(property: 'schedule', type: 'string', example: 'm/d/Y H:i:s'),
+                    new OA\Property(property: 'referenceIds', type: 'string'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('SMS sent'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
+    #[OA\Post(
+        path: '/send-sms',
+        summary: 'Send an SMS message via the gateway',
+        tags: ['SMS'],
+        security: [['sanctum' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['message', 'numbers'],
+                properties: [
+                    new OA\Property(property: 'message', type: 'string', maxLength: 918),
+                    new OA\Property(property: 'numbers', type: 'array', items: new OA\Items(type: 'string')),
+                    new OA\Property(property: 'lang', type: 'string', enum: ['0', '64'], description: '0 = English, 64 = Arabic'),
+                    new OA\Property(property: 'schedule', type: 'string', example: 'm/d/Y H:i:s'),
+                    new OA\Property(property: 'referenceIds', type: 'string'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('SMS sent'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function send(Request $request)
     {
         // ✅ Validate request

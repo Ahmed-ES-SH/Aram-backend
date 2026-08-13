@@ -8,6 +8,18 @@ use App\Models\Notification;
 use App\Models\Organization;
 use App\Models\PromotionActivity;
 use App\Models\User;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\RefOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,18 +28,37 @@ use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Exception;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
 
     use ApiResponse;
 
+    #[OA\Get(
+        path: '/auth/google/redirect',
+        summary: 'Start Google OAuth flow',
+        tags: ['Auth'],
+        responses: [
+            new OA\Response(response: 302, description: 'Redirects the browser to Google OAuth consent page.'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->stateless()->redirect();
     }
 
 
+    #[OA\Get(
+        path: '/auth/google/callback',
+        summary: 'Handle Google OAuth callback',
+        tags: ['Auth'],
+        responses: [
+            new OA\Response(response: 302, description: 'Redirects the browser to the frontend callback URL with a token or an error query parameter.'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function handleGoogleCallback(Request $request)
     {
         try {
@@ -67,6 +98,25 @@ class AuthController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/login',
+        summary: 'Login with email or phone',
+        tags: ['Auth'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/LoginRequest'),
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Login success — user or organization account with a fresh Sanctum token.',
+                content: new OA\JsonContent(ref: '#/components/schemas/LoginResponse'),
+            ),
+            new UnauthorizedResponse( 'Invalid credentials'),
+            new UnprocessableResponse('Invalid login format'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function login(Request $request)
     {
         try {
@@ -186,6 +236,24 @@ class AuthController extends Controller
         return $otp;
     }
 
+    #[OA\Post(
+        path: '/send-otp',
+        summary: 'Send password reset OTP by email',
+        tags: ['Auth'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/SendOTPRequest'),
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'OTP sent successfully.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse'),
+            ),
+            new UnprocessableResponse('Validation failed'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function sendOTP(Request $request)
     {
         try {
@@ -217,6 +285,24 @@ class AuthController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/verify-otp',
+        summary: 'Verify a password reset OTP',
+        tags: ['Auth'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/VerifyOTPRequest'),
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'OTP verified.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse'),
+            ),
+            new UnprocessableResponse('Invalid or expired OTP'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function verifyOTP(Request $request)
     {
         $request->validate([
@@ -242,6 +328,29 @@ class AuthController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/reset-password',
+        summary: 'Reset the password with a verified OTP',
+        tags: ['Auth'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/ResetPasswordRequest'),
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Password reset successfully.',
+                content: new OA\JsonContent(ref: '#/components/schemas/StatusMessageResponse'),
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Invalid or expired OTP',
+                content: new OA\JsonContent(ref: '#/components/schemas/StatusMessageResponse'),
+            ),
+            new UnprocessableResponse('Validation failed'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function resetPassword(Request $request)
     {
         // 1 - Validate inputs
@@ -290,6 +399,21 @@ class AuthController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/logout',
+        summary: 'Logout — revoke the current token',
+        security: [['sanctum' => []]],
+        tags: ['Auth'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Logged out successfully.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse'),
+            ),
+            new UnauthorizedResponse( 'Unauthenticated'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function logout(Request $request)
     {
         try {
@@ -309,6 +433,21 @@ class AuthController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/current-user',
+        summary: 'Get the currently authenticated account',
+        security: [['sanctum' => []]],
+        tags: ['Auth'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Authenticated account with unread counters.',
+                content: new OA\JsonContent(ref: '#/components/schemas/CurrentUserResponse'),
+            ),
+            new UnauthorizedResponse( 'Unauthenticated'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function getCurrentUser(Request $request)
     {
         try {

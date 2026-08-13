@@ -8,7 +8,20 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Category;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\RefOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class CategoryController extends Controller
 {
@@ -21,9 +34,16 @@ class CategoryController extends Controller
     }
 
 
-    /**
-     * Display a listing of the resource.
-     */
+    #[OA\Get(
+        path: '/categories',
+        summary: 'List all categories (paginated)',
+        tags: ['Categories'],
+        responses: [
+            new PaginatedOkResponse('Category'),
+            new NotFoundResponse('No categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function index()
     {
         try {
@@ -38,6 +58,25 @@ class CategoryController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/categories-by-state',
+        summary: 'List categories filtered by activity state (paginated)',
+        tags: ['Categories'],
+        parameters: [
+            new OA\Parameter(
+                name: 'state',
+                in: 'query',
+                required: true,
+                schema: new OA\Schema(type: 'boolean'),
+                example: true,
+            ),
+        ],
+        responses: [
+            new PaginatedOkResponse('Category'),
+            new NotFoundResponse('No categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function activeCategories(Request $request)
     {
         try {
@@ -59,6 +98,16 @@ class CategoryController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/categories-with-subcategories',
+        summary: 'List all categories with their sub categories',
+        tags: ['Categories'],
+        responses: [
+            new ListOkResponse('Category'),
+            new NotFoundResponse('No categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function activeCategoriesWithSubCategories()
     {
         try {
@@ -77,6 +126,26 @@ class CategoryController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/categories/search',
+        summary: 'Search categories by title (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Categories'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['query'],
+                properties: [
+                    new OA\Property(property: 'query', type: 'string', example: 'صح'),
+                ],
+            ),
+        ),
+        responses: [
+            new PaginatedOkResponse('Category'),
+            new UnprocessableResponse('Search query is required'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function search(Request $request)
     {
         try {
@@ -109,6 +178,16 @@ class CategoryController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/public-categories',
+        summary: 'List public categories (paginated)',
+        tags: ['Categories'],
+        responses: [
+            new PaginatedOkResponse('Category'),
+            new NotFoundResponse('No categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function publicCategories()
     {
         try {
@@ -127,6 +206,24 @@ class CategoryController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/all-public-categories',
+        summary: 'List all public categories',
+        tags: ['Categories'],
+        parameters: [
+            new OA\Parameter(
+                name: 'public',
+                in: 'query',
+                required: false,
+                schema: new OA\Schema(type: 'boolean'),
+            ),
+        ],
+        responses: [
+            new ListOkResponse('Category'),
+            new NotFoundResponse('No categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function AllPublicCategories(Request $request)
     {
         try {
@@ -149,9 +246,23 @@ class CategoryController extends Controller
 
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[OA\Post(
+        path: '/add-category',
+        summary: 'Create a new category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Categories'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/CategoryStoreRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('Category', 'Created'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreCategoryRequest $request)
     {
         try {
@@ -167,9 +278,20 @@ class CategoryController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[OA\Get(
+        path: '/category/{id}',
+        summary: 'Show a single category with organizations (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('Category'),
+            new NotFoundResponse('Category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
 
@@ -183,9 +305,27 @@ class CategoryController extends Controller
 
 
 
-    /**
-     * Update the specified resource in storage.
-     */
+    #[OA\Post(
+        path: '/update-category/{id}',
+        summary: 'Update a category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/CategoryUpdateRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('Category'),
+            new NotFoundResponse('Category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function update($id, UpdateCategoryRequest $request)
     {
         try {
@@ -206,6 +346,29 @@ class CategoryController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/update-category-state/{id}',
+        summary: 'Toggle category activity state (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['is_active'],
+                properties: [
+                    new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                ],
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('Category'),
+            new NotFoundResponse('Category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function updateState($id, Request $request)
     {
         try {
@@ -229,9 +392,20 @@ class CategoryController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    #[OA\Delete(
+        path: '/delete-category/{id}',
+        summary: 'Delete a category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Category deleted'),
+            new NotFoundResponse('Category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Requests\StoreOrganizationReview;
 use App\Http\Traits\ApiResponse;
 use App\Models\OrganizationReview;
 use Illuminate\Http\Request;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class OrganizationReviewController extends Controller
 {
@@ -14,6 +21,19 @@ class OrganizationReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[OA\Get(
+        path: '/org-reviews/{id}',
+        summary: 'Get paginated reviews for an organization',
+        tags: ['Reviews'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Organization reviews with pagination'),
+            new NotFoundResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function ReviewsForOrg($id)
     {
         try {
@@ -44,6 +64,18 @@ class OrganizationReviewController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/org-reviews-numbers/{id}',
+        summary: 'Get reviews statistics (counts and average rating)',
+        tags: ['Reviews'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Reviews statistics'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function ReviewsNumbers($id)
     {
         try {
@@ -93,6 +125,32 @@ class OrganizationReviewController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/add-review',
+        summary: 'Add a review for an organization',
+        security: [['sanctum' => []]],
+        tags: ['Reviews'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['stars', 'head_line', 'content', 'user_id', 'organization_id'],
+                properties: [
+                    new OA\Property(property: 'stars', type: 'integer', minimum: 1, maximum: 5),
+                    new OA\Property(property: 'head_line', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'content', type: 'string', minLength: 4),
+                    new OA\Property(property: 'like_counts', type: 'integer', nullable: true, minimum: 0),
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'organization_id', type: 'integer'),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Review created'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreOrganizationReview $request)
     {
         try {
@@ -111,6 +169,21 @@ class OrganizationReviewController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/delete-review/{id}',
+        summary: 'Delete a review',
+        security: [['sanctum' => []]],
+        tags: ['Reviews'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Review deleted'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

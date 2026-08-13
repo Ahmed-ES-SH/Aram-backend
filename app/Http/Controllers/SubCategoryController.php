@@ -8,7 +8,20 @@ use App\Http\Requests\UpdateSubCategoryRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
 use App\Models\SubCategory;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\RefOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class SubCategoryController extends Controller
 {
@@ -21,9 +34,16 @@ class SubCategoryController extends Controller
         $this->imageservice = $imageService;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    #[OA\Get(
+        path: '/sub-categories',
+        summary: 'List all sub categories (paginated)',
+        tags: ['Sub Categories'],
+        responses: [
+            new PaginatedOkResponse('SubCategory'),
+            new NotFoundResponse('No sub categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function index()
     {
         try {
@@ -38,6 +58,32 @@ class SubCategoryController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/sub-categories-by-parent',
+        summary: 'List sub categories of a parent category (paginated)',
+        tags: ['Sub Categories'],
+        parameters: [
+            new OA\Parameter(
+                name: 'parent_id',
+                in: 'query',
+                required: true,
+                schema: new OA\Schema(type: 'integer'),
+            ),
+            new OA\Parameter(
+                name: 'query',
+                in: 'query',
+                required: false,
+                description: 'Optional search term.',
+                schema: new OA\Schema(type: 'string'),
+            ),
+        ],
+        responses: [
+            new PaginatedOkResponse('SubCategory'),
+            new NotFoundResponse('No sub categories found'),
+            new UnprocessableResponse('Validation failed'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function getSubCategoriesByParent(Request $request)
     {
         try {
@@ -80,6 +126,26 @@ class SubCategoryController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/sub-categories-by-state',
+        summary: 'List sub categories by activity state (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Sub Categories'],
+        parameters: [
+            new OA\Parameter(
+                name: 'state',
+                in: 'query',
+                required: true,
+                schema: new OA\Schema(type: 'boolean'),
+                example: true,
+            ),
+        ],
+        responses: [
+            new PaginatedOkResponse('SubCategory'),
+            new NotFoundResponse('No sub categories found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function activeSubCategories(Request $request)
     {
         try {
@@ -96,6 +162,16 @@ class SubCategoryController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/public-sub-categories',
+        summary: 'List active public sub categories (paginated)',
+        tags: ['Sub Categories'],
+        responses: [
+            new PaginatedOkResponse('SubCategory'),
+            new NotFoundResponse('No sub categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function publicSubCategories()
     {
         try {
@@ -110,6 +186,16 @@ class SubCategoryController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/all-public-sub-categories',
+        summary: 'List all sub categories',
+        tags: ['Sub Categories'],
+        responses: [
+            new ListOkResponse('SubCategory'),
+            new NotFoundResponse('No sub categories found'),
+            new ServerErrorResponse( 'Server error'),
+        ],
+    )]
     public function AllSubCategories()
     {
         try {
@@ -123,9 +209,23 @@ class SubCategoryController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[OA\Post(
+        path: '/add-sub-category',
+        summary: 'Create a new sub category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Sub Categories'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/SubCategoryStoreRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('SubCategory', 'Created'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreSubCategoryRequest $request)
     {
         try {
@@ -141,9 +241,20 @@ class SubCategoryController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[OA\Get(
+        path: '/sub-category/{id}',
+        summary: 'Show a single sub category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Sub Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('SubCategory'),
+            new NotFoundResponse('Sub category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
         $category = SubCategory::findOrFail($id);
@@ -156,9 +267,27 @@ class SubCategoryController extends Controller
 
 
 
-    /**
-     * Update the specified resource in storage.
-     */
+    #[OA\Post(
+        path: '/update-sub-category/{id}',
+        summary: 'Update a sub category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Sub Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/SubCategoryUpdateRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('SubCategory'),
+            new NotFoundResponse('Sub category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function update($id, UpdateSubCategoryRequest $request)
     {
         try {
@@ -176,6 +305,29 @@ class SubCategoryController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/update-sub-category-state/{id}',
+        summary: 'Toggle sub category activity state (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Sub Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['is_active'],
+                properties: [
+                    new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                ],
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('SubCategory'),
+            new NotFoundResponse('Sub category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function updateState($id, Request $request)
     {
         try {
@@ -196,9 +348,20 @@ class SubCategoryController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    #[OA\Delete(
+        path: '/delete-sub-category/{id}',
+        summary: 'Delete a sub category (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Sub Categories'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Sub category deleted'),
+            new NotFoundResponse('Sub category not found'),
+            new UnauthorizedResponse(), new ForbiddenResponse(), new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

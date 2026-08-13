@@ -11,11 +11,36 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use OpenApi\Attributes as OA;
+
 class WithdrawRequestController extends Controller
 {
 
     use ApiResponse;
 
+    #[OA\Get(
+        path: '/withdraw-requests',
+        summary: 'List all withdraw requests (admin, paginated, filterable)',
+        security: [['sanctum' => []]],
+        tags: ['Wallet & Transactions'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'approved', 'rejected'])),
+            new OA\Parameter(name: 'user_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new PaginatedOkResponse('WithdrawRequest'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request)
     {
         $query = WithdrawRequest::query()->with('user');
@@ -35,6 +60,32 @@ class WithdrawRequestController extends Controller
     }
 
     // ✅ Withdraw from available balance
+    #[OA\Post(
+        path: '/wallet/withdraw',
+        summary: 'Request a withdrawal from the available balance',
+        security: [['sanctum' => []]],
+        tags: ['Wallet & Transactions'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_id', 'type', 'amount', 'bank_number', 'method'],
+                properties: [
+                    new OA\Property(property: 'user_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'type', type: 'string', enum: ['user', 'organization'], example: 'user'),
+                    new OA\Property(property: 'amount', type: 'number', format: 'float', example: 100.0),
+                    new OA\Property(property: 'bank_number', type: 'string', example: 'SA4420000000000000000000'),
+                    new OA\Property(property: 'method', type: 'string', example: 'bank'),
+                    new OA\Property(property: 'details', type: 'object', nullable: true, additionalProperties: true),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Withdrawal request submitted successfully'),
+            new UnprocessableResponse('Insufficient balance or missing fields'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function withdraw(Request $request)
     {
         try {
@@ -102,6 +153,21 @@ class WithdrawRequestController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/withdraw-requests/{id}',
+        summary: 'Show a single withdraw request (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Wallet & Transactions'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('WithdrawRequest'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
         $withdrawRequest = WithdrawRequest::with('user')->findOrFail($id);
@@ -110,6 +176,22 @@ class WithdrawRequestController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/admin/withdraw-requests/{id}/approve',
+        summary: 'Approve a pending withdraw request (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Wallet & Transactions'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Withdrawal request approved successfully'),
+            new UnprocessableResponse('Request already processed'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function approve($id)
     {
         $withdraw = WithdrawRequest::findOrFail($id);
@@ -134,6 +216,30 @@ class WithdrawRequestController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/admin/withdraw-requests/{id}/reject',
+        summary: 'Reject a pending withdraw request and refund the amount (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Wallet & Transactions'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'note', type: 'string', example: 'Invalid bank details'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Withdrawal request rejected and amount returned'),
+            new UnprocessableResponse('Request already processed'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function reject(Request $request, $id)
     {
         $withdraw = WithdrawRequest::findOrFail($id);

@@ -2,18 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Traits\ApiResponse;
 use App\Models\ArticleInteractions;
 use App\Models\UserArticleInteraction;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class ArticleInteractionsController extends Controller
 {
     use ApiResponse;
 
 
+    #[OA\Post(
+        path: '/check-user-interaction',
+        summary: 'Check the current interaction type of a user on an article',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_id', 'article_id'],
+                properties: [
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'article_id', type: 'integer'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Interaction type or null'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function checkUserInteraction(Request $request)
     {
         try {
@@ -45,6 +75,30 @@ class ArticleInteractionsController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/add-article-interaction',
+        summary: 'Add a reaction to an article (love, like, dislike, laughter)',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['interaction_type', 'user_id', 'article_id'],
+                properties: [
+                    new OA\Property(property: 'interaction_type', type: 'string', enum: ['love', 'like', 'dislike', 'laughter']),
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'article_id', type: 'integer'),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Reaction added or updated'),
+            new ErrorResponse(400, 'User already reacted with the same type'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function addInterAction(Request $request)
     {
         try {
@@ -122,6 +176,31 @@ class ArticleInteractionsController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/update-article-interaction',
+        summary: 'Change the reaction type of a user on an article',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['interaction_type', 'user_id', 'article_id'],
+                properties: [
+                    new OA\Property(property: 'interaction_type', type: 'string', enum: ['love', 'like', 'dislike', 'laughter']),
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'article_id', type: 'integer'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Interaction updated'),
+            new ErrorResponse(400, 'No changes detected in the interaction type'),
+            new NotFoundResponse(),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateInteraction(Request $request)
     {
         try {
@@ -189,6 +268,29 @@ class ArticleInteractionsController extends Controller
 
 
 
+    #[OA\Delete(
+        path: '/cancel-article-interaction',
+        summary: 'Remove a user reaction from an article',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_id', 'article_id'],
+                properties: [
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'article_id', type: 'integer'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Interaction removed successfully'),
+            new NotFoundResponse(),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function removeInteraction(Request $request)
     {
         try {

@@ -11,6 +11,15 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class ServicePageContactMessageController extends Controller
 {
 
@@ -22,6 +31,16 @@ class ServicePageContactMessageController extends Controller
         $this->notificationService = $notificationService;
     }
 
+    #[OA\Post(
+        path: '/add-service-message',
+        summary: 'Submit a contact message for a service page',
+        tags: ['Service Pages'],
+        responses: [
+            new CreatedResponse('Message created'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreServiceContactMessageRequest $request)
     {
         try {
@@ -50,6 +69,21 @@ class ServicePageContactMessageController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/update-service-message/{message}',
+        summary: 'Update a service page contact message (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'message', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Message updated'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(ServicePageContactMessage $messaage, Request $request)
     {
         try {
@@ -71,6 +105,21 @@ class ServicePageContactMessageController extends Controller
 
 
 
+    #[OA\Delete(
+        path: '/delete-service-message/{message}',
+        summary: 'Delete a service page contact message (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'message', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Message deleted'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(ServicePageContactMessage $messaage)
     {
         try {

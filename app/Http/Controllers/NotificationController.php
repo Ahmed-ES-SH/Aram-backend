@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Requests\SendNotificationRequest;
 use App\Http\Traits\ApiResponse;
 use App\Http\Services\NotificationService;
@@ -9,6 +10,14 @@ use App\Models\Notification;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\NoContentResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class NotificationController extends Controller
 {
@@ -20,6 +29,32 @@ class NotificationController extends Controller
         $this->notificationService = $notificationService;
     }
 
+    #[OA\Post(
+        path: '/send-notification',
+        summary: 'Send a notification to an account',
+        security: [['sanctum' => []]],
+        tags: ['Notifications'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['content', 'recipient_id', 'recipient_type', 'sender_id', 'sender_type'],
+                properties: [
+                    new OA\Property(property: 'content', type: 'string'),
+                    new OA\Property(property: 'recipient_id', type: 'integer'),
+                    new OA\Property(property: 'recipient_type', type: 'string', enum: ['user', 'organization']),
+                    new OA\Property(property: 'sender_id', type: 'integer'),
+                    new OA\Property(property: 'sender_type', type: 'string', enum: ['user', 'organization']),
+                    new OA\Property(property: 'user_ids', type: 'array', nullable: true, items: new OA\Items(type: 'integer')),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Notification sent'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ErrorResponse(500, 'Notification sending failed'),
+        ],
+    )]
     public function sendNotification(SendNotificationRequest $request)
     {
         $data = $request->validated();
@@ -38,6 +73,31 @@ class NotificationController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/send-multiple-notification',
+        summary: 'Send notifications to multiple users (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Notifications'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_ids', 'content', 'sender_id', 'sender_type', 'recipient_type'],
+                properties: [
+                    new OA\Property(property: 'user_ids', type: 'array', items: new OA\Items(type: 'integer'), description: 'Array of user ids'),
+                    new OA\Property(property: 'content', type: 'string'),
+                    new OA\Property(property: 'sender_id', type: 'integer'),
+                    new OA\Property(property: 'sender_type', type: 'string', enum: ['user', 'organization']),
+                    new OA\Property(property: 'recipient_type', type: 'string', enum: ['user', 'organization']),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Notifications sent'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ErrorResponse(500, 'Notifications sending failed'),
+        ],
+    )]
     public function sendMultipleNotification(Request $request)
     {
         $data = $request->validate([
@@ -70,6 +130,21 @@ class NotificationController extends Controller
         return $this->successResponse($result['notifications'], 200);
     }
 
+    #[OA\Get(
+        path: '/notifications/{id}/{type}',
+        summary: 'Get paginated notifications for an account',
+        security: [['sanctum' => []]],
+        tags: ['Notifications'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'type', in: 'path', required: true, schema: new OA\Schema(type: 'string'), description: 'Defaults to user type'),
+        ],
+        responses: [
+            new PaginatedOkResponse('Notification'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getNotificationsForAccount($id, $type = 'user')
     {
         try {
@@ -125,6 +200,21 @@ class NotificationController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/make-notifications-readed/{id}',
+        summary: 'Mark all unread notifications as read for an account',
+        security: [['sanctum' => []]],
+        tags: ['Notifications'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('All notifications marked as read'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function makeAllNotificationsAsRead($id)
     {
         try {
@@ -151,6 +241,22 @@ class NotificationController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/last-ten-notifications/{id}/{type}',
+        summary: 'Get the last ten notifications for an account',
+        security: [['sanctum' => []]],
+        tags: ['Notifications'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'type', in: 'path', required: true, schema: new OA\Schema(type: 'string'), description: 'Defaults to user type'),
+        ],
+        responses: [
+            new OkResponse('Last ten notifications'),
+            new NoContentResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getLastTenNotifications($id, $type = 'user')
     {
         try {

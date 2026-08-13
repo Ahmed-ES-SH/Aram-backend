@@ -9,6 +9,14 @@ use App\Models\WebsiteVideo;
 use Exception;
 use Illuminate\Http\Request;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class HomePageController extends Controller
 {
     use ApiResponse;
@@ -21,6 +29,15 @@ class HomePageController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/active-hero-section',
+        summary: 'Check whether the hero section is active',
+        tags: ['Home Page'],
+        responses: [
+            new OkResponse('Hero section active flag'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function activeHeroSection()
     {
         try {
@@ -33,6 +50,21 @@ class HomePageController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/get-section/{id}',
+        summary: 'Get a homepage section by id',
+        tags: ['Home Page'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'limit_number', in: 'query', required: false, schema: new OA\Schema(type: 'integer', maximum: 30), example: 30),
+            new OA\Parameter(name: 'main_page', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
+        ],
+        responses: [
+            new OkResponse('Section data'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getSection($id, Request $request)
     {
         try {
@@ -93,6 +125,35 @@ class HomePageController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/update-section/{id}',
+        summary: 'Create or update a homepage section (admin, multipart)',
+        security: [['sanctum' => []]],
+        tags: ['Home Page'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'image', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'video', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'column_1', type: 'string', description: 'column_N values up to limit_number'),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new OkResponse('Section updated'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateSection(Request $request, $id)
     {
         try {

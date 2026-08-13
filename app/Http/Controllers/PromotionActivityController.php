@@ -14,6 +14,17 @@ use App\Models\PromoterRatio;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class PromotionActivityController extends Controller
 {
     use ApiResponse;
@@ -21,6 +32,18 @@ class PromotionActivityController extends Controller
     /**
      * Get promotion activities for a specific user.
      */
+    #[OA\Get(
+        path: '/promoter-activities',
+        summary: 'List activities of the current promoter (paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Promoters'],
+        responses: [
+            new PaginatedOkResponse('PromotionActivity'),
+            new NotFoundResponse('Promoter profile not found'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getPromoterActivities(Request $request)
     {
         try {
@@ -49,6 +72,24 @@ class PromotionActivityController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/promoter-activities-by-type',
+        summary: 'List promoter activities filtered by type (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Promoters'],
+        parameters: [
+            new OA\Parameter(name: 'promoter_id', in: 'query', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'promoter_type', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+            new OA\Parameter(name: 'activity_type', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['signup', 'purchase', 'visit'])),
+        ],
+        responses: [
+            new PaginatedOkResponse('PromotionActivity'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getActivitiesByType(Request $request)
     {
         try {
@@ -90,6 +131,18 @@ class PromotionActivityController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/top-promoters-data',
+        summary: 'Get the top 5 promoters by sales (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Promoters'],
+        responses: [
+            new OkResponse('Top promoters'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getTopPromotersData()
     {
         // جلب أفضل 5 مروجين بناءً على مجموع المبيعات من عمليات الشراء
@@ -122,6 +175,25 @@ class PromotionActivityController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/promoter-data',
+        summary: 'Get promoter data with paginated activities (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Promoters'],
+        parameters: [
+            new OA\Parameter(name: 'account_type', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+            new OA\Parameter(name: 'account_id', in: 'query', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new PaginatedOkResponse('PromotionActivity'),
+            new NotFoundResponse('Promoter profile not found'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getPromoterData(Request $request)
     {
         try {
@@ -183,6 +255,23 @@ class PromotionActivityController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/top-referred-buyers',
+        summary: 'Get the top 5 referred buyers of a promoter (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Promoters'],
+        parameters: [
+            new OA\Parameter(name: 'promoter_id', in: 'query', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'promoter_type', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+        ],
+        responses: [
+            new OkResponse('Top referred buyers'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getTopReferredBuyers(Request $request)
     {
         try {
@@ -258,6 +347,18 @@ class PromotionActivityController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/promotion-visit',
+        summary: 'Record a promoter activity (visit/purchase/signup)',
+        tags: ['Promoters'],
+        responses: [
+            new CreatedResponse('Activity recorded'),
+            new NotFoundResponse('Promoter not found'),
+            new ForbiddenResponse('Promoter disabled or IP already exists'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StorePromoterActivity $request)
     {
         try {

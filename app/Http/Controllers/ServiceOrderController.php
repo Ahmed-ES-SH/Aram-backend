@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Requests\CreateServiceOrderInvoiceRequest;
 use App\Http\Requests\StoreServiceOrderRequest;
 use App\Http\Resources\ServiceOrderResource;
@@ -15,6 +16,15 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Exception;
 use Throwable;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\NoContentResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class ServiceOrderController extends Controller
 {
@@ -30,6 +40,46 @@ class ServiceOrderController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/all-service-orders',
+        summary: 'List all service orders with filters (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'confirmed', 'in_progress', 'on_hold', 'completed', 'canceled', 'refunded'])),
+            new OA\Parameter(name: 'payment_status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'paid', 'failed'])),
+            new OA\Parameter(name: 'subscription_status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['active', 'expired'])),
+            new OA\Parameter(name: 'user_type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search term'),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Items per page (default 15)'),
+        ],
+        responses: [
+            new PaginatedOkResponse('ServiceOrder'),
+            new NoContentResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
+    #[OA\Get(
+        path: '/service-orders',
+        summary: 'List all service orders with filters (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'confirmed', 'in_progress', 'on_hold', 'completed', 'canceled', 'refunded'])),
+            new OA\Parameter(name: 'payment_status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'paid', 'failed'])),
+            new OA\Parameter(name: 'subscription_status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['active', 'expired'])),
+            new OA\Parameter(name: 'user_type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search term'),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Items per page (default 15)'),
+        ],
+        responses: [
+            new PaginatedOkResponse('ServiceOrder'),
+            new NoContentResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request)
     {
         try {
@@ -106,6 +156,17 @@ class ServiceOrderController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/get-service-orders-options',
+        summary: 'Get filter options for service orders (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        responses: [
+            new OkResponse('Filter options'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getFilterOptions(): \Illuminate\Http\JsonResponse
     {
         return $this->successResponse([
@@ -118,6 +179,20 @@ class ServiceOrderController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/service-orders/{serviceOrder}',
+        summary: 'Show a service order detail (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        parameters: [
+            new OA\Parameter(name: 'serviceOrder', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('ServiceOrder'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function adminShow(ServiceOrder $serviceOrder)
     {
         try {
@@ -165,6 +240,34 @@ class ServiceOrderController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/store-service-order',
+        summary: 'Create a new service order',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'service_id', type: 'integer'),
+                        new OA\Property(property: 'activity_id', type: 'integer', nullable: true),
+                        new OA\Property(property: 'invoice_type', type: 'string', nullable: true),
+                        new OA\Property(property: 'metadata', type: 'object'),
+                        new OA\Property(property: 'files', type: 'array', items: new OA\Items(type: 'object'), description: 'Attached files'),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Order created'),
+            new ErrorResponse(422, 'Order creation failed'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function StoreServiceOrder(StoreServiceOrderRequest $request)
     {
         try {
@@ -182,6 +285,36 @@ class ServiceOrderController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/service-orders/create-invoice',
+        summary: 'Create an invoice for a service order (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['order_id', 'invoice_number', 'total_invoice', 'invoice_type', 'user_id', 'user_type'],
+                properties: [
+                    new OA\Property(property: 'order_id', type: 'integer'),
+                    new OA\Property(property: 'invoice_number', type: 'string'),
+                    new OA\Property(property: 'total_invoice', type: 'number'),
+                    new OA\Property(property: 'before_discount', type: 'number', nullable: true),
+                    new OA\Property(property: 'discount', type: 'number', nullable: true),
+                    new OA\Property(property: 'ref_code', type: 'string', nullable: true),
+                    new OA\Property(property: 'invoice_type', type: 'string'),
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'tax_amount', type: 'number', nullable: true),
+                    new OA\Property(property: 'user_type', type: 'string', enum: ['user', 'organization']),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Invoice created'),
+            new ErrorResponse(422, 'Invoice creation failed'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function createServiceOrderInvoice(CreateServiceOrderInvoiceRequest $request)
     {
         try {
@@ -210,6 +343,21 @@ class ServiceOrderController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/user-service-orders',
+        summary: 'List the authenticated account service orders (paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        parameters: [
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Items per page (default 15)'),
+        ],
+        responses: [
+            new PaginatedOkResponse('ServiceOrder'),
+            new NoContentResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function userServiceOrders(Request $request)
     {
         try {
@@ -242,6 +390,30 @@ class ServiceOrderController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/service-orders/{serviceOrder}/update-status',
+        summary: 'Update a service order status (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        parameters: [
+            new OA\Parameter(name: 'serviceOrder', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['status'],
+                properties: [
+                    new OA\Property(property: 'status', type: 'string', enum: ['pending', 'confirmed', 'in_progress', 'on_hold', 'completed', 'canceled', 'refunded']),
+                ],
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('ServiceOrder'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateStatus(ServiceOrder $serviceOrder, Request $request)
     {
         try {
@@ -264,6 +436,20 @@ class ServiceOrderController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/user-service-orders/{serviceOrder}',
+        summary: 'Show one of the authenticated account service orders',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        parameters: [
+            new OA\Parameter(name: 'serviceOrder', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('ServiceOrder'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function showOrder(ServiceOrder $serviceOrder, Request $request)
     {
         $serviceOrder->load([

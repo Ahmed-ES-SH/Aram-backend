@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Services\ChatService;
 use App\Http\Services\ImageService;
@@ -9,6 +10,13 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class MessageController extends Controller
 {
@@ -27,6 +35,35 @@ class MessageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[OA\Post(
+        path: '/send-message',
+        summary: 'Send a message in a conversation (multipart)',
+        security: [['sanctum' => []]],
+        tags: ['Messages'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'conversation_id', type: 'integer'),
+                        new OA\Property(property: 'receiver_id', type: 'integer'),
+                        new OA\Property(property: 'receiver_type', type: 'string', enum: ['user', 'organization']),
+                        new OA\Property(property: 'message', type: 'string', nullable: true),
+                        new OA\Property(property: 'message_type', type: 'string', enum: ['text', 'pdf', 'image', 'audio']),
+                        new OA\Property(property: 'attachment', type: 'string', format: 'binary', nullable: true, description: 'Attachment file'),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Message sent successfully'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreMessageRequest $request)
     {
         try {
@@ -55,6 +92,21 @@ class MessageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/messages/{messageId}',
+        summary: 'Delete a message (also removes its attachment)',
+        security: [['sanctum' => []]],
+        tags: ['Messages'],
+        parameters: [
+            new OA\Parameter(name: 'messageId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Message deleted successfully'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(Request $request)
     {
         try {
@@ -79,6 +131,28 @@ class MessageController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/conversation/mark-as-read',
+        summary: 'Mark all unread messages from the other participant as read',
+        security: [['sanctum' => []]],
+        tags: ['Messages'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['conversation_id'],
+                properties: [
+                    new OA\Property(property: 'conversation_id', type: 'integer'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('All unread messages marked as read'),
+            new ErrorResponse(403, 'You are not a participant in this conversation'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function markAsRead(Request $request)
     {
         try {

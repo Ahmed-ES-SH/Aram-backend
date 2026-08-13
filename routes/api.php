@@ -1,39 +1,39 @@
 <?php
 
-use App\Http\Controllers\AboutController; // wait
+use App\Http\Controllers\AboutController; 
 use App\Http\Controllers\ServicePageController;
 use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\ArticleCategoryController; // wait
-use App\Http\Controllers\ArticleCommentController; // wait
-use App\Http\Controllers\ArticleController; // wait
-use App\Http\Controllers\ArticleInteractionsController; // wait
-use App\Http\Controllers\AuthController; // wait
+use App\Http\Controllers\ArticleCategoryController; 
+use App\Http\Controllers\ArticleCommentController; 
+use App\Http\Controllers\ArticleController; 
+use App\Http\Controllers\ArticleInteractionsController; 
+use App\Http\Controllers\AuthController; 
 use App\Http\Controllers\CardCategoryController;
 use App\Http\Controllers\CardController;
-use App\Http\Controllers\CategoryController; // wait
-use App\Http\Controllers\ContactMessageController; // wait
-use App\Http\Controllers\ConversationController; // wait
+use App\Http\Controllers\CategoryController; 
+use App\Http\Controllers\ContactMessageController; 
+use App\Http\Controllers\ConversationController; 
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\DashboardMainPageController;
 use App\Http\Controllers\FamilyMemberController;
-use App\Http\Controllers\FooterLinkController; // wait
+use App\Http\Controllers\FooterLinkController; 
 use App\Http\Controllers\KeywordController;
-use App\Http\Controllers\MemberController; // wait
+use App\Http\Controllers\MemberController; 
 use App\Http\Controllers\MessageController;
-use App\Http\Controllers\NotificationController; // wait
+use App\Http\Controllers\NotificationController; 
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\OrganizationPrivacyPolicyController;
-use App\Http\Controllers\QuestionAnswerController; // wait
-use App\Http\Controllers\SocialAccountController; // wait
+use App\Http\Controllers\QuestionAnswerController; 
+use App\Http\Controllers\SocialAccountController; 
 use App\Http\Controllers\SubCategoryController;
-use App\Http\Controllers\TermsConditionController; // wait
-use App\Http\Controllers\OrganizationTermsConditionController; // wait
-use App\Http\Controllers\PrivacyPolicyController; // wait
+use App\Http\Controllers\TermsConditionController; 
+use App\Http\Controllers\OrganizationTermsConditionController; 
+use App\Http\Controllers\PrivacyPolicyController; 
 use App\Http\Controllers\PromoterController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\UserController; // wait
+use App\Http\Controllers\UserController; 
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\HomePageController;
 use App\Http\Controllers\NewsletterController;
@@ -978,7 +978,6 @@ Route::middleware(['auth:sanctum', 'checkAdmin'])->group(function () {
 
     Route::controller(SubCategoryController::class)->group(function () {
         Route::post('/add-sub-category', 'store');
-        Route::post('/sub-categories/search', 'search');
         Route::get('/sub-categories-by-state', 'activeSubCategories');
         Route::get('/sub-category/{id}', 'show');
         Route::post('/update-sub-category/{id}', 'update');
@@ -1214,10 +1213,6 @@ Route::middleware(['auth:sanctum', 'checkAdmin'])->group(function () {
 
     Route::controller(ServiceOrderController::class)->group(function () {
         Route::get('/service-orders', 'index');
-        Route::post('/add-service-order', 'store');
-        Route::get('/service-order/{serviceOrder}', 'show');
-        Route::post('/update-service-order/{serviceOrder}', 'update');
-        Route::delete('/delete-service-order/{serviceOrder}', 'destroy');
     });
 
 

@@ -13,6 +13,17 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use OpenApi\Attributes as OA;
+
 class ArticleController extends Controller
 {
 
@@ -28,6 +39,26 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[OA\Get(
+        path: '/articles',
+        summary: 'List all articles (admin, paginated, filterable)',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+        parameters: [
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'author_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['draft', 'published', 'archived'])),
+            new OA\Parameter(name: 'from_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'to_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search in titles'),
+        ],
+        responses: [
+            new PaginatedOkResponse('Article'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request)
     {
         try {
@@ -70,6 +101,28 @@ class ArticleController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/get-articles-by-search',
+        summary: 'Search articles (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['search_content'],
+                properties: [
+                    new OA\Property(property: 'search_content', type: 'string', minLength: 2, example: 'offers'),
+                ],
+            ),
+        ),
+        responses: [
+            new PaginatedOkResponse('Article'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getArticlesBySearch(Request $request)
     {
         try {
@@ -106,6 +159,15 @@ class ArticleController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/top-ten-articles',
+        summary: 'Get top 10 published articles by views',
+        tags: ['Articles'],
+        responses: [
+            new ListOkResponse('Article'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function topTenArticlesByViews()
     {
         try {
@@ -128,6 +190,15 @@ class ArticleController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/last-three-articles',
+        summary: 'Get the last 3 published articles',
+        tags: ['Articles'],
+        responses: [
+            new ListOkResponse('Article'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getLastThree()
     {
         try {
@@ -148,6 +219,20 @@ class ArticleController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/articles-by-status/{status}',
+        summary: 'List published articles by status (paginated, filterable)',
+        tags: ['Articles'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'path', required: true, schema: new OA\Schema(type: 'string', enum: ['draft', 'published', 'archived'])),
+            new OA\Parameter(name: 'query', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search in titles/content'),
+            new OA\Parameter(name: 'category', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Filter by article category id'),
+        ],
+        responses: [
+            new PaginatedOkResponse('Article'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getArticlesByStatus($status, Request $request)
     {
         try {
@@ -198,6 +283,20 @@ class ArticleController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/articles-by-tag',
+        summary: 'List published articles by tag (paginated, filterable)',
+        tags: ['Articles'],
+        parameters: [
+            new OA\Parameter(name: 'tag_id', in: 'query', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'category', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Filter by article category id'),
+        ],
+        responses: [
+            new OkResponse('Articles retrieved successfully'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getArticlesByTag(Request $request)
     {
         try {
@@ -253,6 +352,15 @@ class ArticleController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/random-articles',
+        summary: 'Get up to 8 random published articles',
+        tags: ['Articles'],
+        responses: [
+            new ListOkResponse('Article'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getRandomArticles()
     {
         try {
@@ -264,6 +372,19 @@ class ArticleController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/articles-by-search',
+        summary: 'Search published articles (paginated)',
+        tags: ['Articles'],
+        parameters: [
+            new OA\Parameter(name: 'search_content', in: 'query', required: true, schema: new OA\Schema(type: 'string', minLength: 2)),
+        ],
+        responses: [
+            new PaginatedOkResponse('Article'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getPublishedArticlesBySearch(Request $request)
     {
         try {
@@ -310,6 +431,26 @@ class ArticleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[OA\Post(
+        path: '/add-article',
+        summary: 'Create a new article (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/ArticleStoreRequest'),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Article created'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreArticleRequest $request)
     {
         try {
@@ -329,6 +470,18 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      */
+    #[OA\Get(
+        path: '/articles/{id}',
+        summary: 'Show a single article with relations',
+        tags: ['Articles'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('Article'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
 
@@ -345,6 +498,29 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    #[OA\Post(
+        path: '/update-article/{id}',
+        summary: 'Update an existing article (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/ArticleStoreRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('Article'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update($id, UpdateArticleRequest $request)
     {
         try {
@@ -364,6 +540,21 @@ class ArticleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/delete-article/{id}',
+        summary: 'Delete an article (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Articles'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Article deleted'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

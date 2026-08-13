@@ -29,27 +29,21 @@ class ChatService
         $this->imageService = $imageService;
     }
 
-    /**
-     * إرسال رسالة في المحادثة عبر Pusher
-     */
+    
     public function sendMessage(array $data)
     {
         try {
-            // ✅ حفظ الرسالة
             $message = Message::create(Arr::except($data, ['attachment']));
 
-            // ✅ معالجة المرفقات إن وجدت
             if (isset($data['attachment'])) {
                 $this->imageService->uploadChatAttachment($data['attachment'], $message);
             }
 
-            // ✅ تحديد المستقبل بناءً على المحادثة
             $conversation = Conversation::findOrFail($message->conversation_id);
             $receiverId = $conversation->participant_one_id == $message->sender_id
                 ? $conversation->participant_two_id
                 : $conversation->participant_one_id;
 
-            // ✅ إرسال الرسالة عبر Pusher
             $this->pusher->trigger(
                 'conversation.' . $message->conversation_id,
                 'MessageSent',
@@ -67,17 +61,14 @@ class ChatService
                 ]
             );
 
-            // ✅ تحقق من المحادثة النشطة للمستقبل
             $activeConversation = Cache::get("user:{$receiverId}:active_conversation");
 
             if ($activeConversation != $message->conversation_id) {
-                // ✅ حساب عدد الرسائل غير المقروءة للمستقبل
                 $unreadCount = Message::where('conversation_id', $message->conversation_id)
                     ->where('sender_id', '!=', $receiverId)
                     ->where('is_read', false)
                     ->count();
 
-                // ✅ إرسال إشعار للمستقبل لتحديث العداد
                 $this->pusher->trigger(
                     'user.' . $receiverId,
                     'UnreadMessageUpdated',

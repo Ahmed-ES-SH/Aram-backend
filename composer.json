@@ -11,6 +11,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "require": {
         "php": "^8.2",
+        "darkaonline/l5-swagger": "^11.1",
         "http-interop/http-factory-guzzle": "^1.2",
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",

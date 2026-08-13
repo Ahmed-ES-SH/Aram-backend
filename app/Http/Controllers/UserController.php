@@ -14,10 +14,23 @@ use App\Models\PromoterRatio;
 use App\Models\PromotionActivity;
 use App\Models\Referral;
 use App\Models\User;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\RefOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Exception;
+use OpenApi\Attributes as OA;
 
 class UserController extends Controller
 {
@@ -32,6 +45,19 @@ class UserController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/users',
+        summary: 'List all users (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        responses: [
+            new PaginatedOkResponse('User'),
+            new NotFoundResponse('No users found'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index() // admin Route
     {
         try {
@@ -49,6 +75,22 @@ class UserController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/users-for-center',
+        summary: 'Search users by name/email/phone for selection (protected, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'query', in: 'query', required: true, schema: new OA\Schema(type: 'string')),
+        ],
+        responses: [
+            new PaginatedOkResponse('User'),
+            new NotFoundResponse('No users found'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function usersForCenter(Request $request)
     {
         $request->validate([
@@ -73,6 +115,23 @@ class UserController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/users-with-selected-data',
+        summary: 'List users with selected fields, optionally excluding promoters (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'query', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'for_promoters', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
+        ],
+        responses: [
+            new PaginatedOkResponse('User'),
+            new NotFoundResponse('No users found'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function usersWithSelectedData(Request $request)
     {
         try {
@@ -110,6 +169,23 @@ class UserController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/register',
+        summary: 'Register a new user account',
+        tags: ['Auth'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/RegisterUserRequest'),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('User created'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreUserRequest $request)
     {
         try {
@@ -153,6 +229,21 @@ class UserController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/user/{id}',
+        summary: 'Show a single user (protected)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('User'),
+            new NotFoundResponse('User not found'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
         try {
@@ -171,6 +262,29 @@ class UserController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/update-user/{id}',
+        summary: 'Update a user (protected)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/UpdateUserRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('User'),
+            new NotFoundResponse('User not found'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(UpdateUserRequest $request, $id)
     {
         try {
@@ -206,6 +320,22 @@ class UserController extends Controller
 
 
 
+    #[OA\Delete(
+        path: '/delete-user/{id}',
+        summary: 'Delete a user (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('User deleted'),
+            new NotFoundResponse('User not found'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id) // admin route
     {
         try {
@@ -226,6 +356,29 @@ class UserController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/search-for-user-by-name',
+        summary: 'Search users by name/email/phone/country (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['query'],
+                properties: [
+                    new OA\Property(property: 'query', type: 'string', example: 'John'),
+                ],
+            ),
+        ),
+        responses: [
+            new PaginatedOkResponse('User'),
+            new NotFoundResponse('No users found'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function searchForUsers(Request $request) // admin Route
     {
         try {
@@ -251,6 +404,19 @@ class UserController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/users-ids',
+        summary: 'Get all user ids (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        responses: [
+            new OkResponse('List of user ids'),
+            new NotFoundResponse('No users found'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getUsersIds() // admin Route
     {
         try {
@@ -269,6 +435,18 @@ class UserController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/get-public-users-ids',
+        summary: 'Get active user ids (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        responses: [
+            new OkResponse('List of active user ids'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getPublicUsersIds()
     {
         try {
@@ -286,6 +464,18 @@ class UserController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/users-count',
+        summary: 'Get total users count (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        responses: [
+            new OkResponse('Total users count'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getUsersCount()
     {
         try {
@@ -298,6 +488,30 @@ class UserController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/check-password-user/{id}',
+        summary: 'Check the current password of a user (protected)',
+        security: [['sanctum' => []]],
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['password'],
+                properties: [
+                    new OA\Property(property: 'password', type: 'string', format: 'password'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Password is correct'),
+            new UnauthorizedResponse('Password does not match'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function checkPassword(Request $request, $id)
     {
         $request->validate([
@@ -318,6 +532,27 @@ class UserController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/send-verify-email',
+        summary: 'Send the email verification link',
+        tags: ['Users'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', format: 'email'),
+                ],
+            ),
+        ),
+        responses: [
+            new RefOkResponse('MessageResponse', 200, 'Verification email sent'),
+            new NotFoundResponse('No account with this email'),
+            new ErrorResponse(400, 'Account already verified'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function sendVerifyEmail(Request $request)
     {
         try {
@@ -355,6 +590,22 @@ class UserController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/verify-email/{id}',
+        summary: 'Verify an email with the token and redirect to login',
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'account_type', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+            new OA\Parameter(name: 'token', in: 'query', required: true, schema: new OA\Schema(type: 'string')),
+        ],
+        responses: [
+            new OA\Response(response: 302, description: 'Redirects to the frontend login page.'),
+            new ErrorResponse(404, 'Account not found'),
+            new ErrorResponse(400, 'Already verified or invalid token'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function verifyEmail($id, Request $request)
     {
         try {

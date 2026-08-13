@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Services\AppointmentResponseService;
 use App\Http\Services\AppointmentService;
 use App\Http\Services\CancelAppointmentService;
@@ -13,6 +14,13 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\NoContentResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class AppointmentController extends Controller
 {
@@ -23,6 +31,21 @@ class AppointmentController extends Controller
 
 
     // available times for users to show the times he can selected
+    #[OA\Get(
+        path: '/organizations/{organization}/available-times',
+        summary: 'Get available appointment time slots for a given date',
+        tags: ['Appointments'],
+        parameters: [
+            new OA\Parameter(name: 'organization', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date'), description: 'Date to generate slots for (defaults to today)'),
+            new OA\Parameter(name: 'interval', in: 'query', required: false, schema: new OA\Schema(type: 'integer', example: 30), description: 'Slot interval in minutes (default 30)'),
+        ],
+        responses: [
+            new OkResponse('Available times'),
+            new ErrorResponse(400, 'Working hours are not set for this organization'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getAvailableTimes(Request $request, Organization $organization)
     {
         try {
@@ -78,6 +101,21 @@ class AppointmentController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/organizations/{organization}/all-times',
+        summary: 'Get all time slots with availability status',
+        tags: ['Appointments'],
+        parameters: [
+            new OA\Parameter(name: 'organization', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date'), description: 'Date to generate slots for (defaults to today)'),
+            new OA\Parameter(name: 'interval', in: 'query', required: false, schema: new OA\Schema(type: 'integer', example: 30), description: 'Slot interval in minutes (default 30)'),
+        ],
+        responses: [
+            new OkResponse('All times with availability status'),
+            new ErrorResponse(400, 'Working hours are not set for this organization'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getAllTimes(Request $request, Organization $organization)
     {
         try {
@@ -164,6 +202,19 @@ class AppointmentController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/all-times/{organization}',
+        summary: 'Get all appointments for an organization grouped by day',
+        tags: ['Appointments'],
+        parameters: [
+            new OA\Parameter(name: 'organization', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Appointments grouped by day'),
+            new NoContentResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getAllAppointments(Request $request, Organization $organization)
     {
         try {
@@ -208,6 +259,22 @@ class AppointmentController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/appointments/{type}/{id}',
+        summary: 'List appointments for a user or an organization (paginated, filterable)',
+        tags: ['Appointments'],
+        parameters: [
+            new OA\Parameter(name: 'type', in: 'path', required: true, schema: new OA\Schema(type: 'string'), description: 'Must be user or organization'),
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'), description: 'The user or organization id'),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Filter by appointment status'),
+            new OA\Parameter(name: 'date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date'), description: 'Filter by appointment date'),
+        ],
+        responses: [
+            new PaginatedOkResponse('Appointment'),
+            new ErrorResponse(400, 'Invalid type, must be user or organization'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request, string $type, int $id)
     {
         try {
@@ -247,6 +314,33 @@ class AppointmentController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/organizations/{organization}/appointments',
+        summary: 'Create a new appointment booking request',
+        tags: ['Appointments'],
+        parameters: [
+            new OA\Parameter(name: 'organization', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_id', 'start_time', 'is_paid'],
+                properties: [
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'start_time', type: 'string', format: 'date-time', example: '2026-01-01 10:00'),
+                    new OA\Property(property: 'end_time', type: 'string', format: 'date-time', nullable: true),
+                    new OA\Property(property: 'is_paid', type: 'boolean'),
+                    new OA\Property(property: 'user_notes', type: 'string'),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Booking request sent successfully'),
+            new ErrorResponse(400, 'Selected time is outside working hours'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(Request $request, Organization $organization, AppointmentService $appointmentService)
     {
         try {
@@ -266,6 +360,29 @@ class AppointmentController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/pending-appointments/{organization}',
+        summary: 'Bulk insert cancelled appointments owned by the organization',
+        tags: ['Appointments'],
+        parameters: [
+            new OA\Parameter(name: 'organization', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['appointments'],
+                properties: [
+                    new OA\Property(property: 'appointments', type: 'array', items: new OA\Items(type: 'object'), description: 'List of {organization_id, start_time, end_time}'),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Appointments added successfully'),
+            new ErrorResponse(400, 'No appointments provided'),
+            new ErrorResponse(409, 'No new appointments to insert'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function cancelAppointmentsByOwner(Request $request, Organization $organization)
     {
         try {
@@ -343,6 +460,32 @@ class AppointmentController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/organizations/{organization}/appointments/{appointment}/response',
+        summary: 'Respond to an appointment booking request (confirm or reject)',
+        tags: ['Appointments'],
+        parameters: [
+            new OA\Parameter(name: 'organization', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'appointment', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['status'],
+                properties: [
+                    new OA\Property(property: 'status', type: 'string', enum: ['confirmed', 'rejected']),
+                    new OA\Property(property: 'organization_notes', type: 'string', nullable: true),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Appointment updated'),
+            new ErrorResponse(403, 'Appointment does not belong to this organization'),
+            new ErrorResponse(409, 'Appointment already responded to'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function respond(Request $request, Organization $organization, Appointment $appointment, AppointmentResponseService $service)
     {
         $result = $service->respondToAppointment($appointment, $request->all(), $organization);
@@ -354,6 +497,28 @@ class AppointmentController extends Controller
         return $this->successResponse($result['appointment'], 200);
     }
 
+    #[OA\Post(
+        path: '/cancel-appointment',
+        summary: 'Cancel an appointment',
+        tags: ['Appointments'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['appointment_id', 'cancler_id', 'cancler_type'],
+                properties: [
+                    new OA\Property(property: 'appointment_id', type: 'integer'),
+                    new OA\Property(property: 'cancler_id', type: 'integer'),
+                    new OA\Property(property: 'cancler_type', type: 'string', enum: ['user', 'organization']),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Appointment cancelled'),
+            new ErrorResponse(403, 'Cancellation not allowed'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function cancel(Request $request, CancelAppointmentService $appointmentService)
     {
         $validated = $request->validate([
@@ -373,6 +538,29 @@ class AppointmentController extends Controller
 
 
 
+    #[OA\Delete(
+        path: '/delete-appointment',
+        summary: 'Delete an appointment (pending/confirmed appointments cannot be deleted)',
+        tags: ['Appointments'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['appointment_id', 'deleter_id', 'deleter_type'],
+                properties: [
+                    new OA\Property(property: 'appointment_id', type: 'integer'),
+                    new OA\Property(property: 'deleter_id', type: 'integer'),
+                    new OA\Property(property: 'deleter_type', type: 'string', enum: ['user', 'organization']),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Appointment deleted'),
+            new ErrorResponse(400, 'Cannot delete active appointments'),
+            new ErrorResponse(403, 'Not authorized to delete this appointment'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(Request $request)
     {
         try {

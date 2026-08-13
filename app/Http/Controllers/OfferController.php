@@ -10,6 +10,17 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Offer;
 use Illuminate\Http\Request;
 
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use OpenApi\Attributes as OA;
+
 class OfferController extends Controller
 {
 
@@ -26,6 +37,27 @@ class OfferController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[OA\Get(
+        path: '/dashboard/offers',
+        summary: 'List all offers (admin, paginated, filterable)',
+        security: [['sanctum' => []]],
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'query', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search in title/description'),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['waiting', 'active', 'expired'])),
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Comma separated category ids'),
+            new OA\Parameter(name: 'discount_type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['percentage', 'fixed'])),
+            new OA\Parameter(name: 'start_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'end_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), example: 12),
+        ],
+        responses: [
+            new PaginatedOkResponse('Offer'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request)
     {
         try {
@@ -94,6 +126,21 @@ class OfferController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/active-offers',
+        summary: 'List active offers (paginated, filterable, sortable)',
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'query', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search in title/description'),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['newest', 'popular', 'expiring', 'discount']), example: 'newest'),
+            new OA\Parameter(name: 'category', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Comma separated category ids'),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), example: 10),
+        ],
+        responses: [
+            new PaginatedOkResponse('Offer'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function activeOffers(Request $request)
     {
         try {
@@ -165,6 +212,20 @@ class OfferController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/active-offers/{orgId}',
+        summary: 'List active offers of a single organization',
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'orgId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'limit', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), example: 10),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), example: 1),
+        ],
+        responses: [
+            new PaginatedOkResponse('Offer'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function activeOffersByOrganization(Request $request, $id)
     {
         try {
@@ -203,6 +264,21 @@ class OfferController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/account-offers',
+        summary: 'List offers of the current organization account (paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'query', required: true, schema: new OA\Schema(type: 'integer'), description: 'Organization id'),
+        ],
+        responses: [
+            new PaginatedOkResponse('Offer'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function accountOffers(Request $request)
     {
         try {
@@ -230,6 +306,25 @@ class OfferController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[OA\Post(
+        path: '/add-offer',
+        summary: 'Create a new offer (protected)',
+        security: [['sanctum' => []]],
+        tags: ['Offers'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/OfferStoreRequest'),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Offer created'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreOfferRequest $request)
     {
         try {
@@ -256,6 +351,20 @@ class OfferController extends Controller
     /**
      * Display the specified resource.
      */
+    #[OA\Get(
+        path: '/get-offer/{id}',
+        summary: 'Show a single offer with relations',
+        security: [['sanctum' => []]],
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('Offer'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
         try {
@@ -281,6 +390,29 @@ class OfferController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    #[OA\Post(
+        path: '/dashboard/update-offer/{id}',
+        summary: 'Update an existing offer (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/OfferStoreRequest'),
+            ),
+        ),
+        responses: [
+            new EntityOkResponse('Offer'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(UpdateOfferRequest $request, $id)
     {
         try {
@@ -305,6 +437,32 @@ class OfferController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/dashboard/update-status-offer/{id}',
+        summary: 'Update offer status (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['status'],
+                properties: [
+                    new OA\Property(property: 'status', type: 'string', enum: ['waiting', 'active', 'expired']),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Offer status updated successfully'),
+            new NotFoundResponse('Offer not found'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateStatus(Request $request, $id)
     {
         try {
@@ -333,6 +491,22 @@ class OfferController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/dashboard/delete-offer/{id}',
+        summary: 'Delete an offer (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Offers'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Offer deleted'),
+            new NotFoundResponse('Offer not found'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

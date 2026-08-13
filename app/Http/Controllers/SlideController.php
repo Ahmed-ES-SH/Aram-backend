@@ -12,6 +12,17 @@ use Illuminate\Http\Request;
 
 use function PHPUnit\Framework\isEmpty;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class SlideController extends Controller
 {
 
@@ -26,6 +37,18 @@ class SlideController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[OA\Get(
+        path: '/slides',
+        summary: 'List all slides (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Slides'],
+        responses: [
+            new ListOkResponse('Slide'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index()
     {
         try {
@@ -52,6 +75,15 @@ class SlideController extends Controller
 
 
 
+    #[OA\Get(
+        path: '/active-slides',
+        summary: 'List active slides',
+        tags: ['Slides'],
+        responses: [
+            new ListOkResponse('Slide'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function activeSlides()
     {
         try {
@@ -80,6 +112,19 @@ class SlideController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[OA\Post(
+        path: '/add-slide',
+        summary: 'Create a new slide (admin, multipart)',
+        security: [['sanctum' => []]],
+        tags: ['Slides'],
+        responses: [
+            new CreatedResponse('Slide created'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreSlideRequest $request)
     {
         try {
@@ -98,6 +143,21 @@ class SlideController extends Controller
     /**
      * Display the specified resource.
      */
+    #[OA\Get(
+        path: '/get-slide/{id}',
+        summary: 'Show a single slide (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Slides'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('Slide'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show($id)
     {
         try {
@@ -124,6 +184,22 @@ class SlideController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    #[OA\Post(
+        path: '/update-slide/{id}',
+        summary: 'Update a slide (admin, multipart)',
+        security: [['sanctum' => []]],
+        tags: ['Slides'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('Slide'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(UpdateSlideRequest $request, $id)
     {
         try {
@@ -156,6 +232,21 @@ class SlideController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/delete-slide/{id}',
+        summary: 'Delete a slide (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Slides'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('slide deleted successfully'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($id)
     {
         try {

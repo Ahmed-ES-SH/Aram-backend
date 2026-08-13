@@ -7,6 +7,15 @@ use App\Http\Services\TempUploadService;
 use App\Http\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+
+use OpenApi\Attributes as OA;
+
 class TempUploadController extends Controller
 {
     use ApiResponse;
@@ -26,6 +35,31 @@ class TempUploadController extends Controller
      * @param UploadTempFileRequest $request
      * @return JsonResponse
      */
+    #[OA\Post(
+        path: '/uploads/temp',
+        summary: 'Upload a file to temporary storage',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['file'],
+                    properties: [
+                        new OA\Property(property: 'file', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'service_order_id', type: 'integer', nullable: true),
+                    ],
+                ),
+            ),
+        ),
+        responses: [
+            new CreatedResponse('File uploaded successfully'),
+            new UnprocessableResponse('Upload failed'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function upload(UploadTempFileRequest $request): JsonResponse
     {
         try {
@@ -59,6 +93,21 @@ class TempUploadController extends Controller
      * @param string $uuid
      * @return JsonResponse
      */
+    #[OA\Delete(
+        path: '/uploads/temp/{uuid}',
+        summary: 'Delete a pending temporary upload',
+        security: [['sanctum' => []]],
+        tags: ['Service Orders'],
+        parameters: [
+            new OA\Parameter(name: 'uuid', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+        ],
+        responses: [
+            new OkResponse('File deleted successfully'),
+            new NotFoundResponse('File not found or already attached'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(string $uuid): JsonResponse
     {
         $deleted = $this->tempUploadService->deleteByUuid($uuid);

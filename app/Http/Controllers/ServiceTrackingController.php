@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Requests\StoreServiceTrackingRequest;
 use App\Http\Requests\UpdateServiceTrackingRequest;
 use App\Http\Requests\UpdateServiceTrackingStatusRequest;
@@ -21,6 +22,13 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class ServiceTrackingController extends Controller
 {
@@ -41,6 +49,29 @@ class ServiceTrackingController extends Controller
     /**
      * Display a listing of all service trackings (Admin).
      */
+    #[OA\Get(
+        path: '/service-trackings',
+        summary: 'List all service trackings with filters (admin, paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'in_progress', 'completed', 'cancelled'])),
+            new OA\Parameter(name: 'current_phase', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['initiation', 'planning', 'execution', 'monitoring', 'review', 'delivery', 'support'])),
+            new OA\Parameter(name: 'service_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'user_type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['user', 'organization'])),
+            new OA\Parameter(name: 'user_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'from_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'to_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'sort_order', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'])),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Items per page (default 15)'),
+        ],
+        responses: [
+            new OkResponse('Service trackings'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request): JsonResponse
     {
         $query = ServiceTracking::with(['service', 'order', 'invoice']);
@@ -94,6 +125,37 @@ class ServiceTrackingController extends Controller
     /**
      * Store a newly created service tracking (Admin).
      */
+    #[OA\Post(
+        path: '/add-service-tracking',
+        summary: 'Create a service tracking record (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['service_id', 'user_id', 'user_type'],
+                properties: [
+                    new OA\Property(property: 'service_id', type: 'integer'),
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'user_type', type: 'string', enum: ['user', 'organization']),
+                    new OA\Property(property: 'service_order_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'invoice_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'status', type: 'string', enum: ['pending', 'in_progress', 'completed', 'cancelled']),
+                    new OA\Property(property: 'current_phase', type: 'string', enum: ['initiation', 'planning', 'execution', 'monitoring', 'review', 'delivery', 'support']),
+                    new OA\Property(property: 'metadata', type: 'object', nullable: true),
+                    new OA\Property(property: 'start_time', type: 'string', nullable: true, format: 'date-time'),
+                    new OA\Property(property: 'end_time', type: 'string', nullable: true, format: 'date-time'),
+                    new OA\Property(property: 'files', type: 'array', items: new OA\Items(type: 'object'), nullable: true),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Tracking created'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreServiceTrackingRequest $request): JsonResponse
     {
         try {
@@ -157,6 +219,20 @@ class ServiceTrackingController extends Controller
     /**
      * Display the specified service tracking (Admin).
      */
+    #[OA\Get(
+        path: '/service-tracking/{serviceTracking}',
+        summary: 'Show a service tracking detail (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Service tracking'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show(ServiceTracking $serviceTracking): JsonResponse
     {
         $serviceTracking->load(['service', 'order', 'invoice']);
@@ -177,6 +253,37 @@ class ServiceTrackingController extends Controller
     /**
      * Update the specified service tracking (Admin).
      */
+    #[OA\Post(
+        path: '/update-service-tracking/{serviceTracking}',
+        summary: 'Update a service tracking record (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                                properties: [
+                    new OA\Property(property: 'service_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'user_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'user_type', type: 'string', nullable: true),
+                    new OA\Property(property: 'service_order_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'invoice_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'status', type: 'string', nullable: true),
+                    new OA\Property(property: 'current_phase', type: 'string', nullable: true),
+                    new OA\Property(property: 'metadata', type: 'object', nullable: true),
+                    new OA\Property(property: 'files', type: 'array', items: new OA\Items(type: 'object'), nullable: true),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Service tracking updated successfully'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(UpdateServiceTrackingRequest $request, ServiceTracking $serviceTracking): JsonResponse
     {
         $serviceTracking->update($request->validated());
@@ -194,6 +301,20 @@ class ServiceTrackingController extends Controller
     /**
      * Remove the specified service tracking (Admin).
      */
+    #[OA\Delete(
+        path: '/delete-service-tracking/{serviceTracking}',
+        summary: 'Delete a service tracking record (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Service tracking deleted successfully'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(ServiceTracking $serviceTracking): JsonResponse
     {
         $serviceTracking->delete();
@@ -207,6 +328,30 @@ class ServiceTrackingController extends Controller
     /**
      * Update the status of a service tracking (Admin).
      */
+    #[OA\Post(
+        path: '/service-tracking/{serviceTracking}/status',
+        summary: 'Update a service tracking status (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['status'],
+                properties: [
+                    new OA\Property(property: 'status', type: 'string', enum: ['pending', 'in_progress', 'completed', 'cancelled']),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Status updated successfully'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updateStatus(UpdateServiceTrackingStatusRequest $request, ServiceTracking $serviceTracking): JsonResponse
     {
         $oldStatus = $serviceTracking->status;
@@ -235,6 +380,30 @@ class ServiceTrackingController extends Controller
     /**
      * Update the phase of a service tracking (Admin).
      */
+    #[OA\Post(
+        path: '/service-tracking/{serviceTracking}/phase',
+        summary: 'Update a service tracking phase (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['current_phase'],
+                properties: [
+                    new OA\Property(property: 'current_phase', type: 'string', enum: ['initiation', 'planning', 'execution', 'monitoring', 'review', 'delivery', 'support']),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Phase updated successfully'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function updatePhase(UpdateServiceTrackingPhaseRequest $request, ServiceTracking $serviceTracking): JsonResponse
     {
         $serviceTracking->updatePhase($request->validated()['current_phase']);
@@ -249,6 +418,21 @@ class ServiceTrackingController extends Controller
     /**
      * Advance to next phase (Admin).
      */
+    #[OA\Post(
+        path: '/service-tracking/{serviceTracking}/advance-phase',
+        summary: 'Advance a service tracking to the next phase (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Advanced to next phase'),
+            new ErrorResponse(400, 'Already at the final phase'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function advancePhase(ServiceTracking $serviceTracking): JsonResponse
     {
         $nextPhase = $serviceTracking->getNextPhase();
@@ -272,6 +456,21 @@ class ServiceTrackingController extends Controller
     /**
      * Get statistics for service trackings (Admin).
      */
+    #[OA\Get(
+        path: '/service-tracking-statistics',
+        summary: 'Get service tracking statistics (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'from_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'to_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+        ],
+        responses: [
+            new OkResponse('Tracking statistics'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function statistics(Request $request): JsonResponse
     {
         $query = ServiceTracking::query();
@@ -317,6 +516,17 @@ class ServiceTrackingController extends Controller
     /**
      * Get available statuses and phases (for dropdowns).
      */
+    #[OA\Get(
+        path: '/service-tracking-options',
+        summary: 'Get available statuses, phases and user types (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        responses: [
+            new OkResponse('Tracking options'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getOptions(): JsonResponse
     {
         return response()->json([
@@ -334,6 +544,23 @@ class ServiceTrackingController extends Controller
     /**
      * Get current user's service trackings.
      */
+    #[OA\Get(
+        path: '/my-service-trackings',
+        summary: 'List the authenticated account service trackings (paginated)',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'current_phase', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'active_only', in: 'query', required: false, schema: new OA\Schema(type: 'boolean'), description: 'Only active trackings'),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Items per page (default 10)'),
+        ],
+        responses: [
+            new OkResponse('Service trackings'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function myTrackings(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -369,6 +596,21 @@ class ServiceTrackingController extends Controller
     /**
      * Get a specific tracking for the current user.
      */
+    #[OA\Get(
+        path: '/my-service-trackings/{serviceTracking}',
+        summary: 'Show one of the authenticated account service trackings',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Service tracking'),
+            new ErrorResponse(403, 'Unauthorized access to this tracking'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function myTrackingShow(ServiceTracking $serviceTracking): JsonResponse
     {
         $user = Auth::user();
@@ -393,6 +635,17 @@ class ServiceTrackingController extends Controller
     /**
      * Get active trackings count for current user.
      */
+    #[OA\Get(
+        path: '/my-active-trackings-count',
+        summary: 'Get the active service trackings count for the authenticated account',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        responses: [
+            new OkResponse('Active count'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function myActiveCount(): JsonResponse
     {
         $user = Auth::user();
@@ -413,6 +666,22 @@ class ServiceTrackingController extends Controller
     /**
      * Cancel a tracking (User can only cancel their own pending trackings).
      */
+    #[OA\Post(
+        path: '/cancel-my-tracking/{serviceTracking}',
+        summary: 'Cancel one of the authenticated account pending trackings',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'serviceTracking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Tracking cancelled successfully'),
+            new ErrorResponse(400, 'Only pending trackings can be cancelled'),
+            new ErrorResponse(403, 'Unauthorized access to this tracking'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function cancelMyTracking(ServiceTracking $serviceTracking): JsonResponse
     {
         $user = Auth::user();
@@ -446,6 +715,21 @@ class ServiceTrackingController extends Controller
     /**
      * Get tracking by order ID.
      */
+    #[OA\Get(
+        path: '/tracking-by-order/{orderId}',
+        summary: 'Get a service tracking by order id',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'orderId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Service tracking'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getByOrder(int $orderId): JsonResponse
     {
         $tracking = ServiceTracking::where('order_id', $orderId)
@@ -468,6 +752,21 @@ class ServiceTrackingController extends Controller
     /**
      * Get tracking by invoice ID.
      */
+    #[OA\Get(
+        path: '/tracking-by-invoice/{invoiceId}',
+        summary: 'Get a service tracking by invoice id',
+        security: [['sanctum' => []]],
+        tags: ['Service Tracking'],
+        parameters: [
+            new OA\Parameter(name: 'invoiceId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Service tracking'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function getByInvoice(int $invoiceId): JsonResponse
     {
         $tracking = ServiceTracking::where('invoice_id', $invoiceId)

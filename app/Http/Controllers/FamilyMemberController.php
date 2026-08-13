@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Http\Requests\StoreFamilyMemberRequest;
 use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
@@ -11,6 +12,13 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\NoContentResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class FamilyMemberController extends Controller
 {
@@ -29,6 +37,17 @@ class FamilyMemberController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    #[OA\Get(
+        path: '/family-members',
+        summary: 'List family members connected to the authenticated user',
+        security: [['sanctum' => []]],
+        tags: ['Family Members'],
+        responses: [
+            new OkResponse('Family members'),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request): JsonResponse
     {
         try {
@@ -51,6 +70,18 @@ class FamilyMemberController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    #[OA\Get(
+        path: '/family-members/pending',
+        summary: 'List pending family requests for the authenticated user',
+        security: [['sanctum' => []]],
+        tags: ['Family Members'],
+        responses: [
+            new OkResponse('Pending family requests'),
+            new NoContentResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function pendingRequests(Request $request)
     {
         try {
@@ -82,6 +113,29 @@ class FamilyMemberController extends Controller
      * @param  \App\Http\Requests\StoreFamilyMemberRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
+    #[OA\Post(
+        path: '/add-family-member',
+        summary: 'Send a family member invitation',
+        security: [['sanctum' => []]],
+        tags: ['Family Members'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['family_member_id'],
+                properties: [
+                    new OA\Property(property: 'family_member_id', type: 'integer'),
+                    new OA\Property(property: 'relationship', type: 'string', nullable: true, maxLength: 50),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('Family request sent'),
+            new UnprocessableResponse(),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreFamilyMemberRequest $request): JsonResponse
     {
         try {
@@ -193,6 +247,21 @@ class FamilyMemberController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
+    #[OA\Post(
+        path: '/family/{id}/accept',
+        summary: 'Accept a pending family request',
+        security: [['sanctum' => []]],
+        tags: ['Family Members'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Family request accepted successfully'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function accept(int $id, Request $request): JsonResponse
     {
         try {
@@ -267,6 +336,21 @@ class FamilyMemberController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
+    #[OA\Post(
+        path: '/family/{id}/reject',
+        summary: 'Reject a pending family request',
+        security: [['sanctum' => []]],
+        tags: ['Family Members'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Family request rejected successfully'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function reject(int $id, Request $request): JsonResponse
     {
         try {
@@ -324,6 +408,21 @@ class FamilyMemberController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
+    #[OA\Delete(
+        path: '/family/{id}',
+        summary: 'Remove a family relation or pending request',
+        security: [['sanctum' => []]],
+        tags: ['Family Members'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Family relation deleted successfully'),
+            new NotFoundResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(int $id, Request $request): JsonResponse
     {
         try {

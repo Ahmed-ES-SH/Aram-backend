@@ -7,6 +7,10 @@ use App\Models\Tag;
 use Exception;
 use Illuminate\Http\Request;
 
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use OpenApi\Attributes as OA;
+
 class TagController extends Controller
 {
 
@@ -17,6 +21,18 @@ class TagController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[OA\Get(
+        path: '/tags',
+        summary: 'List tags (paginated, optional limit)',
+        tags: ['Tags'],
+        parameters: [
+            new OA\Parameter(name: 'limit', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), description: 'Return only N latest tags when > 0'),
+        ],
+        responses: [
+            new PaginatedOkResponse('Tag'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request)
     {
         try {

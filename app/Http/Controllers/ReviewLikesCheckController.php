@@ -2,14 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Models\organizationReview;
 use App\Models\ReviewLikesCheck;
 use Illuminate\Http\Request;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class ReviewLikesCheckController extends Controller
 {
 
 
+    #[OA\Post(
+        path: '/react-review',
+        summary: 'React (like) to a review',
+        tags: ['Reviews'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_id', 'organization_id', 'review_id'],
+                properties: [
+                    new OA\Property(property: 'user_id', type: 'integer'),
+                    new OA\Property(property: 'organization_id', type: 'integer'),
+                    new OA\Property(property: 'review_id', type: 'integer'),
+                ],
+            ),
+        ),
+        responses: [
+            new CreatedResponse('User reacted successfully'),
+            new OkResponse('Already reacted to this review'),
+            new UnprocessableResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(Request $request)
     {
         try {
@@ -52,6 +80,19 @@ class ReviewLikesCheckController extends Controller
     }
 
 
+    #[OA\Get(
+        path: '/review-like-user/{orgId}/{userId}',
+        summary: 'Get review ids the user liked for an organization',
+        tags: ['Reviews'],
+        parameters: [
+            new OA\Parameter(name: 'orgId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'userId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Liked review ids'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function GetReviewsForUser($orgId, $userId)
     {
         try {
@@ -72,6 +113,20 @@ class ReviewLikesCheckController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/review-like/{reviewId}/{userId}',
+        summary: 'Remove a review reaction',
+        tags: ['Reviews'],
+        parameters: [
+            new OA\Parameter(name: 'reviewId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'userId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Reaction removed'),
+            new NotFoundResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy($reviewId, $userId)
     {
         try {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
 use App\Models\Invoice;
 use App\Http\Services\PaymentService;
 use App\Http\Services\ProcessBookPaymentService;
@@ -13,6 +14,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessPaymentJob;
 use Exception;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
 
 class PaymentController extends Controller
 {
@@ -40,6 +46,17 @@ class PaymentController extends Controller
         $this->processServiceDealPayment = $processServiceDealPayment;
     }
 
+    #[OA\Post(
+        path: '/payment/create-session',
+        summary: 'Create a Thawani payment session',
+        security: [['sanctum' => []]],
+        tags: ['Payments'],
+        responses: [
+            new OkResponse('Payment session'),
+            new UnauthorizedResponse(),
+            new ErrorResponse(500, 'Session creation failed'),
+        ],
+    )]
     public function createSession(Request $request)
     {
         try {
@@ -55,6 +72,31 @@ class PaymentController extends Controller
 
 
 
+    #[OA\Post(
+        path: '/payment/callback',
+        summary: 'Handle a payment callback after the Thawani checkout',
+        security: [['sanctum' => []]],
+        tags: ['Payments'],
+requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['provisionalData_id', 'invoice_number', 'payment_type'],
+                properties: [
+                    new OA\Property(property: 'provisionalData_id', type: 'string'),
+                    new OA\Property(property: 'invoice_number', type: 'string'),
+                    new OA\Property(property: 'payment_type', type: 'string', enum: ['cards', 'book', 'service', 'deal_service']),
+                    new OA\Property(property: 'payment_id', type: 'string', nullable: true),
+                    new OA\Property(property: 'session_id', type: 'string', nullable: true),
+                ],
+            ),
+        ),
+        responses: [
+            new OkResponse('Payment processed'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function callback(Request $request)
     {
         $validated = $request->validate([
@@ -83,6 +125,21 @@ class PaymentController extends Controller
     }
 
 
+    #[OA\Post(
+        path: '/payment/webhook',
+        summary: 'Handle the Thawani webhook (signature verified)',
+        security: [['sanctum' => []]],
+        tags: ['Payments'],
+        parameters: [
+            new OA\Parameter(name: 'thawani-signature', in: 'header', required: true, schema: new OA\Schema(type: 'string'), description: 'HMAC signature header'),
+            new OA\Parameter(name: 'thawani-timestamp', in: 'header', required: true, schema: new OA\Schema(type: 'string'), description: 'Timestamp header'),
+        ],
+        responses: [
+            new OkResponse('Webhook accepted'),
+            new ErrorResponse(401, 'Invalid signature'),
+            new ErrorResponse(500, 'Failed to dispatch payment job'),
+        ],
+    )]
     public function webhook(Request $request)
     {
         // 1. Verify Signature

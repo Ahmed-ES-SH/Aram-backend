@@ -17,6 +17,20 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Exception;
 
+use App\OpenApi\Responses\OkResponse;
+use App\OpenApi\Responses\ListOkResponse;
+use App\OpenApi\Responses\PaginatedOkResponse;
+use App\OpenApi\Responses\CreatedResponse;
+use App\OpenApi\Responses\EntityOkResponse;
+use App\OpenApi\Responses\NotFoundResponse;
+use App\OpenApi\Responses\UnauthorizedResponse;
+use App\OpenApi\Responses\ForbiddenResponse;
+use App\OpenApi\Responses\ServerErrorResponse;
+use App\OpenApi\Responses\ErrorResponse;
+use App\OpenApi\Responses\UnprocessableResponse;
+
+use OpenApi\Attributes as OA;
+
 class ServicePageController extends Controller
 {
     use ApiResponse;
@@ -32,6 +46,23 @@ class ServicePageController extends Controller
     // PUBLIC ENDPOINTS
     // =========================================================================
 
+    #[OA\Get(
+        path: '/service-pages',
+        summary: 'List active service pages (filterable)',
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'min_price', in: 'query', required: false, schema: new OA\Schema(type: 'number')),
+            new OA\Parameter(name: 'max_price', in: 'query', required: false, schema: new OA\Schema(type: 'number')),
+            new OA\Parameter(name: 'is_active', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Search in slug'),
+        ],
+        responses: [
+            new ListOkResponse('ServicePage'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function index(Request $request): JsonResponse
     {
         try {
@@ -84,6 +115,19 @@ class ServicePageController extends Controller
     /**
      * Get a single service page by slug (full data)
      */
+    #[OA\Get(
+        path: '/service-pages/{id}',
+        summary: 'Show a single active service page with full data',
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('ServicePage'),
+            new NotFoundResponse('Service page not found'),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function show(int $id): JsonResponse|ServicePageResource
     {
         $servicePage = ServicePage::where('id', $id)
@@ -111,6 +155,32 @@ class ServicePageController extends Controller
     // ADMIN ENDPOINTS
     // =========================================================================
 
+    #[OA\Get(
+        path: '/dashboard/service-pages',
+        summary: 'List all service pages (admin, paginated, filterable)',
+        security: [['sanctum' => []]],
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer'), example: 15),
+            new OA\Parameter(name: 'category_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'is_active', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
+            new OA\Parameter(name: 'min_price', in: 'query', required: false, schema: new OA\Schema(type: 'number')),
+            new OA\Parameter(name: 'max_price', in: 'query', required: false, schema: new OA\Schema(type: 'number')),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'from_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'to_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['created_at', 'price', 'order', 'slug', 'updated_at']), example: 'order'),
+            new OA\Parameter(name: 'sort_order', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc']), example: 'asc'),
+        ],
+        responses: [
+            new PaginatedOkResponse('ServicePage'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function adminIndex(Request $request): JsonResponse
     {
         try {
@@ -190,6 +260,21 @@ class ServicePageController extends Controller
     /**
      * Get a single service page for admin editing
      */
+    #[OA\Get(
+        path: '/dashboard/service-pages/{id}',
+        summary: 'Show a single service page for admin editing',
+        security: [['sanctum' => []]],
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('ServicePage'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function adminShow(int $id): JsonResponse
     {
         try {
@@ -214,6 +299,20 @@ class ServicePageController extends Controller
     /**
      * Store a new service page
      */
+    #[OA\Post(
+        path: '/dashboard/service-pages',
+        summary: 'Create a new service page (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Pages'],
+        responses: [
+            new CreatedResponse('Service page created'),
+            new ErrorResponse(400, 'This order already exists'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function store(StoreServicePageRequest $request): JsonResponse
     {
         try {
@@ -234,6 +333,23 @@ class ServicePageController extends Controller
     /**
      * Update an existing service page
      */
+    #[OA\Post(
+        path: '/dashboard/service-pages/{id}',
+        summary: 'Update an existing service page (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new EntityOkResponse('ServicePage'),
+            new ErrorResponse(400, 'This order already exists'),
+            new UnprocessableResponse(),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function update(UpdateServicePageRequest $request, int $id): JsonResponse
     {
         try {
@@ -258,6 +374,21 @@ class ServicePageController extends Controller
     /**
      * Delete a service page
      */
+    #[OA\Delete(
+        path: '/dashboard/service-pages/{id}',
+        summary: 'Delete a service page (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Service Pages'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OkResponse('Service page deleted successfully'),
+            new UnauthorizedResponse(),
+            new ForbiddenResponse(),
+            new ServerErrorResponse(),
+        ],
+    )]
     public function destroy(int $id): JsonResponse
     {
         try {

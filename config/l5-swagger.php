@@ -46,6 +46,7 @@ return [
                 'annotations' => [
                     app_path('Http/Controllers'),
                     app_path('OpenApi'),
+                    app_path('Modules'),
                 ],
             ],
         ],

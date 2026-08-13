@@ -3,7 +3,7 @@
 namespace App\Modules\Service\Services;
 
 use App\Http\Services\NotificationService;
-use App\Models\Appointment;
+use App\Modules\Service\Models\Appointment;
 use App\Modules\User\Models\User;
 use App\Modules\Organization\Models\Organization;
 use Illuminate\Support\Facades\DB;

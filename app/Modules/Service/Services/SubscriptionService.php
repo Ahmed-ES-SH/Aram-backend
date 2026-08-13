@@ -2,7 +2,7 @@
 
 namespace App\Modules\Service\Services;
 
-use App\Models\ServiceOrder;
+use App\Modules\Service\Models\ServiceOrder;
 use App\Events\SubscriptionExpired;
 use Illuminate\Support\Facades\Log;
 

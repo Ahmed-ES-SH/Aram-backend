@@ -3,7 +3,7 @@
 namespace App\Modules\Organization\Models;
 
 use App\Helpers\TextNormalizer;
-use App\Models\Appointment;
+use App\Modules\Service\Models\Appointment;
 use App\Models\Category;
 use App\Models\Conversation;
 use App\Models\Coupon;

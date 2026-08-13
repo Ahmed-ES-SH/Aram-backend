@@ -2,8 +2,8 @@
 
 namespace App\Http\Services;
 
-use App\Models\PendingServiceOrderFile;
-use App\Models\ServiceTrackingFile;
+use App\Modules\Service\Models\PendingServiceOrderFile;
+use App\Modules\Service\Models\ServiceTrackingFile;
 use App\Modules\Organization\Models\Organization;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -132,7 +132,7 @@ class TempUploadService
      * Attach temp files to a ServiceTracking entity.
      *
      * @param array $uuids
-     * @param \App\Models\ServiceTracking $serviceTracking
+     * @param \App\Modules\Service\Models\ServiceTracking $serviceTracking
      * @return array Array of created ServiceTrackingFile records
      */
     public function attachToServiceTracking(array $uuids, $serviceTracking): array

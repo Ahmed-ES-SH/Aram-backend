@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\Transaction;
 use App\Modules\User\Models\User;
 use App\Models\WithdrawRequest;

@@ -7,7 +7,7 @@ use App\Http\Requests\SendNotificationRequest;
 use App\Http\Traits\ApiResponse;
 use App\Http\Services\NotificationService;
 use App\Models\Notification;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Modules\User\Models\User;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\ErrorResponse;

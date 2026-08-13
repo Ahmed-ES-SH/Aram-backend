@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
 
     //     Relation::morphMap([
     //         'user' => \App\Modules\User\Models\User::class,
-    //         'organization' => \App\Models\Organization::class,
+    //         'organization' => \App\Modules\Organization\Models\Organization::class,
     //     ]);
     // }
 
@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Relation::morphMap([
             'user' => \App\Modules\User\Models\User::class,
-            'organization' => \App\Models\Organization::class,
+            'organization' => \App\Modules\Organization\Models\Organization::class,
         ]);
 
         Storage::extend('google', function ($app, $config) {

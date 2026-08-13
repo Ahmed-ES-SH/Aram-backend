@@ -9,7 +9,7 @@ use App\Http\Resources\ServiceOrderResource;
 use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
 use App\Http\Services\StoreServiceOrderService;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\ServiceOrder;
 use App\Modules\User\Models\User;
 use Illuminate\Http\Request;

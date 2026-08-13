@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Organization\Controllers;
+use App\Http\Controllers\Controller;
 
-use App\Models\OrganizationSubCategory;
+use App\Modules\Organization\Models\OrganizationSubCategory;
 use Illuminate\Http\Request;
 
 class OrganizationSubCategoryController extends Controller

@@ -11,7 +11,7 @@ use App\Http\Services\NotificationService;
 use App\Http\Services\TempUploadService;
 use App\Http\Traits\ApiResponse;
 use App\Models\ServiceTracking;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\PendingServiceOrderFile;
 use App\Models\ServicePage;
 use Illuminate\Http\Request;

@@ -4,7 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\PendingServiceOrderFile;
 use App\Models\ServiceTrackingFile;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;

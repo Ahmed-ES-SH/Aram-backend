@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Services\OrganizationServices;
+namespace App\Modules\Organization\Services;
 
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 

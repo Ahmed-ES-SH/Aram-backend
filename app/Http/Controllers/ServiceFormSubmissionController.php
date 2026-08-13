@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use OpenApi\Attributes as OA;
 use App\Http\Traits\ApiResponse;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\ServiceForm;
 use App\Models\ServiceFormField;
 use App\Models\ServiceFormSubmission;

@@ -5,7 +5,7 @@ namespace App\Http\Services;
 use App\Http\Traits\ApiResponse;
 use App\Models\Appointment;
 use App\Models\Invoice;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\ProvisionalData;
 use App\Models\Transaction;
 use App\Modules\User\Models\User;

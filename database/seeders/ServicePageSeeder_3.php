@@ -14,7 +14,7 @@ use App\Models\ServicePageTestimonial;
 use App\Models\ServicePageCtaSection;
 use App\Models\ServiceTracking;
 use App\Modules\User\Models\User;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use Illuminate\Database\Seeder;
 
 class ServicePageSeeder_3 extends Seeder

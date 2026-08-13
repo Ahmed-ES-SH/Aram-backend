@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
 use App\Mail\VerifyEmail;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\Promoter;
 use App\Models\PromoterRatio;
 use App\Models\PromotionActivity;

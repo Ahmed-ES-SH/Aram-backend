@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Organization\Controllers;
+use App\Http\Controllers\Controller;
 
 use OpenApi\Attributes as OA;
-use App\Http\Requests\StoreOrganizationReview;
+use App\Modules\Organization\Requests\StoreOrganizationReview;
 use App\Http\Traits\ApiResponse;
-use App\Models\OrganizationReview;
+use App\Modules\Organization\Models\OrganizationReview;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\NotFoundResponse;

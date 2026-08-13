@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Promoter;
 use App\Modules\User\Models\User;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 

@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Organization\Controllers;
+use App\Http\Controllers\Controller;
 
-use App\Http\Services\OrganizationServices\CreateOrganizationService;
-use App\Http\Services\OrganizationServices\DeleteOrganizationService;
-use App\Http\Services\OrganizationServices\FetchOrganizationsData;
-use App\Http\Services\OrganizationServices\UpdateOrganizationService;
-use App\Http\Requests\StoreOrganizationRequest;
-use App\Http\Requests\StoreOrganiztionWithOfferRequest;
-use App\Http\Requests\UpdateOrganizationRequest;
+use App\Modules\Organization\Services\CreateOrganizationService;
+use App\Modules\Organization\Services\DeleteOrganizationService;
+use App\Modules\Organization\Services\FetchOrganizationsData;
+use App\Modules\Organization\Services\UpdateOrganizationService;
+use App\Modules\Organization\Requests\StoreOrganizationRequest;
+use App\Modules\Organization\Requests\StoreOrganiztionWithOfferRequest;
+use App\Modules\Organization\Requests\UpdateOrganizationRequest;
 use App\Http\Traits\ApiResponse;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\EntityOkResponse;
@@ -24,7 +25,7 @@ use App\OpenApi\Responses\UnauthorizedResponse;
 use App\OpenApi\Responses\UnprocessableResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use Exception;
 use OpenApi\Attributes as OA;
 

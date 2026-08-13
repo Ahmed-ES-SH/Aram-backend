@@ -9,7 +9,7 @@ use App\Models\PromotionActivity;
 use Illuminate\Http\Request;
 use App\Models\Promoter;
 use App\Modules\User\Models\User;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\PromoterRatio;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;

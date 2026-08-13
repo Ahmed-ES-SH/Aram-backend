@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Modules\Keyword\Models\Keyword;
-use App\Models\Organization;
-use App\Models\OrganizationBenefit;
+use App\Modules\Organization\Models\Organization;
+use App\Modules\Organization\Models\OrganizationBenefit;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

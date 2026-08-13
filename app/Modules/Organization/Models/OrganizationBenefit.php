@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\Organization\Models;
 
+use App\Models\Card;
 use Illuminate\Database\Eloquent\Model;
 
 class OrganizationBenefit extends Model

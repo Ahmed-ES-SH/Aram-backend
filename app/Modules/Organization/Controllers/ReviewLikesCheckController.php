@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Organization\Controllers;
+use App\Http\Controllers\Controller;
 
 use OpenApi\Attributes as OA;
-use App\Models\organizationReview;
-use App\Models\ReviewLikesCheck;
+use App\Modules\Organization\Models\organizationReview;
+use App\Modules\Organization\Models\ReviewLikesCheck;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\NotFoundResponse;

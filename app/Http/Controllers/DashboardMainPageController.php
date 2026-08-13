@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Models\Coupon;
 use App\Models\Offer;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use App\Models\Promoter;
 use App\Models\ServicePage;
 use App\Modules\User\Models\User;

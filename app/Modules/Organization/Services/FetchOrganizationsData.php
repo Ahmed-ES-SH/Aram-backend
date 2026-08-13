@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Services\OrganizationServices;
+namespace App\Modules\Organization\Services;
 
-use App\Http\Resources\SelectedOrganizationDataResource;
+use App\Modules\Organization\Resources\SelectedOrganizationDataResource;
 use App\Http\Traits\ApiResponse;
-use App\Models\Organization;
+use App\Modules\Organization\Models\Organization;
 use Illuminate\Support\Facades\Cache;
 use Exception;
 

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\OrganizationReview;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\Models\Organization; // لو عندك موديل المنظمات
 use Faker\Factory as Faker;
 

@@ -9,7 +9,7 @@ use App\Models\PromotionActivity;
 use App\Models\ServiceOrder;
 use App\Models\ServiceTracking;
 use App\Models\ServiceTrackingFile;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

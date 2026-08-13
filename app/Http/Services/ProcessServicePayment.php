@@ -14,7 +14,7 @@ use App\Models\ServicePage;
 use App\Models\ServiceTracking;
 use App\Models\ServiceTrackingFile;
 use App\Models\Transaction;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Log;

@@ -5,7 +5,7 @@ namespace App\Http\Services;
 use App\Models\Coupon;
 use App\Models\CouponOrganization;
 use App\Models\CouponUser;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\Response;
 

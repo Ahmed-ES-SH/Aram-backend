@@ -4,7 +4,7 @@ namespace App\Http\Services;
 
 use App\Http\Services\NotificationService;
 use App\Models\Appointment;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\Models\Organization;
 use Illuminate\Support\Facades\DB;
 use Exception;

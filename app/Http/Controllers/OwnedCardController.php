@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 use App\Http\Traits\ApiResponse;
 use App\Models\Organization;
 use App\Models\OwnedCard;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\NoContentResponse;

@@ -8,7 +8,7 @@ use App\Models\CouponOrganization;
 use App\Models\CouponUsage;
 use App\Models\CouponUser;
 use App\Models\OwnedCard;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;

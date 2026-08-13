@@ -33,7 +33,7 @@ use App\Http\Controllers\OrganizationTermsConditionController;
 use App\Http\Controllers\PrivacyPolicyController; 
 use App\Http\Controllers\PromoterController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\UserController; 
+use App\Modules\User\Controllers\UserController; 
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\HomePageController;
 use App\Http\Controllers\NewsletterController;

@@ -8,7 +8,7 @@ use App\Models\Invoice;
 use App\Models\Organization;
 use App\Models\ProvisionalData;
 use App\Models\Transaction;
-use App\Models\User;
+use App\Modules\User\Models\User;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Mail;
 use Exception;

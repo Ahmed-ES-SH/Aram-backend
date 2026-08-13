@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Keyword;
+use App\Modules\Keyword\Models\Keyword;
 use App\Models\Organization;
 use App\Models\OrganizationBenefit;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;

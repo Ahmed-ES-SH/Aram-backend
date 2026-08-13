@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Article\Controllers;
 
-use App\Models\ArticleTag;
+use App\Http\Controllers\Controller;
+use App\Modules\Article\Models\ArticleTag;
 use Illuminate\Http\Request;
 
 class ArticleTagController extends Controller

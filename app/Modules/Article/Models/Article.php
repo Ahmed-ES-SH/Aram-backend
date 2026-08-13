@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\Article\Models;
 
+use App\Modules\Article\Models\Tag;
 use App\Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 

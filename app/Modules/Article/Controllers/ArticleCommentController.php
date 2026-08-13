@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Article\Controllers;
 
 use OpenApi\Attributes as OA;
-use App\Http\Requests\StoreArticleComment;
+use App\Http\Controllers\Controller;
+use App\Modules\Article\Requests\StoreArticleComment;
 use App\Http\Traits\ApiResponse;
-use App\Models\ArticleComment;
+use App\Modules\Article\Models\ArticleComment;
 use Exception;
 use Illuminate\Http\Request;
 use App\OpenApi\Responses\CreatedResponse;

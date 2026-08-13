@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\Keyword\Models;
 
+use App\Models\Card;
 use Illuminate\Database\Eloquent\Model;
 
 class Keyword extends Model

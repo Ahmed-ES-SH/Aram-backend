@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Member;
+use App\Modules\Member\Models\Member;
 use Faker\Factory as Faker;
 
 class MemberSeeder extends Seeder

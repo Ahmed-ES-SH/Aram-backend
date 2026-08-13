@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Keyword\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Helpers\TextNormalizer;
 use App\Http\Traits\ApiResponse;
-use App\Models\Keyword;
+use App\Modules\Keyword\Models\Keyword;
 use Illuminate\Http\Request;
 
 use App\OpenApi\Responses\CreatedResponse;

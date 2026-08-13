@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Article\Controllers;
 
 use App\Helpers\TextNormalizer;
-use App\Http\Requests\StoreArticleRequest;
-use App\Http\Requests\UpdateArticleRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Article\Requests\StoreArticleRequest;
+use App\Modules\Article\Requests\UpdateArticleRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
-use App\Models\Article;
-use App\Models\ArticleTag;
+use App\Modules\Article\Models\Article;
+use App\Modules\Article\Models\ArticleTag;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;

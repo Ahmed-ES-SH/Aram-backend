@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Article\Controllers;
 
 use OpenApi\Attributes as OA;
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
-use App\Models\ArticleInteractions;
-use App\Models\UserArticleInteraction;
+use App\Modules\Article\Models\ArticleInteractions;
+use App\Modules\Article\Models\UserArticleInteraction;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

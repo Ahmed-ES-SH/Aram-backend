@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Article\Controllers;
 
 use App\Helpers\TextNormalizer;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
-use App\Models\ArticleCategory;
+use App\Modules\Article\Models\ArticleCategory;
 use App\Models\Category;
 use App\OpenApi\Responses\CreatedResponse;
 use App\OpenApi\Responses\EntityOkResponse;

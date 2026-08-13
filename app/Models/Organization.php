@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\TextNormalizer;
+use App\Modules\Keyword\Models\Keyword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;

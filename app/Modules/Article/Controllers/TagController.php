@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Article\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
-use App\Models\Tag;
+use App\Modules\Article\Models\Tag;
 use Exception;
 use Illuminate\Http\Request;
 

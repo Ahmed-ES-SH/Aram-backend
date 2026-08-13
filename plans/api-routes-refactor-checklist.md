@@ -48,11 +48,11 @@
 - [x] OwnedCardController (`app/Modules/Card/Controllers`)
 - [x] CurrencyController (`app/Modules/Card/Controllers`)
 
-## Wallet / Payment — [x] services moved to `app/Modules/Payment/Services`
-- [ ] WalletController
-- [ ] TransactionController
-- [ ] PaymentController
-- [ ] WithdrawRequestController
+## Wallet / Payment — [x] DONE
+- [x] WalletController (`app/Modules/Payment/Controllers`)
+- [x] TransactionController (`app/Modules/Payment/Controllers`)
+- [x] PaymentController (`app/Modules/Payment/Controllers`)
+- [x] WithdrawRequestController (`app/Modules/Payment/Controllers`)
 
 ## Coupon — [x] services moved to `app/Modules/Coupon/Services`
 - [ ] CouponController
@@ -92,6 +92,6 @@
 - [ ] TempUploadController
 
 ---
-**Totals:** 62 controllers — 31 refactored `[x]`, 31 pending `[ ]`.
+**Totals:** 62 controllers — 35 refactored `[x]`, 27 pending `[ ]`.
 
 > Services: 22 of 26 moved to `app/Modules/*/Services` (`Service` 6, `Payment` 8, `Coupon` 5, `Promotion` 1, `Conversation` 2). Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`, `SMSService`.

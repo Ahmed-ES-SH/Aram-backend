@@ -2,7 +2,7 @@
 
 namespace App\Modules\Payment\Services;
 
-use App\DTOs\PaymentDTO;
+use App\Modules\Payment\DTOs\PaymentDTO;
 use App\Http\Traits\ApiResponse;
 use App\Modules\Promotion\Services\PromotionService;
 use App\Modules\Service\Models\PendingServiceOrderFile;

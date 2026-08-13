@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Payment\Controllers;
 
+use App\Http\Controllers\Controller;
 use OpenApi\Attributes as OA;
 use App\Models\Invoice;
 use App\Modules\Payment\Services\PaymentService;
@@ -12,7 +13,7 @@ use App\Modules\Payment\Services\ProcessServicePayment;
 use App\Http\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Jobs\ProcessPaymentJob;
+use App\Modules\Payment\Jobs\ProcessPaymentJob;
 use Exception;
 use App\OpenApi\Responses\ErrorResponse;
 use App\OpenApi\Responses\OkResponse;

@@ -2,7 +2,7 @@
 
 namespace App\Modules\Payment\Services;
 
-use App\DTOs\PaymentDTO;
+use App\Modules\Payment\DTOs\PaymentDTO;
 use App\Http\Services\NotificationService;
 use App\Http\Traits\ApiResponse;
 use App\Models\Invoice;
@@ -14,7 +14,7 @@ use App\Modules\Service\Models\ServiceOrder;
 use App\Modules\Service\Models\ServicePage;
 use App\Modules\Service\Models\ServiceTracking;
 use App\Modules\Service\Models\ServiceTrackingFile;
-use App\Models\Transaction;
+use App\Modules\Payment\Models\Transaction;
 use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Exception;

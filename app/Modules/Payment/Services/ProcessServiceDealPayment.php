@@ -10,7 +10,7 @@ use App\Models\PromotionActivity;
 use App\Models\ProvisionalData;
 use App\Modules\Service\Models\ServiceOrder;
 use App\Modules\Service\Models\ServicePage;
-use App\Models\Transaction;
+use App\Modules\Payment\Models\Transaction;
 use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Throwable;

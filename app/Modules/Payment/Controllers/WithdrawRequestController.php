@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Payment\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Modules\Organization\Models\Organization;
-use App\Models\Transaction;
+use App\Modules\Payment\Models\Transaction;
 use App\Modules\User\Models\User;
-use App\Models\WithdrawRequest;
+use App\Modules\Payment\Models\WithdrawRequest;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

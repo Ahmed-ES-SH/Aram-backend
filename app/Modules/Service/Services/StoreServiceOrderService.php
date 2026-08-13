@@ -2,14 +2,14 @@
 
 namespace App\Modules\Service\Services;
 
-use App\Http\Requests\StoreServiceOrderRequest;
+use App\Modules\Service\Requests\StoreServiceOrderRequest;
 use App\Http\Services\NotificationService;
 use App\Models\Invoice;
 use App\Models\PromoterRatio;
 use App\Models\PromotionActivity;
-use App\Models\ServiceOrder;
-use App\Models\ServiceTracking;
-use App\Models\ServiceTrackingFile;
+use App\Modules\Service\Models\ServiceOrder;
+use App\Modules\Service\Models\ServiceTracking;
+use App\Modules\Service\Models\ServiceTrackingFile;
 use App\Modules\User\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;

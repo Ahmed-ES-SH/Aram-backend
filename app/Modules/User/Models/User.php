@@ -5,7 +5,7 @@ namespace App\Modules\User\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Helpers\TextNormalizer;
-use App\Models\Appointment;
+use App\Modules\Service\Models\Appointment;
 use App\Models\Conversation;
 use App\Models\Coupon;
 use App\Models\Message;

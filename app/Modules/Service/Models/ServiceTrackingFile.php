@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Modules\Service\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ServiceTrackingFile extends Model
+{
+    protected $fillable = [
+        'service_tracking_id',
+        'disk',
+        'path',
+        'file_type',
+        'original_name',
+        'mime_type',
+        'size',
+        'uploaded_by',
+        'uploaded_by_type',
+    ];
+
+
+
+    public function tracking()
+    {
+        return $this->belongsTo(ServiceTracking::class);
+    }
+}

@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AboutController; 
-use App\Http\Controllers\ServicePageController;
-use App\Http\Controllers\AppointmentController;
+use App\Modules\Service\Controllers\ServicePageController;
+use App\Modules\Service\Controllers\AppointmentController;
 use App\Modules\Article\Controllers\ArticleCategoryController; 
 use App\Modules\Article\Controllers\ArticleCommentController; 
 use App\Modules\Article\Controllers\ArticleController; 
@@ -48,15 +48,15 @@ use App\Http\Controllers\OwnedCardController;
 use App\Http\Controllers\PromoterRatioController;
 use App\Http\Controllers\PromoterTrackingController;
 use App\Http\Controllers\PromotionActivityController;
-use App\Http\Controllers\ServiceCategoryController;
+use App\Modules\Service\Controllers\ServiceCategoryController;
 use App\Http\Controllers\VariableDataController;
 use App\Http\Controllers\WebsiteVideoController;
-use App\Http\Controllers\ServiceTrackingController;
-use App\Http\Controllers\ServiceFormController;
-use App\Http\Controllers\ServiceFormFieldController;
-use App\Http\Controllers\ServiceFormSubmissionController;
-use App\Http\Controllers\ServiceOrderController;
-use App\Http\Controllers\ServicePageContactMessageController;
+use App\Modules\Service\Controllers\ServiceTrackingController;
+use App\Modules\Service\Controllers\ServiceFormController;
+use App\Modules\Service\Controllers\ServiceFormFieldController;
+use App\Modules\Service\Controllers\ServiceFormSubmissionController;
+use App\Modules\Service\Controllers\ServiceOrderController;
+use App\Modules\Service\Controllers\ServicePageContactMessageController;
 use App\Http\Controllers\TempUploadController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoController;

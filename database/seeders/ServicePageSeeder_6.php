@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\ServicePage;
-use App\Models\ServicePageHeroSection;
-use App\Models\ServicePageProblemSection;
-use App\Models\ServicePageProblemItem;
-use App\Models\ServicePageSolutionSection;
-use App\Models\ServicePageSolutionFeature;
-use App\Models\ServicePageGalleryImage;
-use App\Models\ServicePageStat;
-use App\Models\ServicePageTestimonial;
-use App\Models\ServicePageCtaSection;
-use App\Models\ServiceTracking;
+use App\Modules\Service\Models\ServicePage;
+use App\Modules\Service\Models\ServicePageHeroSection;
+use App\Modules\Service\Models\ServicePageProblemSection;
+use App\Modules\Service\Models\ServicePageProblemItem;
+use App\Modules\Service\Models\ServicePageSolutionSection;
+use App\Modules\Service\Models\ServicePageSolutionFeature;
+use App\Modules\Service\Models\ServicePageGalleryImage;
+use App\Modules\Service\Models\ServicePageStat;
+use App\Modules\Service\Models\ServicePageTestimonial;
+use App\Modules\Service\Models\ServicePageCtaSection;
+use App\Modules\Service\Models\ServiceTracking;
 use App\Modules\User\Models\User;
 use App\Modules\Organization\Models\Organization;
 use Illuminate\Database\Seeder;

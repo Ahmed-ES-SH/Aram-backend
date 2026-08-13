@@ -29,7 +29,7 @@
 - [x] OrganizationTermsConditionController (`app/Modules/Organization`)
 - [x] ReviewLikesCheckController (`app/Modules/Organization`)
 
-## Service
+## Service — [x] services moved to `app/Modules/Service/Services`
 - [ ] ServicePageController
 - [ ] ServicePageContactMessageController
 - [ ] ServiceCategoryController
@@ -46,23 +46,23 @@
 - [ ] OwnedCardController
 - [ ] CurrencyController
 
-## Wallet / Payment
+## Wallet / Payment — [x] services moved to `app/Modules/Payment/Services`
 - [ ] WalletController
 - [ ] TransactionController
 - [ ] PaymentController
 - [ ] WithdrawRequestController
 
-## Coupon
+## Coupon — [x] services moved to `app/Modules/Coupon/Services`
 - [ ] CouponController
 
-## Offer / Promotion
+## Offer / Promotion — [x] services moved to `app/Modules/Promotion/Services`
 - [ ] OfferController
 - [ ] PromoterController
 - [ ] PromoterRatioController
 - [ ] PromoterTrackingController
 - [ ] PromotionActivityController
 
-## Conversation / Messaging
+## Conversation / Messaging — [x] services moved to `app/Modules/Conversation/Services`
 - [ ] ConversationController
 - [ ] MessageController
 - [ ] NotificationController
@@ -91,3 +91,5 @@
 
 ---
 **Totals:** 59 controllers — 14 refactored `[x]`, 45 pending `[ ]`.
+
+> Services: 22 of 26 moved to `app/Modules/*/Services`. Remaining global (shared): `ImageService`, `NotificationService`, `TempUploadService`, `SMSService`.

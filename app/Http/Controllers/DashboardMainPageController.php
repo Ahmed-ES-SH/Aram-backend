@@ -7,7 +7,7 @@ use App\Models\Coupon;
 use App\Models\Offer;
 use App\Modules\Organization\Models\Organization;
 use App\Models\Promoter;
-use App\Models\ServicePage;
+use App\Modules\Service\Models\ServicePage;
 use App\Modules\User\Models\User;
 use Carbon\Carbon;
 use Exception;

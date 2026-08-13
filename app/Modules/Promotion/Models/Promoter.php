@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\Promotion\Models;
 
 use App\Helpers\TextNormalizer;
+use App\Models\Referral;
 use App\Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 

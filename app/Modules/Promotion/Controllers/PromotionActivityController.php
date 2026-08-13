@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Promotion\Controllers;
 
-use App\Http\Requests\StorePromoterActivity;
+use App\Http\Controllers\Controller;
+use App\Modules\Promotion\Requests\StorePromoterActivity;
 use Exception;
 use App\Http\Traits\ApiResponse;
-use App\Models\PromotionActivity;
+use App\Modules\Promotion\Models\PromotionActivity;
 use Illuminate\Http\Request;
-use App\Models\Promoter;
+use App\Modules\Promotion\Models\Promoter;
 use App\Modules\User\Models\User;
 use App\Modules\Organization\Models\Organization;
-use App\Models\PromoterRatio;
+use App\Modules\Promotion\Models\PromoterRatio;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 

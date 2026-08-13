@@ -3,8 +3,8 @@
 namespace App\Modules\Promotion\Services;
 
 use App\Modules\Payment\DTOs\PaymentDTO;
-use App\Models\Promoter;
-use App\Models\PromotionActivity;
+use App\Modules\Promotion\Models\Promoter;
+use App\Modules\Promotion\Models\PromotionActivity;
 use App\Models\ProvisionalData;
 
 class PromotionService

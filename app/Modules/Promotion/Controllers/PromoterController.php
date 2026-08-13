@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Promotion\Controllers;
 
 use OpenApi\Attributes as OA;
-use App\Http\Requests\StorePromoterRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Promotion\Requests\StorePromoterRequest;
 use App\Http\Traits\ApiResponse;
 use App\Modules\Organization\Models\Organization;
-use App\Models\Promoter;
+use App\Modules\Promotion\Models\Promoter;
 use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\Request;

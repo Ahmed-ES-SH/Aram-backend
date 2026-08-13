@@ -2,9 +2,9 @@
 
 namespace App\Modules\Coupon\Services;
 
-use App\Models\Coupon;
-use App\Models\CouponOrganization;
-use App\Models\CouponUser;
+use App\Modules\Coupon\Models\Coupon;
+use App\Modules\Coupon\Models\CouponOrganization;
+use App\Modules\Coupon\Models\CouponUser;
 use App\Modules\User\Models\User;
 use Exception;
 use Illuminate\Http\Response;

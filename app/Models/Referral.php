@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Modules\Promotion\Models\Promoter;
 use App\Modules\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 

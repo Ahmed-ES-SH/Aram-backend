@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Coupon;
-use App\Models\Offer;
+use App\Modules\Coupon\Models\Coupon;
+use App\Modules\Promotion\Models\Offer;
 use App\Modules\Organization\Models\Organization;
-use App\Models\Promoter;
+use App\Modules\Promotion\Models\Promoter;
 use App\Modules\Service\Models\ServicePage;
 use App\Modules\User\Models\User;
 use Carbon\Carbon;

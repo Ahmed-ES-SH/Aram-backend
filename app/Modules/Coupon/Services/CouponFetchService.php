@@ -4,7 +4,7 @@ namespace App\Modules\Coupon\Services;
 
 use App\Helpers\TextNormalizer;
 use App\Http\Traits\ApiResponse;
-use App\Models\Coupon;
+use App\Modules\Coupon\Models\Coupon;
 use Illuminate\Http\Request;
 
 class CouponFetchService

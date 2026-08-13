@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\PromoterRatio;
+use App\Modules\Promotion\Models\PromoterRatio;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

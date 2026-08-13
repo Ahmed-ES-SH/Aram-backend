@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Promotion\Controllers;
 
 use App\Helpers\TextNormalizer;
-use App\Http\Requests\StoreOfferRequest;
-use App\Http\Requests\UpdateOfferRequest;
+use App\Http\Controllers\Controller;
+use App\Modules\Promotion\Requests\StoreOfferRequest;
+use App\Modules\Promotion\Requests\UpdateOfferRequest;
 use App\Http\Services\ImageService;
 use App\Http\Traits\ApiResponse;
-use App\Models\Offer;
+use App\Modules\Promotion\Models\Offer;
 use Illuminate\Http\Request;
 
 use App\OpenApi\Responses\CreatedResponse;

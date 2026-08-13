@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\Promotion\Controllers;
 
 use OpenApi\Attributes as OA;
 use App\Http\Traits\ApiResponse;
-use App\Models\Promoter;
-use App\Models\PromotionActivity;
+use App\Http\Controllers\Controller;
+use App\Modules\Promotion\Models\Promoter;
+use App\Modules\Promotion\Models\PromotionActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\OpenApi\Responses\OkResponse;

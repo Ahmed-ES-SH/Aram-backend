@@ -30,7 +30,7 @@ class NewsletterSeeder extends Seeder
             'content' => 'Don\'t miss out on this limited time offer just for you.',
             'section_1_title' => '50% Discount on Annual Plans',
             'section_1_description' => 'Use code JAN50 at checkout.',
-            'section_2_image' => 'https://via.placeholder.com/600x200?text=Sale+Banner',
+            'section_2_image' => 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
             'section_3_title' => 'Refer a Friend',
             'section_3_description' => 'Get extra month free when you refer.',
         ]);
@@ -51,7 +51,7 @@ class NewsletterSeeder extends Seeder
         Newsletter::create([
             'subject' => 'Invitation: Annual Developer Conference',
             'content' => 'Join us for the biggest developer event of the year.',
-            'section_1_image' => 'https://via.placeholder.com/600x300?text=Conference+Hero',
+            'section_1_image' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
             'section_2_title' => 'Keynote Speakers',
             'section_2_description' => 'Hear from industry leaders and pioneers.',
             'section_3_title' => 'Workshop Schedule',

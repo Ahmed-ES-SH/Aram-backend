@@ -49,6 +49,18 @@ class DatabaseSeeder extends Seeder
             ReferralSeeder::class,
             ServicePageSeeder::class,
             VariableDataSeeder::class,
+
+            // Phase 1 — fixed + registered orphan seeders
+            ConversationMessageSeeder::class,
+            WebsiteVideoSeeder::class,
+            NewsletterSeeder::class,
+            TodoSeeder::class,
+            promoterRatioSeeder::class,
+
+            // Phase 2 — new activity/usage/flow seeders
+            UserActivitySeeder::class,
+            CouponOfferUsageSeeder::class,
+            ServiceFlowSeeder::class,
         ]);
     }
 }

@@ -25,308 +25,607 @@ class OrganizationSeeder extends Seeder
         DB::table('organization_categories')->truncate();
         DB::table('organization_sub_categories')->truncate();
 
-        $categories = DB::table('categories')->pluck('id')->toArray();
-        $subCategories = DB::table('sub_categories')->pluck('id')->toArray();
-        $keywordIds = Keyword::pluck('id')->toArray();
+        // Map categories and sub-categories by title to guarantee full coverage
+        $categories = DB::table('categories')->pluck('id', 'title_en')->toArray();
+        $subCategories = DB::table('sub_categories')->pluck('id', 'title_en')->toArray();
 
-        // استخدام صور عشوائية من Unsplash
-        $unsplashImages = [
-            'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1576097449790-4d4c1505d30d?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1585435557343-3b092031d5ad?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1551076805-e1869033e561?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=300&fit=crop',
+        $keywords = Keyword::all(['id', 'title'])->pluck('id', 'title')->toArray();
+
+        // Verified working Unsplash photo IDs (HTTP 200) grouped by theme.
+        $themeImages = [
+            'health'     => ['photo-1516574187841-cb9cc2ca948b', 'photo-1586773860418-d37222d8fce3', 'photo-1559757148-5c350d0d3c56', 'photo-1582750433449-648ed127bb54'],
+            'tech'       => ['photo-1519389950473-47ba0277781c', 'photo-1555066931-4365d14bab8c', 'photo-1461749280684-dccba630e2f6', 'photo-1531482615713-2afd69097998', 'photo-1555396273-367ea4eb4db5', 'photo-1551288049-bebda4e38f71', 'photo-1522071820081-009f0129c71c'],
+            'travel'     => ['photo-1476514525535-07fb3b4ae5f1', 'photo-1469854523086-cc02fe5d8800', 'photo-1488646953014-85cb44e25828', 'photo-1503454537195-1dcabb73ffb9', 'photo-1529139574466-a303027c1d8b'],
+            'food'       => ['photo-1546069901-ba9599a7e63c', 'photo-1555939594-58d7cb561ad1', 'photo-1490645935967-10de6ba17061', 'photo-1469334031218-e382a71b716b', 'photo-1515003197210-e0cd71810b5f', 'photo-1517245386807-bb43f82c33c4'],
+            'sports'     => ['photo-1521575107034-e0fa0b594529', 'photo-1524594152303-9fd13543fe6e', 'photo-1571019613454-1cb2f99b2d8b', 'photo-1526628953301-3e589a6a8b74'],
+            'science'    => ['photo-1503676260728-1c00da094a0b', 'photo-1535139262971-c51845709a48', 'photo-1563986768609-322da13575f3'],
+            'finance'    => ['photo-1542831371-29b0f74f9713', 'photo-1460925895917-afdab827c52f', 'photo-1556745757-8d76bdb6984b'],
+            'environment'=> ['photo-1504384308090-c894fdcc538d', 'photo-1551076805-e1869033e561'],
+            'education'  => ['photo-1524178232363-1fb2b075b655', 'photo-1523240795612-9a054b0db644', 'photo-1522202176988-66273c2fd55f', 'photo-1503676260728-1c00da094a0b'],
+            'art'        => ['photo-1542393545-10f5cde2c810', 'photo-1551632811-561732d1e306', 'photo-1531482615713-2afd69097998'],
+            'business'   => ['photo-1556745757-8d76bdb6984b', 'photo-1555396273-367ea4eb4db5', 'photo-1551288049-bebda4e38f71', 'photo-1521791136064-7986c2920216'],
+            'fashion'    => ['photo-1483985988355-763728e1935b', 'photo-1436262513933-a0b06755c784'],
+            'media'      => ['photo-1477346611705-65d1883cee1e', 'photo-1519345182560-3f2917c472ef', 'photo-1516321497487-e288fb19713f'],
+            'political'  => ['photo-1573164713988-8665fc963095', 'photo-1545324418-cc1a3fa10c00'],
+            'history'    => ['photo-1464822759023-fed622ff2c3b', 'photo-1579684385127-1ef15d508118'],
+            'culture'    => ['photo-1521791136064-7986c2920216', 'photo-1464822759023-fed622ff2c3b', 'photo-1494390248081-4e521a5940db'],
         ];
 
-        $unsplashLogos = [
-            'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1556655673-33c2d8ad598c?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1565688534245-05d6b5be184a?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1567446537710-90f13fc6d89c?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1565106430482-8f6e74349ca1?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1567446537711-0aa0f003345c?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1565687127020-99d5f0c5d0b4?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1565106430479-60b83c4cbca3?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1565687126999-7db7e54c2175?w=200&h=200&fit=crop',
-            'https://images.unsplash.com/photo-1565106430409-3a2f4c3c3e3d?w=200&h=200&fit=crop',
+        // Verified working Unsplash photo IDs used for logos / avatars
+        $logoImages = [
+            'photo-1560472354-b33ff0c44a43',
+            'photo-1565688534245-05d6b5be184a',
+            'photo-1565106430482-8f6e74349ca1',
+            'photo-1517248135467-4c7edcad34c4',
+            'photo-1559839734-2b71ea197ec2',
+            'photo-1567521464027-f127ff144326',
+            'photo-1607082348824-0a96f2a4b9da',
+            'photo-1542393545-10f5cde2c810',
+            'photo-1551632811-561732d1e306',
+            'photo-1552083375-1447ce886485',
+            'photo-1521791136064-7986c2920216',
+            'photo-1531482615713-2afd69097998',
+            'photo-1517245386807-bb43f82c33c4',
+            'photo-1555396273-367ea4eb4db5',
+            'photo-1469854523086-cc02fe5d8800',
+            'photo-1504674900247-0877df9cc836',
+            'photo-1568901346375-23c9450c58cd',
+            'photo-1573164713988-8665fc963095',
         ];
 
-        // البيانات الأساسية للمراكز كمصفوفات مباشرة (بدون json_encode)
-        $baseOrganizations = [
+        $imageUrl = fn ($id, $w = 1200, $h = null) => 'https://images.unsplash.com/' . $id
+            . '?auto=format&fit=crop&w=' . $w . ($h ? '&h=' . $h : '') . '&q=80';
+
+        // Realistic organizations anchored in Egypt, covering every main & sub category.
+        $organizations = [
             [
-                'location' => [
-                    'address' => 'Cairo, Egypt',
-                    'coordinates' => [
-                        'lat' => 30.0444,
-                        'lng' => 31.2357
-                    ]
-                ],
-                'accaptable_message' => 'Your booking request has been accepted.',
-                'unaccaptable_message' => 'Sorry, your booking request was rejected.',
-                'confirmation_price' => 100.00,
-                'confirmation_status' => 'confirmed',
-                'phone_number' => '+201234567890',
-                'open_at' => '08:00:00',
-                'close_at' => '18:00:00',
-                'url' => 'https://example.com/cairo-center',
-                'rateing' => 4.5,
-                'status' => 'published',
-                'booking_status' => 'available',
-                'Number_of_reservations' => 120,
-                'active' => true,
-                'title' => 'Cairo Medical Center',
-                'description' => 'A trusted medical center located in downtown Cairo.'
+                'title' => 'Nile Valley Medical Center',
+                'description' => 'A leading multi-specialty medical center in downtown Cairo offering outpatient clinics, diagnostics, and long-term disease management with a board of certified specialists.',
+                'city' => 'Cairo', 'district' => 'Downtown', 'street' => '21 El Kasr El Aini St',
+                'lat' => 30.0444, 'lng' => 31.2357,
+                'categories' => ['Health'],
+                'theme' => 'health',
+                'keywords' => ['Medical Consultation', 'General Practitioner', 'Symptom Assessment', 'Chronic Disease Management'],
             ],
             [
-                'location' => [
-                    'address' => 'Giza, Egypt',
-                    'coordinates' => [
-                        'lat' => 29.9737,
-                        'lng' => 31.2819
-                    ]
-                ],
-                'accaptable_message' => 'Your booking is approved.',
-                'unaccaptable_message' => 'We cannot accept your booking at this time.',
-                'confirmation_price' => 150.00,
-                'confirmation_status' => 'pending',
-                'phone_number' => '+201098765432',
-                'open_at' => '09:00:00',
-                'close_at' => '20:00:00',
-                'url' => 'https://example.com/giza-center',
-                'rateing' => 4.0,
-                'status' => 'under_review',
-                'booking_status' => 'available',
-                'Number_of_reservations' => 85,
-                'active' => true,
-                'title' => 'Giza Health Center',
-                'description' => 'Providing high-quality health services in Giza.'
+                'title' => 'ModernTech Innovation Hub',
+                'description' => 'A technology development center and co-working community focused on web and mobile engineering, UX design, and digital product incubation for startups and enterprises.',
+                'city' => 'New Cairo', 'district' => 'Fifth Settlement', 'street' => '90th St, North Investors Building',
+                'lat' => 30.0250, 'lng' => 31.4700,
+                'categories' => ['Technology', 'Modern Technology'],
+                'theme' => 'tech',
+                'keywords' => ['Web Development', 'Mobile App Development', 'UX/UI Design', 'SEO', 'Data Analysis'],
             ],
             [
-                'location' => [
-                    'address' => 'Alexandria, Egypt',
-                    'coordinates' => [
-                        'lat' => 31.2001,
-                        'lng' => 29.9187
-                    ]
-                ],
-                'accaptable_message' => 'We are glad to confirm your booking.',
-                'unaccaptable_message' => 'Unfortunately, we cannot confirm your booking.',
-                'confirmation_price' => 120.00,
-                'confirmation_status' => 'confirmed',
-                'phone_number' => '+201223344556',
-                'open_at' => '07:30:00',
-                'close_at' => '17:30:00',
-                'url' => 'https://example.com/alex-center',
-                'rateing' => 4.7,
-                'status' => 'published',
-                'booking_status' => 'available',
-                'Number_of_reservations' => 200,
-                'active' => true,
-                'title' => 'Alexandria Care Center',
-                'description' => 'A modern care center serving Alexandria residents.'
+                'title' => 'Pharaonic Tours Egypt',
+                'description' => 'A premium travel agency specializing in curated tours across Egypt, blending history, culture, and adventure with licensed multilingual guides and comfortable transport.',
+                'city' => 'Giza', 'district' => 'Haram', 'street' => '45 Pyramids Road',
+                'lat' => 29.9941, 'lng' => 31.1448,
+                'categories' => ['Travel', 'History', 'Culture'],
+                'theme' => 'travel',
+                'keywords' => ['Translation', 'Localization', 'Data Entry'],
             ],
             [
-                'location' => [
-                    'address' => 'Hurghada, Egypt',
-                    'coordinates' => [
-                        'lat' => 27.2579,
-                        'lng' => 33.8116
-                    ]
-                ],
-                'accaptable_message' => 'Your appointment is confirmed.',
-                'unaccaptable_message' => 'Your appointment cannot be confirmed.',
-                'confirmation_price' => 90.00,
-                'confirmation_status' => 'rejected',
-                'phone_number' => '+201334455667',
-                'open_at' => '10:00:00',
-                'close_at' => '22:00:00',
-                'url' => 'https://example.com/hurghada-center',
-                'rateing' => 3.9,
-                'status' => 'not_published',
-                'booking_status' => 'unavailable',
-                'Number_of_reservations' => 40,
-                'active' => false,
-                'title' => 'Hurghada Wellness Center',
-                'description' => 'A wellness center in Hurghada offering relaxation and therapy services.'
+                'title' => 'Golden Spoon Fine Dining',
+                'description' => 'An award-winning fine dining restaurant in Zamalek serving contemporary Egyptian and Mediterranean cuisine, with private dining options and an in-house pastry lab.',
+                'city' => 'Cairo', 'district' => 'Zamalek', 'street' => '12 Brazil St',
+                'lat' => 30.0626, 'lng' => 31.2167,
+                'categories' => ['Food'],
+                'theme' => 'food',
+                'keywords' => ['Copywriting', 'Content Marketing'],
             ],
             [
-                'location' => [
-                    'address' => 'Luxor, Egypt',
-                    'coordinates' => [
-                        'lat' => 25.6872,
-                        'lng' => 32.6396
-                    ]
-                ],
-                'accaptable_message' => 'Booking confirmed successfully.',
-                'unaccaptable_message' => 'Booking request denied.',
-                'confirmation_price' => 110.00,
-                'confirmation_status' => 'confirmed',
-                'phone_number' => '+201445566778',
-                'open_at' => '06:00:00',
-                'close_at' => '16:00:00',
-                'url' => 'https://example.com/luxor-center',
-                'rateing' => 4.2,
-                'status' => 'published',
-                'booking_status' => 'available',
-                'Number_of_reservations' => 65,
-                'active' => true,
-                'title' => 'Luxor Health Clinic',
-                'description' => 'Affordable healthcare services in Luxor.'
+                'title' => 'El-Masry Sports Academy',
+                'description' => 'A professional training academy offering football, swimming, and athletics programs for all ages, with certified coaches, modern courts, and wellness recovery facilities.',
+                'city' => 'Alexandria', 'district' => 'Sidi Gaber', 'street' => '8 Emad El Din St',
+                'lat' => 31.2180, 'lng' => 29.9395,
+                'categories' => ['Sports'],
+                'theme' => 'sports',
+                'keywords' => ['Training and Development', 'Data Analysis'],
+            ],
+            [
+                'title' => 'Arab Science Research Institute',
+                'description' => 'A research institution headquartered in Upper Egypt conducting interdisciplinary studies in applied sciences, with analytical laboratories and academic partnerships.',
+                'city' => 'Asyut', 'district' => 'El Walideya', 'street' => '2 University Street',
+                'lat' => 27.1809, 'lng' => 31.1837,
+                'categories' => ['Science'],
+                'theme' => 'science',
+                'keywords' => ['Data Analysis', 'Statistical Analysis', 'Machine Learning Models'],
+            ],
+            [
+                'title' => 'Nile Bank Financial Services',
+                'description' => 'A full-service financial institution offering retail and corporate banking, investment advisory, and treasury solutions with a secure digital banking platform.',
+                'city' => 'Cairo', 'district' => 'Nasr City', 'street' => '34 Abbas El Akkad St',
+                'lat' => 30.0638, 'lng' => 31.3234,
+                'categories' => ['Finance', 'Economics'],
+                'theme' => 'finance',
+                'keywords' => ['Financial Analysis', 'Bookkeeping', 'Business Intelligence'],
+            ],
+            [
+                'title' => 'Green Future Environmental Center',
+                'description' => 'A sustainability center dedicated to renewable energy adoption, waste reduction, and community awareness programs across the Nile Delta, supported by certified engineers.',
+                'city' => 'Tanta', 'district' => 'El Gharbia', 'street' => '15 El Geish St',
+                'lat' => 30.7885, 'lng' => 31.0000,
+                'categories' => ['Environment'],
+                'theme' => 'environment',
+                'keywords' => ['Data Visualization', 'ETL Pipelines'],
+            ],
+            [
+                'title' => 'Delta Educational Academy',
+                'description' => 'An accredited learning institute offering preparatory and secondary education with STEM track programs, language enrichment, and individualized learning plans.',
+                'city' => 'Mansoura', 'district' => 'El Mowza', 'street' => '9 Gomhoreya St',
+                'lat' => 31.0409, 'lng' => 31.3785,
+                'categories' => ['Education'],
+                'theme' => 'education',
+                'keywords' => ['E-learning', 'Online Tutoring', 'Interactive Lessons', 'Curriculum Development'],
+            ],
+            [
+                'title' => 'Cairo Art & Design Studio',
+                'description' => 'A contemporary art studio and gallery in Zamalek hosting exhibitions, commissioned paintings, and private workshops for emerging and established artists.',
+                'city' => 'Cairo', 'district' => 'Zamalek', 'street' => '6 El Mansour Mohamed St',
+                'lat' => 30.0580, 'lng' => 31.2240,
+                'categories' => ['Art'],
+                'theme' => 'art',
+                'keywords' => ['Illustration', 'Logo Design', 'Creative Writing'],
+            ],
+            [
+                'title' => 'Alexandria Business Consultancy',
+                'description' => 'A management and strategy consultancy supporting SMEs with market research, operational optimization, feasibility studies, and access to funding networks.',
+                'city' => 'Alexandria', 'district' => 'Smouha', 'street' => '77 El Nasr St',
+                'lat' => 31.2210, 'lng' => 29.9690,
+                'categories' => ['Business', 'Economics'],
+                'theme' => 'business',
+                'keywords' => ['Business Plan', 'Feasibility Study', 'Market Analysis', 'Project Management'],
+            ],
+            [
+                'title' => 'Fashion House of Cairo',
+                'description' => 'A fashion design house crafting limited-edition ready-to-wear collections from premium ethically sourced fabrics, with personal styling and made-to-order services.',
+                'city' => 'Cairo', 'district' => 'Maadi', 'street' => '26 Rd 9',
+                'lat' => 29.9658, 'lng' => 31.2575,
+                'categories' => ['Fashion'],
+                'theme' => 'fashion',
+                'keywords' => ['Logo Design', 'Product Design', 'Copywriting'],
+            ],
+            [
+                'title' => 'MediaPro Production House',
+                'description' => 'An integrated media production company offering film, video, and broadcast services with in-house studios, cinematography teams, and post-production editing.',
+                'city' => 'Giza', 'district' => 'Mohandessin', 'street' => '31 Syria St',
+                'lat' => 30.0550, 'lng' => 31.2070,
+                'categories' => ['Media'],
+                'theme' => 'media',
+                'keywords' => ['Video Editing', 'Voice Over', 'Sound Mixing', 'Podcast Editing'],
+            ],
+            [
+                'title' => 'Modern Marketing Solutions',
+                'description' => 'A full-funnel digital marketing agency delivering data-driven campaigns, creative production, content marketing, and performance analytics for regional brands.',
+                'city' => 'Cairo', 'district' => 'Nasr City', 'street' => '60 Abbas El Akkad St',
+                'lat' => 30.0570, 'lng' => 31.3172,
+                'categories' => ['Marketing'],
+                'theme' => 'business',
+                'keywords' => ['Digital Marketing', 'Marketing Strategy', 'Facebook Ads', 'Google Ads', 'SEO', 'Email Marketing'],
+            ],
+            [
+                'title' => 'Political Insight Research Center',
+                'description' => 'A non-partisan policy research center producing data-driven analysis, public opinion studies, and expert briefings for decision makers and the media.',
+                'city' => 'Cairo', 'district' => 'Zamalek', 'street' => '18 Abu El Feda St',
+                'lat' => 30.0610, 'lng' => 31.2200,
+                'categories' => ['Political Analysis'],
+                'theme' => 'political',
+                'keywords' => ['Data Analysis', 'Statistical Analysis', 'Predictive Analytics', 'Copywriting'],
+            ],
+            [
+                'title' => 'Advanced Technology Laboratories',
+                'description' => 'An applied research and engineering lab developing IoT, embedded systems, and AI prototypes in partnership with universities on the industrial city belt.',
+                'city' => '10th of Ramadan', 'district' => 'Industrial Zone B',
+                'street' => '3 Factories District',
+                'lat' => 30.3095, 'lng' => 31.7402,
+                'categories' => ['Modern Technology', 'Technology', 'Science'],
+                'theme' => 'tech',
+                'keywords' => ['Machine Learning Models', 'Python Data Analysis', '3D Modeling', 'Product Design'],
+            ],
+            [
+                'title' => 'Medical Excellence Clinic',
+                'description' => 'A patient-centered outpatient clinic in Sheikh Zayed offering internal medicine, dermatology, nutrition counseling, and preventive care programs.',
+                'city' => 'Giza', 'district' => 'Sheikh Zayed', 'street' => '14 El Hadaba El Wosta',
+                'lat' => 30.0561, 'lng' => 30.9694,
+                'categories' => ['Health'],
+                'theme' => 'health',
+                'keywords' => ['Medical Consultation', 'Internal Medicine', 'Dermatology Advice', 'Nutrition Advice', 'Preventive Medicine'],
+            ],
+            [
+                'title' => 'Entrepreneurs Growth Hub',
+                'description' => 'A business incubation space providing mentorship, co-working, workshops, and seed-funding connections for early-stage Egyptian startups.',
+                'city' => 'New Cairo', 'district' => 'Sun City', 'street' => '48 Ring Road Extension',
+                'lat' => 30.0120, 'lng' => 31.4490,
+                'categories' => ['Business', 'Economics'],
+                'theme' => 'business',
+                'keywords' => ['Business Plan', 'Feasibility Study', 'Market Analysis'],
+            ],
+            [
+                'title' => 'Environmental Protection Council',
+                'description' => 'An NGO promoting environmental stewardship in the Suez Canal region through cleanups, green infrastructure projects, and public educational campaigns.',
+                'city' => 'Ismailia', 'district' => 'El Salam', 'street' => '11 Suez Canal St',
+                'lat' => 30.5965, 'lng' => 32.2715,
+                'categories' => ['Environment', 'Science'],
+                'theme' => 'environment',
+                'keywords' => ['Data Visualization', 'ETL Pipelines'],
+            ],
+            [
+                'title' => 'Smart Learning Center',
+                'description' => 'A modern educational center combining classroom tuition with coding bootcamps, robotics clubs, and digital skills workshops for students of all ages.',
+                'city' => 'Zagazig', 'district' => 'El Bostan', 'street' => '22 El Kawmeya St',
+                'lat' => 30.5877, 'lng' => 31.5020,
+                'categories' => ['Education', 'Technology'],
+                'theme' => 'education',
+                'keywords' => ['Teaching Coding', 'E-learning', 'Interactive Lessons', 'Online Tutoring'],
+            ],
+            [
+                'title' => 'Fitness First Athletic Club',
+                'description' => 'A modern fitness and wellness club offering strength training, group classes, physiotherapy guidance, and structured nutrition plans in Port Said.',
+                'city' => 'Port Said', 'district' => 'El Sharq', 'street' => '5 23rd of December St',
+                'lat' => 31.2653, 'lng' => 32.3019,
+                'categories' => ['Sports', 'Health'],
+                'theme' => 'sports',
+                'keywords' => ['Training and Development', 'Nutrition Advice', 'Mental Health Support'],
+            ],
+            [
+                'title' => 'Sphinx History Museum',
+                'description' => 'A historical museum and cultural venue preserving Pharaonic artifacts, hosting expert-led tours, and running conservation education programs with universities.',
+                'city' => 'Giza', 'district' => 'El Remaya', 'street' => '1 Pyramids Plateau Rd',
+                'lat' => 29.9861, 'lng' => 31.1318,
+                'categories' => ['History', 'Culture'],
+                'theme' => 'history',
+                'keywords' => ['Creative Writing', 'Copywriting'],
+            ],
+            [
+                'title' => 'Red Sea Diving Center',
+                'description' => 'A PADI-certified diving and water-sports center in Hurghada offering courses, guided reef trips, and underwater photography packages along the Red Sea coast.',
+                'city' => 'Hurghada', 'district' => 'Sheraton Road', 'street' => '9 Villages Rd',
+                'lat' => 27.2579, 'lng' => 33.8116,
+                'categories' => ['Travel', 'Sports'],
+                'theme' => 'travel',
+                'keywords' => ['Video Editing', 'Photography'],
+            ],
+            [
+                'title' => 'Nile Gourmet Catering',
+                'description' => 'A corporate and events catering company delivering chef-crafted menus, full-service banquet management, and creative culinary experiences across Cairo.',
+                'city' => 'Cairo', 'district' => 'Heliopolis', 'street' => '16 El Obour Buildings',
+                'lat' => 30.0900, 'lng' => 31.3290,
+                'categories' => ['Food', 'Business'],
+                'theme' => 'food',
+                'keywords' => ['Copywriting', 'Content Marketing'],
+            ],
+            [
+                'title' => 'Modern Finance Advisory',
+                'description' => 'An independent financial advisory firm delivering wealth planning, corporate restructuring, and risk management with transparent and fee-based advice.',
+                'city' => 'Alexandria', 'district' => 'El Azarita', 'street' => '30 El Sultan Hussein St',
+                'lat' => 31.1970, 'lng' => 29.9070,
+                'categories' => ['Finance', 'Economics'],
+                'theme' => 'finance',
+                'keywords' => ['Financial Analysis', 'Bookkeeping', 'Business Intelligence', 'Statistical Analysis'],
+            ],
+            [
+                'title' => 'Sustainable Fashion Atelier',
+                'description' => 'An eco-conscious fashion atelier producing zero-waste garments from upcycled and organic textiles, with workshops on regenerative fashion design.',
+                'city' => 'Cairo', 'district' => 'Dokki', 'street' => '44 Mosadak St',
+                'lat' => 30.0375, 'lng' => 31.2090,
+                'categories' => ['Fashion', 'Environment'],
+                'theme' => 'fashion',
+                'keywords' => ['Product Design', 'Logo Design'],
+            ],
+            [
+                'title' => 'Digital Branding Studio',
+                'description' => 'A branding and visual identity studio crafting logos, packaging, and full brand systems for startups, combining strategy with playful design execution.',
+                'city' => 'Cairo', 'district' => 'Garden City', 'street' => '3 El Saray St',
+                'lat' => 30.0330, 'lng' => 31.2280,
+                'categories' => ['Marketing', 'Art'],
+                'theme' => 'art',
+                'keywords' => ['Logo Design', 'Illustration', 'Brand Building'],
+            ],
+            [
+                'title' => 'National News & Analysis Network',
+                'description' => 'A newsroom and analysis platform delivering verified reporting, live broadcast, and data-driven coverage across political and economic beats.',
+                'city' => 'Cairo', 'district' => '6th of October', 'street' => '28 El Mehwar St',
+                'lat' => 29.9440, 'lng' => 30.9180,
+                'categories' => ['Media', 'Political Analysis'],
+                'theme' => 'media',
+                'keywords' => ['Copywriting', 'Video Editing', 'Voice Over'],
+            ],
+            [
+                'title' => 'National Science Symposium Center',
+                'description' => 'A conference and outreach center hosting national research symposia, student science fairs, and hands-on laboratory experimentation days for schools.',
+                'city' => 'Minya', 'district' => 'El Minya University St',
+                'street' => '1 Camels Market Rd',
+                'lat' => 28.1099, 'lng' => 30.7503,
+                'categories' => ['Science', 'Education'],
+                'theme' => 'science',
+                'keywords' => ['Online Tutoring', 'Curriculum Development'],
+            ],
+            [
+                'title' => 'Arabic Culture Institute',
+                'description' => 'An institute dedicated to Arabic heritage and arts, offering language classes, traditional craft workshops, theater programs, and cultural documentation.',
+                'city' => 'Luxor', 'district' => 'El Karnak', 'street' => '7 Karnak Temple Rd',
+                'lat' => 25.7200, 'lng' => 32.6580,
+                'categories' => ['Culture', 'Education', 'Art'],
+                'theme' => 'culture',
+                'keywords' => ['Translation', 'Localization', 'Creative Writing'],
+            ],
+            [
+                'title' => 'Corporate Strategy Partners',
+                'description' => 'A strategy consulting firm advising enterprises on market entry, digital transformation, and organizational redesign with benchmarked research.',
+                'city' => 'Cairo', 'district' => 'Sheraton', 'street' => '10 El Tayaran St',
+                'lat' => 30.0730, 'lng' => 31.3400,
+                'categories' => ['Business'],
+                'theme' => 'business',
+                'keywords' => ['Business Plan', 'Feasibility Study', 'Market Analysis', 'Project Management', 'HR Management'],
+            ],
+            [
+                'title' => 'Future Fintech Center',
+                'description' => 'A fintech innovation hub combining financial services with engineering labs, accelerating digital payments, lending, and open-banking products.',
+                'city' => 'Giza', 'district' => 'Smart Village', 'street' => 'KM 28 Cairo-Alex Desert Rd',
+                'lat' => 30.0650, 'lng' => 30.9520,
+                'categories' => ['Modern Technology', 'Finance', 'Technology'],
+                'theme' => 'tech',
+                'keywords' => ['Mobile App Development', 'Data Analysis', 'Machine Learning Models', 'Web Development'],
+            ],
+            [
+                'title' => 'Family Health & Wellness Center',
+                'description' => 'An integrated wellness center offering family medicine, pediatric care, mental health counseling, and lifestyle coaching in Aswan.',
+                'city' => 'Aswan', 'district' => 'El Corniche', 'street' => '23 Nile Corniche',
+                'lat' => 24.0889, 'lng' => 32.8998,
+                'categories' => ['Health'],
+                'theme' => 'health',
+                'keywords' => ['Pediatric Consultation', 'Psychological Counseling', 'Mental Health Support', 'Nutrition Advice'],
+            ],
+            [
+                'title' => 'Culinary Arts Academy',
+                'description' => 'A professional cooking school offering chef diplomas, pastry certifications, and short workshops blending international technique with Egyptian flavors.',
+                'city' => 'Alexandria', 'district' => 'San Stefano', 'street' => '4 El Geish Rd',
+                'lat' => 31.2400, 'lng' => 29.9520,
+                'categories' => ['Food', 'Education'],
+                'theme' => 'food',
+                'keywords' => ['E-learning', 'Online Tutoring', 'Interactive Lessons'],
+            ],
+            [
+                'title' => 'Legacy Travel & Landmarks',
+                'description' => 'A destination management company designing luxury heritage itineraries in Luxor and Aswan, including river cruises, hot-air balloon rides, and temple tours.',
+                'city' => 'Luxor', 'district' => 'El Gezira', 'street' => '15 Khalid Ibn El Walid St',
+                'lat' => 25.6872, 'lng' => 32.6396,
+                'categories' => ['Travel', 'History'],
+                'theme' => 'travel',
+                'keywords' => ['Translation', 'Localization'],
+            ],
+            [
+                'title' => 'Data & Media Intelligence Co.',
+                'description' => 'A data science and media analytics firm providing audience insights, content strategy, and visualization dashboards for broadcasters and digital platforms.',
+                'city' => 'Cairo', 'district' => 'New Cairo', 'street' => '83 El Teseen St',
+                'lat' => 30.0100, 'lng' => 31.4400,
+                'categories' => ['Media', 'Modern Technology', 'Marketing'],
+                'theme' => 'media',
+                'keywords' => ['Data Analysis', 'Data Visualization', 'Predictive Analytics', 'Digital Marketing', 'Business Intelligence'],
             ],
         ];
 
-        // إنشاء 50 مركز باستخدام البيانات الأساسية مع تغييرات بسيطة
-        $organizations = [];
+        $benefitsByTheme = [
+            'health' => [
+                'Experienced board-certified medical team',
+                'State-of-the-art diagnostic equipment',
+                '24/7 emergency and follow-up support',
+                'Transparent consultation pricing',
+                'Free follow-up review after the first visit',
+            ],
+            'tech' => [
+                'Agile delivery from idea to launch',
+                'Senior engineers and designers only',
+                'Ongoing maintenance and support plans',
+                'Clear weekly progress reporting',
+                'Flexible engagement and pricing models',
+            ],
+            'travel' => [
+                'Expert licensed local tour guides',
+                'Handpicked authentic experiences',
+                'Flexible booking and free rescheduling',
+                'Safe and insured transfers',
+                'Multi-language customer support',
+            ],
+            'food' => [
+                'Fresh ingredients sourced daily',
+                'Chef-crafted authentic recipes',
+                'Reservations with instant confirmation',
+                'Private dining and event spaces',
+                'Live cooking and tasting experiences',
+            ],
+            'sports' => [
+                'Professional certified coaches',
+                'Modern facilities and equipment',
+                'Personalized training plans',
+                'Nutrition and recovery guidance',
+                'Programs for all age groups',
+            ],
+            'science' => [
+                'Research published in peer-reviewed journals',
+                'Accessible public data portal',
+                'Hands-on laboratory programs',
+                'Collaborations with universities',
+                'Public science engagement events',
+            ],
+            'finance' => [
+                'Independent and unbiased advisory',
+                'Robust risk management frameworks',
+                'Transparent fee structure',
+                'Secure digital banking platforms',
+                'Periodic portfolio performance reviews',
+            ],
+            'environment' => [
+                'Certified sustainability projects',
+                'Community cleanup programs',
+                'Adoption of green technologies',
+                'Measurable carbon reduction',
+                'Public awareness campaigns',
+            ],
+            'education' => [
+                'Accredited and modern curricula',
+                'Experienced professional educators',
+                'Interactive small classrooms',
+                'Practical skill-building tracks',
+                'Scholarships for outstanding students',
+            ],
+            'art' => [
+                'Curated gallery exhibitions',
+                'Private studio workshops',
+                'Artist-in-residence programs',
+                'Commissioned original artwork',
+                'Art consulting for collectors',
+            ],
+            'business' => [
+                'End-to-end business consultancy',
+                'Market research and feasibility studies',
+                'Operational process optimization',
+                'Access to investor networks',
+                'Post-launch operational support',
+            ],
+            'fashion' => [
+                'Limited-edition original designs',
+                'Premium ethically sourced fabrics',
+                'Personal styling consultations',
+                'Sustainable production practices',
+                'Worldwide delivery and returns',
+            ],
+            'media' => [
+                'High-end production equipment',
+                'In-house content studios',
+                'Multi-platform distribution',
+                'Editorial integrity standards',
+                'Fast-turnaround delivery',
+            ],
+            'political' => [
+                'Non-partisan evidence-based research',
+                'Verified open-data sources',
+                'Expert panel discussions',
+                'Briefings for decision makers',
+                'Public awareness publications',
+            ],
+            'history' => [
+                'Curated museum collections',
+                'Expert-led guided tours',
+                'Educational preservation programs',
+                'Digitized archive access',
+                'Cultural exchange initiatives',
+            ],
+            'culture' => [
+                'Immersive cultural programs',
+                'Traditional arts workshops',
+                'Community art festivals',
+                'Language and heritage classes',
+                'Multimedia cultural archives',
+            ],
+        ];
+
         $cities = ['Cairo', 'Giza', 'Alexandria', 'Hurghada', 'Luxor', 'Mansoura', 'Tanta', 'Aswan', 'Port Said', 'Zagazig'];
-        $types = ['Medical', 'Health', 'Care', 'Wellness', 'Clinic', 'Center', 'Hospital', 'Hub', 'Institute', 'Facility'];
-        $adjectives = ['Advanced', 'Modern', 'Professional', 'Trusted', 'Leading', 'Premium', 'Quality', 'Expert', 'Specialized', 'Comprehensive'];
-        $areaCodes = ['الشمالي', 'الجنوبي', 'الشرقي', 'الغربي', 'المركزي', 'الجديد', 'التقليدي', 'المتطور'];
 
-        for ($i = 0; $i < 50; $i++) {
-            $base = $baseOrganizations[$i % count($baseOrganizations)];
-            $city = $cities[array_rand($cities)];
-            $type = $types[array_rand($types)];
-            $adjective = $adjectives[array_rand($adjectives)];
-            $areaCode = $areaCodes[array_rand($areaCodes)];
+        foreach ($organizations as $index => $data) {
+            $theme = $data['theme'];
 
-            // استخدام الإحداثيات من البيانات الأساسية مباشرة
-            $baseLat = $base['location']['coordinates']['lat'];
-            $baseLng = $base['location']['coordinates']['lng'];
+            $randomImage = $themeImages[$theme][array_rand($themeImages[$theme])];
+            $randomLogo = $logoImages[array_rand($logoImages)];
 
-            $organizations[] = [
-                'location' => json_encode([
-                    'address' => $city . ', Egypt',
-                    'coordinates' => [
-                        'lat' => $baseLat + (rand(-100, 100) / 1000),
-                        'lng' => $baseLng + (rand(-100, 100) / 1000)
-                    ]
-                ]),
-                'accaptable_message' => $base['accaptable_message'],
-                'unaccaptable_message' => $base['unaccaptable_message'],
-                'confirmation_price' => $base['confirmation_price'] + rand(-20, 20),
-                'confirmation_status' => $base['confirmation_status'],
-                'phone_number' => '+201' . rand(100000000, 999999999),
-                'open_at' => $base['open_at'],
-                'close_at' => $base['close_at'],
-                'url' => 'https://example.com/' . Str::slug($city) . '-center-' . ($i + 1),
-                'rateing' => round($base['rateing'] + (rand(-10, 10) / 10), 1),
-                'status' => $base['status'],
-                'booking_status' => $base['booking_status'],
-                'Number_of_reservations' => $base['Number_of_reservations'] + rand(-30, 50),
-                'active' => $base['active'],
-                'title' => $city . ' ' . $adjective . ' ' . $type,
-                'description' => 'A ' . strtolower($adjective) . ' ' . strtolower($type) . ' located in ' . $city . ' providing excellent services.'
-            ];
-        }
+            $title = $data['title'];
+            $email = Str::slug($data['title'], '_') . '_' . uniqid() . '@' . Str::slug($data['district']) . '.com';
 
-        $organizationBenefits = [
-            'Wide network of professional healthcare providers',
-            'Affordable and transparent pricing for all services',
-            'Flexible booking system with real-time availability',
-            'Trusted by thousands of satisfied patients',
-            'Continuous support and follow-up after appointments'
-        ];
-
-        $locations = [
-            [
-                'address' => '123 Nile Street, Cairo, Egypt',
-                'coordinates' => ['lat' => 30.0444, 'lng' => 31.2357],
-            ],
-            [
-                'address' => '45 King Fahd Rd, Riyadh, Saudi Arabia',
-                'coordinates' => ['lat' => 24.7136, 'lng' => 46.6753],
-            ],
-            [
-                'address' => '789 Bourj Avenue, Beirut, Lebanon',
-                'coordinates' => ['lat' => 33.8938, 'lng' => 35.5018],
-            ],
-            [
-                'address' => '12 Habib Bourguiba St, Tunis, Tunisia',
-                'coordinates' => ['lat' => 36.8065, 'lng' => 10.1815],
-            ],
-            [
-                'address' => '88 Algiers Center, Algiers, Algeria',
-                'coordinates' => ['lat' => 36.7538, 'lng' => 3.0588],
-            ],
-        ];
-
-        foreach ($organizations as $index => $organizationData) {
-            // اختيار صور عشوائية من Unsplash
-            $mainImageUrl = $unsplashImages[array_rand($unsplashImages)];
-            $mainLogoImageUrl = $unsplashLogos[array_rand($unsplashLogos)];
-
-            $maxOrder = Organization::max('order') ?? 0;
-
-            $email = Str::slug($organizationData['title'], '_') . '_' . uniqid() . '@example.com';
-
-            $randomLocation = $locations[array_rand($locations)];
-
-            // تحويل الحالة إلى قيم رقمية
-            $confirmationStatus = $organizationData['confirmation_status'] === 'confirmed' ? 1 : ($organizationData['confirmation_status'] === 'pending' ? 0 : 2);
-
-            $bookingStatus = $organizationData['booking_status'] === 'available' ? 1 : 0;
-
-            // إضافة معرّف فريد إلى العنوان لمنع التكرار مع تحسين التنسيق
-            $uniqueSuffix = $index + 1;
-            $areaCode = $areaCodes[array_rand($areaCodes)];
-            $uniqueTitle = $organizationData['title'] . ' - ' . $areaCode . ' - ' . $uniqueSuffix;
+            $keywordIds = [];
+            foreach ($data['keywords'] as $keywordTitle) {
+                if (isset($keywords[$keywordTitle])) {
+                    $keywordIds[] = $keywords[$keywordTitle];
+                }
+            }
 
             $organization = Organization::create([
-                'title' => $uniqueTitle,
-                'image' => $mainImageUrl,
-                'logo' => $mainLogoImageUrl,
-                'password' => Hash::make('password'),
-                'description' => $organizationData['description'],
+                'title' => $title,
+                'description' => $data['description'],
                 'email' => $email,
-                'location' => $organizationData['location'],
-                'accaptable_message' => $organizationData['accaptable_message'],
-                'unaccaptable_message' => $organizationData['unaccaptable_message'],
-                'confirmation_price' => $organizationData['confirmation_price'],
-                'confirmation_status' => $confirmationStatus,
-                'phone_number' => $organizationData['phone_number'],
-                'open_at' => $organizationData['open_at'],
-                'close_at' => $organizationData['close_at'],
-                'url' => $organizationData['url'],
-                'order' => $maxOrder + 1,
-                'rating' => $organizationData['rateing'],
-                'status' => $organizationData['status'],
-                'booking_status' => $bookingStatus,
-                'number_of_reservations' => $organizationData['Number_of_reservations'],
-                'active' => $organizationData['active'] ? 1 : 0,
+                'password' => Hash::make('password'),
+                'location' => [
+                    'address' => $data['street'] . ', ' . $data['district'] . ', ' . $data['city'] . ', Egypt',
+                    'coordinates' => [
+                        'lat' => $data['lat'] + (rand(-40, 40) / 1000),
+                        'lng' => $data['lng'] + (rand(-40, 40) / 1000),
+                    ],
+                ],
+                'accaptable_message' => 'We are glad to confirm your booking request. Please arrive on time and present your booking reference.',
+                'unaccaptable_message' => 'Unfortunately, we cannot accept your booking at this time. Please contact us for assistance.',
+                'confirmation_price' => rand(50, 300) + rand(0, 99) / 100,
+                'confirmation_status' => 1,
+                'phone_number' => '+20' . rand(100, 129) . rand(1000000, 9999999),
+                'open_at' => rand(7, 10) . ':00:00',
+                'close_at' => rand(17, 22) . ':00:00',
+                'url' => 'https://' . Str::slug($data['title']) . '.example.com',
+                'image' => $imageUrl($randomImage, 1200),
+                'logo' => $imageUrl($randomLogo, 400, 400),
+                'verification_code' => $index % 3 === 0 ? (string) rand(100000, 999999) : null,
+                'email_verified' => 1,
+                'email_verification_token' => null,
+                'active' => 1,
+                'status' => in_array($theme, ['political', 'history']) ? 'under_review' : 'published',
+                'rating' => round(3.2 + (rand(0, 17) / 10), 1),
+                'order' => $index + 1,
+                'number_of_reservations' => rand(10, 500),
+                'is_signed' => 1,
+                'booking_status' => 1,
+                'account_type' => 'organization',
             ]);
 
-            $organization->categories()->attach(
-                collect($categories)->shuffle()->take(3)->toArray()
-            );
+            $attachedCategories = array_intersect_key($categories, array_flip($data['categories']));
+            $attachedSubCategories = array_intersect_key($subCategories, array_flip($data['categories']));
 
-            $organization->subCategories()->attach(
-                collect($subCategories)->shuffle()->take(3)->toArray()
-            );
+            if (!empty($attachedCategories)) {
+                $organization->categories()->attach(array_values($attachedCategories));
+            }
+            if (!empty($attachedSubCategories)) {
+                $organization->subCategories()->attach(array_values($attachedSubCategories));
+            }
 
-            foreach ($organizationBenefits as $benefit) {
+            foreach ($benefitsByTheme[$theme] as $benefit) {
                 OrganizationBenefit::create([
                     'organization_id' => $organization->id,
                     'title' => $benefit,
                 ]);
             }
 
-            // إضافة كلمات مفتاحية (Keywords) مع منع التكرار
-            $randomKeywordIds = collect($keywordIds)
-                ->shuffle()
-                ->take(rand(1, 5))
-                ->toArray();
+            if (count($keywordIds) === 0) {
+                $keywordIds = collect($keywords)
+                    ->shuffle()
+                    ->take(rand(1, 4))
+                    ->toArray();
+            }
 
-            // استخدام syncWithoutDetaching لتجنب التكرار
-            $organization->keywords()->syncWithoutDetaching($randomKeywordIds);
+            $organization->keywords()->syncWithoutDetaching($keywordIds);
+        }
+
+        // Safety check: every main and sub category must have at least one organization
+        foreach ($categories as $title => $categoryId) {
+            if (!$this->categoryCovered($categoryId)) {
+                $this->command->warn("Category \"{$title}\" ({$categoryId}) has no organizations.");
+            }
+        }
+        foreach ($subCategories as $title => $subCategoryId) {
+            if (!$this->subCategoryCovered($subCategoryId)) {
+                $this->command->warn("Sub-category \"{$title}\" ({$subCategoryId}) has no organizations.");
+            }
         }
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
 
-        $this->command->info('✅ Inserted 50 organizations with Unsplash images and unique titles.');
+        $total = Organization::count();
+        $this->command->info("✅ Inserted {$total} realistic organizations with verified Unsplash images and full category coverage.");
+    }
+
+    private function categoryCovered(int $categoryId): bool
+    {
+        return DB::table('organization_categories')->where('category_id', $categoryId)->exists();
+    }
+
+    private function subCategoryCovered(int $subCategoryId): bool
+    {
+        return DB::table('organization_sub_categories')->where('subcategory_id', $subCategoryId)->exists();
     }
 }

@@ -41,7 +41,7 @@ trait ApiResponse
     // success response for no content
     protected function noContentResponse()
     {
-        return response()->json(null, 404);
+        return response()->noContent();
     }
 
 

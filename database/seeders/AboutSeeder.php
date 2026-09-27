@@ -16,28 +16,28 @@ class AboutSeeder extends Seeder
         About::updateOrInsert(
             ['id' => 1], // شرط البحث
             [
-                'first_section_title_en' => 'First Section Title (EN)',
-                'first_section_title_ar' => 'عنوان القسم الأول',
-                'first_section_content_ar' => 'محتوى القسم الأول بالعربية',
-                'first_section_content_en' => 'First section content in English',
+                'first_section_title_en' => 'Welcome to Aram',
+                'first_section_title_ar' => 'مرحباً بكم في آرام',
+                'first_section_content_en' => 'Aram is a leading platform that offers premium cards packed with special features, exclusive benefits, and rewarding experiences for every member who joins our community.',
+                'first_section_content_ar' => 'آرام منصة رائدة تقدم بطاقات متميزة مليئة بالمزايا الخاصة والفوائد الحصرية والتجارب المجزية لكل عضو ينضم إلى مجتمعنا.',
 
-                'second_section_title_en' => 'Second Section Title (EN)',
-                'second_section_title_ar' => 'عنوان القسم الثاني',
-                'second_section_content_ar' => 'محتوى القسم الثاني بالعربية',
-                'second_section_content_en' => 'Second section content in English',
+                'second_section_title_en' => 'Our Mission',
+                'second_section_title_ar' => 'رسالتنا',
+                'second_section_content_en' => 'Our mission is to deliver cards with special features that simplify daily life, reward loyalty, and open the door to privileged access across a wide network of partners and services.',
+                'second_section_content_ar' => 'تتمثل رسالتنا في تقديم بطاقات بمزايا خاصة تبسط الحياة اليومية وتكافئ الولاء وتفتح الباب أمام امتيازات حصرية عبر شبكة واسعة من الشركاء والخدمات.',
 
-                'thired_section_title_en' => 'Third Section Title (EN)',
-                'thired_section_title_ar' => 'عنوان القسم الثالث',
-                'thired_section_content_ar' => 'محتوى القسم الثالث بالعربية',
-                'thired_section_content_en' => 'Third section content in English',
+                'thired_section_title_en' => 'Why Choose Aram',
+                'thired_section_title_ar' => 'لماذا تختار آرام',
+                'thired_section_content_en' => 'With Aram, every card comes with special features designed around you: exclusive offers, cashback rewards, dedicated support, and a secure digital experience you can rely on.',
+                'thired_section_content_ar' => 'مع آرام، تأتي كل بطاقة بمزايا خاصة مصممة من أجلك: عروض حصرية، مكافآت نقدية، دعم مخصص، وتجربة رقمية آمنة يمكنك الاعتماد عليها.',
 
-                'fourth_section_title_en' => 'Fourth Section Title (EN)',
-                'fourth_section_title_ar' => 'عنوان القسم الرابع',
-                'fourth_section_content_ar' => 'محتوى القسم الرابع بالعربية',
-                'fourth_section_content_en' => 'Fourth section content in English',
+                'fourth_section_title_en' => 'Join Our Community',
+                'fourth_section_title_ar' => 'انضم إلى مجتمعنا',
+                'fourth_section_content_en' => 'Join thousands of satisfied members today. Aram cards with special features are more than just a card — they are a gateway to a smarter and richer lifestyle.',
+                'fourth_section_content_ar' => 'انضم إلى آلاف الأعضاء الراضين اليوم. بطاقات آرام ذات المزايا الخاصة هي أكثر من مجرد بطاقة — إنها بوابة لأسلوب حياة أذكى وأكثر رفاهية.',
 
                 'show_map' => true,
-                'address' => '1234 Street Name, City, Country',
+                'address' => 'Riyadh, Saudi Arabia',
 
                 // ===============================
                 // إضافة صور لكل قسم من Unsplash

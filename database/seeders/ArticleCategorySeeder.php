@@ -111,6 +111,8 @@ class ArticleCategorySeeder extends Seeder
             DB::table('article_categories')->insert([
                 'title_ar' => $cat['title_ar'], // توليد عنوان عشوائي
                 'title_en' => $cat['title_en'], // توليد عنوان عشوائي
+                'bg_color' => '#f3f4f6',
+                'icon_name' => 'Fauser',
                 'image' => $imageurl, // الصورة المولدة
                 'created_at' => now(),
                 'updated_at' => now(),

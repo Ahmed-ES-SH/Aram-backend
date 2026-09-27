@@ -17,6 +17,7 @@ class promoterRatioSeeder extends Seeder
             'visit_ratio' => 1,
             'signup_ratio' => 1,
             'purchase_ratio' => 1,
+            'service_ratio' => 1,
         ]);
     }
 }
